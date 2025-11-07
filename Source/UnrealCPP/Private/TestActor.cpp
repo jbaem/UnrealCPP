@@ -14,8 +14,13 @@ ATestActor::ATestActor()
 // Called when the game starts or when spawned
 void ATestActor::BeginPlay()
 {
-	Super::BeginPlay();
+	Super::BeginPlay(); // Play BeginPlay() of Super(Parent) Class
 	
+	// Category Name, Verbosity(
+	// Just Color Difference in Console
+	UE_LOG(LogTemp, Log, TEXT("Hello World! 한글, Default Log"));
+	UE_LOG(LogTemp, Warning, TEXT("Hello World!. 한글, Warning Log"));
+	UE_LOG(LogTemp, Error, TEXT("Hello World!. 한글, Error Log"));
 }
 
 // Called every frame
