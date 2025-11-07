@@ -19,15 +19,31 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+private:
+	void ChangeMoveDirection();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float speed = 100.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveSpeed = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveSpeedRate = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveHeight = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SpinSpeed = 0.0f;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> BodyMesh = nullptr;
+
+private:
+	bool bIsMoveUp = true;
+	float ElapsedTime = 0.0f;
 };

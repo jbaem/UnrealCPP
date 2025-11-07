@@ -29,6 +29,26 @@ void AFloatingActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	BodyMesh->AddRelativeLocation(DeltaTime * speed * FVector::UpVector);
+	// Up Down Movement: Constant Speed
+	//ChangeMoveDirection();
+	//BodyMesh->AddRelativeLocation(DeltaTime * MoveSpeed * FVector::UpVector * (bIsMoveUp ? 1 : -1));
+	
+	ElapsedTime += DeltaTime;
+	float MoveHeightRatio = 1 - (FMath::Cos(MoveSpeedRate * ElapsedTime) + 1) * 0.5;
+	BodyMesh->SetRelativeLocation(MoveHeightRatio * MoveHeight * FVector::UpVector);
+	BodyMesh->AddRelativeRotation(DeltaTime * SpinSpeed * FRotator::MakeFromEuler(FVector::UpVector));
 }
 
+void AFloatingActor::ChangeMoveDirection()
+{
+	float BodyMeshRelativeLocationZ = BodyMesh->GetRelativeLocation().Z;
+
+	if (BodyMeshRelativeLocationZ > MoveHeight)
+	{
+		bIsMoveUp = false;
+	}
+	if (BodyMeshRelativeLocationZ < 0)
+	{
+		bIsMoveUp = true;
+	}
+}
