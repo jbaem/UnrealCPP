@@ -23,6 +23,20 @@ void ATestActor::BeginPlay()
 	UE_LOG(LogTemp, Error, TEXT("Hello World!. 한글, Error Log"));
 }
 
+void ATestActor::Test_NormalFunction()
+{
+	UE_LOG(LogTemp, Log, TEXT("Call Test_NormalFunction\n"));
+}
+
+void ATestActor::Test_UFunction()
+{
+	UE_LOG(LogTemp, Log, TEXT("Call Test_UFunction\n"));
+}
+
+void ATestActor::Test_NativeEventFunction_Implementation()
+{
+}
+
 // Called every frame
 void ATestActor::Tick(float DeltaTime)
 {
