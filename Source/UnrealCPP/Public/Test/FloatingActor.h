@@ -19,7 +19,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-private:
+	virtual void OnFloatingMeshUpdate(float DeltaTime);
+
 	void ChangeMoveDirection();
 
 public:	
@@ -43,7 +44,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> BodyMesh = nullptr;
 
-private:
 	bool bIsMoveUp = true;
 	float ElapsedTime = 0.0f;
 };
