@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Animation/AnimInstance.h"
 #include "InputActionValue.h"
+
 #include "ActionCharacter.generated.h"
 
 class UInputAction;
@@ -42,6 +44,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<UCameraComponent> PlayerCamera = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation")
+	TObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Move;

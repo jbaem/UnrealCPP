@@ -59,8 +59,18 @@ void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
 	FVector2D inputDirection = InValue.Get<FVector2D>();
 	
-	FVector moveDirection = FVector(inputDirection.Y, inputDirection.X, 0.0f);
-	AddMovementInput(moveDirection);
+	// 카메라 로컬 기준으로 이동 방향 계산
+	//FVector forwardMove = GetActorForwardVector() * inputDirection.Y;
+	//FVector rightMove = GetActorRightVector() * inputDirection.X;
+
+	const FRotator controlRotation = GetControlRotation();
+	const FRotator yawRotation(0.0f, controlRotation.Yaw, 0.0f);
+	
+	const FVector forward = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
+	AddMovementInput(forward, inputDirection.Y);
+
+	const FVector right = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
+	AddMovementInput(right, inputDirection.X);	
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%.1f, %.1f)"), inputDirection.X, inputDirection.Y);
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%s)"), *inputDirection.ToString());
 }
