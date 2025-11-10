@@ -2,7 +2,9 @@
 
 
 #include "Player/ActionCharacter.h"
-#include <EnhancedInputComponent.h>
+#include "EnhancedInputComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 AActionCharacter::AActionCharacter()
@@ -10,6 +12,14 @@ AActionCharacter::AActionCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->TargetArmLength = 350.0f;
+	SpringArm->SocketOffset = FVector(0, 0, 250);
+
+	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
+	PlayerCamera->SetupAttachment(SpringArm);
+	PlayerCamera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 }
 
 // Called when the game starts or when spawned
@@ -30,7 +40,7 @@ void AActionCharacter::Tick(float DeltaTime)
 void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
 	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (enhanced)
 	{
@@ -41,6 +51,10 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
 	FVector2D inputDirection = InValue.Get<FVector2D>();
+	
+	FVector moveDirection = FVector(inputDirection.Y, inputDirection.X, 0.0f);
+	AddMovementInput(moveDirection);
+
 	UE_LOG(LogTemp, Log, TEXT("Dir : (%.1f, %.1f)"), inputDirection.X, inputDirection.Y);
 	UE_LOG(LogTemp, Log, TEXT("Dir : (%s)"), *inputDirection.ToString());
 }
