@@ -36,6 +36,8 @@ void AActionCharacter::BeginPlay()
 	
 	//Get Animation Blueprint Instance
 	ActionAnimInstance = GetMesh()->GetAnimInstance(); 
+
+	StaminaCurrent = StaminaMax;
 }
 
 // Called every frame
@@ -43,6 +45,12 @@ void AActionCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bIsSprinting && !GetLastMovementInputVector().IsNearlyZero())
+	{
+		UseStamina(SprintStamina * DeltaTime);
+	}
+	
+	StaminaTick(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -83,12 +91,14 @@ void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 	AddMovementInput(moveDirection);
 
 	// Forward/Right 벡터를 사용하여 이동
+	/*
 	//const FRotator controlRotation = GetControlRotation();
 	//const FRotator yawRotation(0.0f, controlRotation.Yaw, 0.0f);
 	//const FVector forward = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
 	//AddMovementInput(forward, inputDirection.Y);
 	//const FVector right = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
 	//AddMovementInput(right, inputDirection.X);	
+	*/
 
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%.1f, %.1f)"), inputDirection.X, inputDirection.Y);
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%s)"), *inputDirection.ToString());
@@ -100,11 +110,15 @@ void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 	
 	if (ActionAnimInstance->IsAnyMontagePlaying()) return;
 	
+	if (StaminaCurrent < RollStamina) return;
+
+	UseStamina(RollStamina);
+
 	FVector LastMoveDir = GetLastMovementInputVector();
 	UE_LOG(LogTemp, Log, TEXT("Roll Input"));
 	UE_LOG(LogTemp, Log, TEXT("Last Movement Input Vector : %s"), *LastMoveDir.ToString());
 	
-	if (LastMoveDir != FVector::ZeroVector)
+	if (!LastMoveDir.IsNearlyZero())
 	{
 		SetActorRotation(LastMoveDir.ToOrientationRotator());
 	}
@@ -116,11 +130,50 @@ void AActionCharacter::SetSprintMode()
 {
 	//UE_LOG(LogTemp, Log, TEXT("Sprint Mode"));
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	bIsSprinting = true;
 }
 
 void AActionCharacter::SetWalkMode()
 {
 	//UE_LOG(LogTemp, Log, TEXT("Walk Mode"));
-	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	bIsSprinting = false;
 }
 
+void AActionCharacter::UseStamina(float StaminaCost)
+{
+	bUseStamina = true;
+	StaminaRecoveryTimer = 0.0f;
+
+	StaminaCurrent -= StaminaCost;
+	if (StaminaCurrent < 0.0f)
+	{
+		SetWalkMode();
+	}
+	StaminaCurrent = FMath::Clamp(StaminaCurrent, 0.0f, StaminaMax);
+}
+
+void AActionCharacter::RestoreStamina(float StaminaAmount)
+{
+	StaminaCurrent += StaminaAmount;
+	StaminaCurrent = FMath::Clamp(StaminaCurrent, 0.0f, StaminaMax);
+}
+
+void AActionCharacter::StaminaTick(float DeltaTime)
+{
+	if (bUseStamina)
+	{
+		StaminaRecoveryTimer += DeltaTime;
+		if (StaminaRecoveryTimer >= StaminaRecoveryDelay)
+		{
+			bUseStamina = false;
+			StaminaRecoveryTimer = 0.0f;
+		}
+	}
+	else
+	{
+		RestoreStamina(StaminaRecoveryAmount * DeltaTime);
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Stamina : %.1f / %.1f"), StaminaCurrent, StaminaMax);
+}

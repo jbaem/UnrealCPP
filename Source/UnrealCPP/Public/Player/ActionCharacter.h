@@ -40,6 +40,10 @@ protected:
 	void SetSprintMode();
 	void SetWalkMode();
 
+	void UseStamina(float StaminaCost);
+	void RestoreStamina(float StaminaAmount);
+	void StaminaTick(float DeltaTime);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
@@ -57,16 +61,36 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Roll = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
-	float RunSpeed = 600.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Walk")
+	float WalkSpeed = 600.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Sprint")
 	float SprintSpeed = 1200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Sprint")
+	float SprintStamina = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Roll")
+	float RollStamina = 20.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
 	TObjectPtr<UAnimMontage> RollMontage = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Status|Stamina")
+	float StaminaMax = 100.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Player|Status|Stamina")
+	float StaminaCurrent = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Status|Stamina")
+	float StaminaRecoveryAmount = 10.0f;
+
 private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
+
+	bool bIsSprinting = false;
+	bool bUseStamina = false;
+	float StaminaRecoveryTimer = 0.0f;
+	float StaminaRecoveryDelay = 2.0f;
 };
