@@ -32,8 +32,8 @@ void AActionPlayerController::SetupInputComponent()
 
 	if (enhanced)
 	{
-		enhanced->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AActionPlayerController::OnLookInput);
 		//여기에 Input Action Bindings 추가
+		enhanced->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AActionPlayerController::OnLookInput);
 	}
 }
 

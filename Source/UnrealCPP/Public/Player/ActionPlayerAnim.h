@@ -24,9 +24,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<APawn> OwnerPawn = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AnimState")
+	TObjectPtr<UPawnMovementComponent> MovementComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float Speed = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AnimState")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Direction")
 	float Direction = 0.0f;
 };

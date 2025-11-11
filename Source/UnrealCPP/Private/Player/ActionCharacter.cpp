@@ -51,7 +51,19 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (enhanced)
 	{
+		//여기에 Input Action Bindings 추가
 		enhanced->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
+		
+		enhanced->BindActionValueLambda(IA_Sprint, ETriggerEvent::Started, 
+			[this](const FInputActionValue& _) {
+				SetSprintMode();
+			}
+		);
+		enhanced->BindActionValueLambda(IA_Sprint, ETriggerEvent::Completed,
+			[this](const FInputActionValue& _) {
+				SetWalkMode();
+			}
+		);
 	}
 }
 
@@ -60,9 +72,6 @@ void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 	FVector2D inputDirection = InValue.Get<FVector2D>();
 	
 	// 카메라 로컬 기준으로 이동 방향 계산
-	//FVector forwardMove = GetActorForwardVector() * inputDirection.Y;
-	//FVector rightMove = GetActorRightVector() * inputDirection.X;
-
 	const FRotator controlRotation = GetControlRotation();
 	const FRotator yawRotation(0.0f, controlRotation.Yaw, 0.0f);
 	
@@ -73,5 +82,17 @@ void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 	AddMovementInput(right, inputDirection.X);	
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%.1f, %.1f)"), inputDirection.X, inputDirection.Y);
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%s)"), *inputDirection.ToString());
+}
+
+void AActionCharacter::SetSprintMode()
+{
+	//UE_LOG(LogTemp, Log, TEXT("Sprint Mode"));
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+void AActionCharacter::SetWalkMode()
+{
+	//UE_LOG(LogTemp, Log, TEXT("Walk Mode"));
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
