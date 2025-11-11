@@ -71,15 +71,21 @@ void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
 	FVector2D inputDirection = InValue.Get<FVector2D>();
 	
-	// 카메라 로컬 기준으로 이동 방향 계산
-	const FRotator controlRotation = GetControlRotation();
-	const FRotator yawRotation(0.0f, controlRotation.Yaw, 0.0f);
-	
-	const FVector forward = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
-	AddMovementInput(forward, inputDirection.Y);
+	// 컨트롤러의 Yaw 회전을 기준으로 이동 방향 계산
+	FVector moveDirection = FVector(inputDirection.Y, inputDirection.X, 0.0f);
+	FQuat controlYawRotation = FQuat(FRotator(0, GetControlRotation().Yaw, 0));
 
-	const FVector right = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
-	AddMovementInput(right, inputDirection.X);	
+	moveDirection = controlYawRotation.RotateVector(moveDirection);
+	AddMovementInput(moveDirection);
+
+	// Forward/Right 벡터를 사용하여 이동
+	//const FRotator controlRotation = GetControlRotation();
+	//const FRotator yawRotation(0.0f, controlRotation.Yaw, 0.0f);
+	//const FVector forward = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
+	//AddMovementInput(forward, inputDirection.Y);
+	//const FVector right = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
+	//AddMovementInput(right, inputDirection.X);	
+
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%.1f, %.1f)"), inputDirection.X, inputDirection.Y);
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%s)"), *inputDirection.ToString());
 }
