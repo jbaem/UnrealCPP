@@ -34,6 +34,8 @@ void AActionCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//Get Animation Blueprint Instance
+	ActionAnimInstance = GetMesh()->GetAnimInstance(); 
 }
 
 // Called every frame
@@ -64,6 +66,8 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 				SetWalkMode();
 			}
 		);
+
+		enhanced->BindAction(IA_Roll, ETriggerEvent::Triggered, this, &AActionCharacter::OnRollInput);
 	}
 }
 
@@ -88,6 +92,24 @@ void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%.1f, %.1f)"), inputDirection.X, inputDirection.Y);
 	//UE_LOG(LogTemp, Log, TEXT("Dir : (%s)"), *inputDirection.ToString());
+}
+
+void AActionCharacter::OnRollInput(const FInputActionValue& Value)
+{
+	if (!ActionAnimInstance.IsValid() || !::IsValid(RollMontage)) return;
+	
+	if (ActionAnimInstance->IsAnyMontagePlaying()) return;
+	
+	FVector LastMoveDir = GetLastMovementInputVector();
+	UE_LOG(LogTemp, Log, TEXT("Roll Input"));
+	UE_LOG(LogTemp, Log, TEXT("Last Movement Input Vector : %s"), *LastMoveDir.ToString());
+	
+	if (LastMoveDir != FVector::ZeroVector)
+	{
+		SetActorRotation(LastMoveDir.ToOrientationRotator());
+	}
+	PlayAnimMontage(RollMontage);
+	
 }
 
 void AActionCharacter::SetSprintMode()

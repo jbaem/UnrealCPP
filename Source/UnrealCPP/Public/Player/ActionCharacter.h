@@ -35,6 +35,7 @@ public:
 
 protected:
 	void OnMoveInput(const FInputActionValue& Value);
+	void OnRollInput(const FInputActionValue& Value);
 
 	void SetSprintMode();
 	void SetWalkMode();
@@ -47,18 +48,25 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<UCameraComponent> PlayerCamera = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation")
-	TObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Move = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Sprint = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Roll = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
 	float RunSpeed = 600.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement")
 	float SprintSpeed = 1200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
+	TObjectPtr<UAnimMontage> RollMontage = nullptr;
+
+private:
+	UPROPERTY()
+	TWeakObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
 };
