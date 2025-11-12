@@ -38,6 +38,7 @@ void AActionCharacter::BeginPlay()
 	ActionAnimInstance = GetMesh()->GetAnimInstance(); 
 
 	StaminaCurrent = StaminaMax;
+	bIsSprinting = false;
 }
 
 // Called every frame
@@ -47,10 +48,12 @@ void AActionCharacter::Tick(float DeltaTime)
 
 	if (bIsSprinting && !GetLastMovementInputVector().IsNearlyZero())
 	{
-		UseStamina(SprintStamina * DeltaTime);
+		UseStamina(SprintStaminaCost * DeltaTime);
 	}
-	
-	StaminaTick(DeltaTime);
+
+
+	// 로그 시간 찍으면서 스태미나 확인
+	UE_LOG(LogTemp, Log, TEXT("Time : %.1f  || Stamina : %.1f / %.1f"), GetWorld()->GetTimeSeconds(), StaminaCurrent, StaminaMax);
 }
 
 // Called to bind functionality to input
@@ -110,13 +113,13 @@ void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 	
 	if (ActionAnimInstance->IsAnyMontagePlaying()) return;
 	
-	if (StaminaCurrent < RollStamina) return;
+	if (StaminaCurrent < RollStaminaCost) return;
 
-	UseStamina(RollStamina);
+	UseStamina(RollStaminaCost);
 
 	FVector LastMoveDir = GetLastMovementInputVector();
-	UE_LOG(LogTemp, Log, TEXT("Roll Input"));
-	UE_LOG(LogTemp, Log, TEXT("Last Movement Input Vector : %s"), *LastMoveDir.ToString());
+	//UE_LOG(LogTemp, Log, TEXT("Roll Input"));
+	//UE_LOG(LogTemp, Log, TEXT("Last Movement Input Vector : %s"), *LastMoveDir.ToString());
 	
 	if (!LastMoveDir.IsNearlyZero())
 	{
@@ -142,38 +145,45 @@ void AActionCharacter::SetWalkMode()
 
 void AActionCharacter::UseStamina(float StaminaCost)
 {
-	bUseStamina = true;
-	StaminaRecoveryTimer = 0.0f;
-
 	StaminaCurrent -= StaminaCost;
-	if (StaminaCurrent < 0.0f)
+	if (StaminaCurrent <= 0.0f)
 	{
+		StaminaCurrent = 0.0f;
 		SetWalkMode();
 	}
-	StaminaCurrent = FMath::Clamp(StaminaCurrent, 0.0f, StaminaMax);
+	StartStaminaRegenTimer();
 }
 
-void AActionCharacter::RestoreStamina(float StaminaAmount)
+void AActionCharacter::StartStaminaRegenTimer()
 {
-	StaminaCurrent += StaminaAmount;
-	StaminaCurrent = FMath::Clamp(StaminaCurrent, 0.0f, StaminaMax);
+	//UWorld* world = GetWorld();
+	//FTimerManager& timerManager = world->GetTimerManager();
+
+	//CoolTime 이 지나면 bUseStamina 를 true 로 변경
+	GetWorldTimerManager().ClearTimer(StaminaRegenTimerHandle);
+	GetWorldTimerManager().SetTimer(
+		StaminaRegenTimerHandle,
+		[this]() {
+			GetWorldTimerManager().SetTimer(
+				StaminaRegenTimerHandle,
+				this,
+				&AActionCharacter::RegenStaminaPerTick,
+				1.0f, // Tick Interval
+				true, // Loop
+				0.1f  // First Delay
+			);
+		},
+		StaminaRegenCoolTime,
+		false
+	);
 }
 
-void AActionCharacter::StaminaTick(float DeltaTime)
+void AActionCharacter::RegenStaminaPerTick()
 {
-	if (bUseStamina)
+	StaminaCurrent += StaminaRegenAmountPerTick;
+	if (StaminaCurrent > StaminaMax)
 	{
-		StaminaRecoveryTimer += DeltaTime;
-		if (StaminaRecoveryTimer >= StaminaRecoveryDelay)
-		{
-			bUseStamina = false;
-			StaminaRecoveryTimer = 0.0f;
-		}
+		StaminaCurrent = StaminaMax;
+		GetWorldTimerManager().ClearTimer(StaminaRegenTimerHandle);
 	}
-	else
-	{
-		RestoreStamina(StaminaRecoveryAmount * DeltaTime);
-	}
-
-	UE_LOG(LogTemp, Log, TEXT("Stamina : %.1f / %.1f"), StaminaCurrent, StaminaMax);
 }

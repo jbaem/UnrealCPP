@@ -41,8 +41,8 @@ protected:
 	void SetWalkMode();
 
 	void UseStamina(float StaminaCost);
-	void RestoreStamina(float StaminaAmount);
-	void StaminaTick(float DeltaTime);
+	void StartStaminaRegenTimer();
+	void RegenStaminaPerTick();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
@@ -68,29 +68,32 @@ protected:
 	float SprintSpeed = 1200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Sprint")
-	float SprintStamina = 5.0f;
+	float SprintStaminaCost = 20.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Roll")
-	float RollStamina = 20.0f;
+	float RollStaminaCost = 40.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
 	TObjectPtr<UAnimMontage> RollMontage = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Status|Stamina")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Resource|Stamina")
 	float StaminaMax = 100.0f;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Player|Status|Stamina")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Resource|Stamina")
 	float StaminaCurrent = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Status|Stamina")
-	float StaminaRecoveryAmount = 10.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Resource|Stamina")
+	float StaminaRegenAmountPerTick = 10.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Resource|Stamina")
+	float StaminaRegenCoolTime = 3.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|State")
+	bool bIsSprinting = false;
 
 private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
 
-	bool bIsSprinting = false;
-	bool bUseStamina = false;
-	float StaminaRecoveryTimer = 0.0f;
-	float StaminaRecoveryDelay = 2.0f;
+	FTimerHandle StaminaRegenTimerHandle;
 };
