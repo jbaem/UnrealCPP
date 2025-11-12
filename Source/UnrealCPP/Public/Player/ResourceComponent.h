@@ -7,8 +7,10 @@
 
 #include "ResourceComponent.generated.h"
 
+// Delegate for Stamina Depleted event
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaminaDepleted);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UNREALCPP_API UResourceComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -31,6 +33,9 @@ public:
 	UFUNCTION(BlueprintCallable, Blueprintpure)
 	inline bool HasEnoughStamina(float StaminaCost) const { return StaminaCurrent >= StaminaCost; };
 
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnStaminaDepleted OnStaminaDepleted;
+
 	inline float GetStaminaCurrent() const { return StaminaCurrent; }
 
 protected:	
@@ -42,7 +47,7 @@ protected:
 	float StaminaMax = 100.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stamina")
-	float StaminaCurrent = 0.0f;
+	float StaminaCurrent = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
 	float StaminaRegenAmountPerTick = 10.0f;

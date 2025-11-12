@@ -41,6 +41,10 @@ protected:
 	void SetSprintMode();
 	void SetWalkMode();
 
+private:
+	UFUNCTION()
+	void OnStaminaDepleted();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;

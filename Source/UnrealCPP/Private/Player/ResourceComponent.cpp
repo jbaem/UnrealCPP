@@ -11,7 +11,6 @@ UResourceComponent::UResourceComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
 }
 
 
@@ -20,7 +19,6 @@ void UResourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
 	StaminaCurrent = StaminaMax;
 }
 
@@ -39,8 +37,8 @@ void UResourceComponent::UseStamina(float StaminaCost)
 	if (StaminaCurrent <= 0.0f)
 	{
 		StaminaCurrent = 0.0f;
-		// alert zero stamina
-		// TODO: SetWalkMode();
+		// alert zero stamina to using delegate
+		OnStaminaDepleted.Broadcast();
 	}
 	StartStaminaRegenTimer();
 }
@@ -52,8 +50,9 @@ void UResourceComponent::StartStaminaRegenTimer()
 
 	FTimerManager& timerManager = world->GetTimerManager();
 
-	//CoolTime 이 지나면 bUseStamina 를 true 로 변경
 	timerManager.ClearTimer(StaminaAutoRegenCoolTimerHandle);
+	timerManager.ClearTimer(StaminaRegenTickTimerHandle);
+
 	timerManager.SetTimer(
 		StaminaAutoRegenCoolTimerHandle,
 		[this, &timerManager]() {

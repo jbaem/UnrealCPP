@@ -37,7 +37,15 @@ void AActionCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	//Get Animation Blueprint Instance
-	ActionAnimInstance = GetMesh()->GetAnimInstance(); 
+	if (GetMesh())
+	{
+		ActionAnimInstance = GetMesh()->GetAnimInstance(); 
+	}
+
+	if (ResourceComponent)
+	{
+		ResourceComponent->OnStaminaDepleted.AddDynamic(this, &AActionCharacter::OnStaminaDepleted);
+	}
 
 	bIsSprinting = false;
 }
@@ -52,9 +60,11 @@ void AActionCharacter::Tick(float DeltaTime)
 		ResourceComponent->UseStamina(SprintStaminaCost * DeltaTime);
 	}
 
-
 	// 로그 시간 찍으면서 스태미나 확인
-	//UE_LOG(LogTemp, Log, TEXT("Time : %.1f  || Stamina : %.1f / %.1f"), GetWorld()->GetTimeSeconds(), StaminaCurrent, StaminaMax);
+	UE_LOG(LogTemp, Log, TEXT("Time : %.1f  || Stamina : %.1f"), 
+		GetWorld()->GetTimeSeconds(),
+		ResourceComponent->GetStaminaCurrent()
+	);
 }
 
 // Called to bind functionality to input
@@ -143,4 +153,9 @@ void AActionCharacter::SetWalkMode()
 	//UE_LOG(LogTemp, Log, TEXT("Walk Mode"));
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	bIsSprinting = false;
+}
+
+void AActionCharacter::OnStaminaDepleted()
+{
+	SetWalkMode();
 }
