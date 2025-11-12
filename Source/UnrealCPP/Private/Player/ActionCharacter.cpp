@@ -143,6 +143,7 @@ void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 
 void AActionCharacter::SetSprintMode()
 {
+	if (ResourceComponent->GetStaminaCurrent() <= 0) return;
 	//UE_LOG(LogTemp, Log, TEXT("Sprint Mode"));
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 	bIsSprinting = true;
