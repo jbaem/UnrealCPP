@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Animation/AnimInstance.h"
 #include "InputActionValue.h"
+#include "Player/ResourceComponent.h"
 
 #include "ActionCharacter.generated.h"
 
@@ -40,10 +41,6 @@ protected:
 	void SetSprintMode();
 	void SetWalkMode();
 
-	void UseStamina(float StaminaCost);
-	void StartStaminaRegenTimer();
-	void RegenStaminaPerTick();
-
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
@@ -51,6 +48,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<UCameraComponent> PlayerCamera = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Resource")
+	TObjectPtr<UResourceComponent> ResourceComponent = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Move = nullptr;
@@ -76,24 +76,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
 	TObjectPtr<UAnimMontage> RollMontage = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Resource|Stamina")
-	float StaminaMax = 100.0f;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|Resource|Stamina")
-	float StaminaCurrent = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Resource|Stamina")
-	float StaminaRegenAmountPerTick = 10.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Resource|Stamina")
-	float StaminaRegenCoolTime = 3.0f;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|State")
 	bool bIsSprinting = false;
 
 private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
-
-	FTimerHandle StaminaRegenTimerHandle;
 };
