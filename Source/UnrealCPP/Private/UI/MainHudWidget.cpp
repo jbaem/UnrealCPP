@@ -19,6 +19,16 @@ void UMainHudWidget::NativeConstruct()
 			// binding 하는 함수가 다르다 // multicast delegate vs dynamic multicast delegate
 			resourceComponent->OnHealthChanged.AddUObject(HealthBar.Get(), &UResourceBarWidget::RefreshWidget);
 			resourceComponent->OnStaminaChanged.AddDynamic(StaminaBar.Get(), &UResourceBarWidget::RefreshWidget);
+		
+			//HealthBar->RefreshWidget(
+			//	resourceComponent->GetHealthCurrent(),
+			//	resourceComponent->GetHealthMax()
+			//);
+			//StaminaBar->RefreshWidget(
+			//	resourceComponent->GetStaminaCurrent(),
+			//	resourceComponent->GetStaminaMax()
+			//);
+
 		}
 	}
 }

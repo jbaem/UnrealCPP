@@ -9,7 +9,7 @@ UResourceComponent::UResourceComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 }
 
@@ -19,7 +19,8 @@ void UResourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StaminaCurrent = StaminaMax;
+	SetHealthCurrent(HealthMax);
+	SetStaminaCurrent(StaminaMax);
 }
 
 
@@ -32,8 +33,7 @@ void UResourceComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 void UResourceComponent::TakeDamage(float HealthAmount)
 {
-	HealthCurrent = FMath::Clamp(HealthCurrent - HealthAmount, 0.0f, HealthMax);
-	OnHealthChanged.Broadcast(HealthCurrent, HealthMax);
+	SetHealthCurrent(HealthCurrent - HealthAmount);
 
 	if (!IsAlive())
 	{
@@ -43,14 +43,12 @@ void UResourceComponent::TakeDamage(float HealthAmount)
 
 void UResourceComponent::RestoreHealth(float HealthAmount)
 {
-	HealthCurrent = FMath::Clamp(HealthCurrent + HealthAmount, 0.0f, HealthMax);
-	OnHealthChanged.Broadcast(HealthCurrent, HealthMax);
+	SetHealthCurrent(HealthCurrent + HealthAmount);
 }
 
 void UResourceComponent::UseStamina(float StaminaCost)
 {
-	StaminaCurrent = FMath::Clamp(StaminaCurrent - StaminaCost, 0.0f, StaminaMax);
-	OnStaminaChanged.Broadcast(StaminaCurrent, StaminaMax);
+	SetStaminaCurrent(StaminaCurrent - StaminaCost);
 	
 	if (StaminaCurrent <= 0.0f)
 	{
@@ -89,10 +87,8 @@ void UResourceComponent::StartStaminaRegenTimer()
 
 void UResourceComponent::RegenStaminaPerTick()
 {
-	StaminaCurrent += StaminaRegenAmountPerTick;
-	StaminaCurrent = FMath::Clamp(StaminaCurrent, 0.0f, StaminaMax);
-	OnStaminaChanged.Broadcast(StaminaCurrent, StaminaMax);
-	
+	SetStaminaCurrent(StaminaCurrent + StaminaRegenAmountPerTick);
+
 	if (StaminaCurrent >= StaminaMax)
 	{
 		UWorld* world = GetWorld();

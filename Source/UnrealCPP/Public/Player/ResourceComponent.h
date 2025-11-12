@@ -58,8 +58,23 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnStaminaChanged OnStaminaChanged;
 
-
+	// Getters
+	inline float GetHealthCurrent() const { return HealthCurrent; }
+	inline float GetHealthMax() const { return HealthMax; }
 	inline float GetStaminaCurrent() const { return StaminaCurrent; }
+	inline float GetStaminaMax() const { return StaminaMax; }
+
+	// Setters
+	inline void SetHealthCurrent(float NewHealth)
+	{
+		HealthCurrent = FMath::Clamp(NewHealth, 0.0f, HealthMax); 
+		OnHealthChanged.Broadcast(HealthCurrent, HealthMax);
+	}
+	inline void SetStaminaCurrent(float NewStamina) 
+	{ 
+		StaminaCurrent = FMath::Clamp(NewStamina, 0.0f, StaminaMax);
+		OnStaminaChanged.Broadcast(StaminaCurrent, StaminaMax);
+	}
 
 protected:	
 	void StartStaminaRegenTimer();
