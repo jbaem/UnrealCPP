@@ -28,15 +28,32 @@ void UResourceComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+}
+
+void UResourceComponent::TakeDamage(float HealthAmount)
+{
+	HealthCurrent = FMath::Clamp(HealthCurrent - HealthAmount, 0.0f, HealthMax);
+	OnHealthChanged.Broadcast(HealthCurrent, HealthMax);
+
+	if (!IsAlive())
+	{
+		OnDie.Broadcast();
+	}
+}
+
+void UResourceComponent::RestoreHealth(float HealthAmount)
+{
+	HealthCurrent = FMath::Clamp(HealthCurrent + HealthAmount, 0.0f, HealthMax);
+	OnHealthChanged.Broadcast(HealthCurrent, HealthMax);
 }
 
 void UResourceComponent::UseStamina(float StaminaCost)
 {
-	StaminaCurrent -= StaminaCost;
+	StaminaCurrent = FMath::Clamp(StaminaCurrent - StaminaCost, 0.0f, StaminaMax);
+	OnStaminaChanged.Broadcast(StaminaCurrent, StaminaMax);
+	
 	if (StaminaCurrent <= 0.0f)
 	{
-		StaminaCurrent = 0.0f;
 		// alert zero stamina to using delegate
 		OnStaminaDepleted.Broadcast();
 	}
@@ -73,10 +90,11 @@ void UResourceComponent::StartStaminaRegenTimer()
 void UResourceComponent::RegenStaminaPerTick()
 {
 	StaminaCurrent += StaminaRegenAmountPerTick;
+	StaminaCurrent = FMath::Clamp(StaminaCurrent, 0.0f, StaminaMax);
+	OnStaminaChanged.Broadcast(StaminaCurrent, StaminaMax);
+	
 	if (StaminaCurrent >= StaminaMax)
 	{
-		StaminaCurrent = StaminaMax;
-
 		UWorld* world = GetWorld();
 		if (world)
 		{

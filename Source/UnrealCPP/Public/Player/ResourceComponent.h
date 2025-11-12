@@ -7,8 +7,11 @@
 
 #include "ResourceComponent.generated.h"
 
-// Delegate for Stamina Depleted event
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDie);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, float); // Non-dynamic delegate for comparing 
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaminaDepleted);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStaminaChanged, float, Current, float, Max);
 
 UCLASS( Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UNREALCPP_API UResourceComponent : public UActorComponent
@@ -28,13 +31,33 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
+	void TakeDamage(float HealthAmount);
+
+	UFUNCTION(BlueprintCallable)
+	void RestoreHealth(float HealthAmount);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	inline bool IsAlive() const { return HealthCurrent > 0.0f; };
+
+	UFUNCTION(BlueprintCallable)
 	void UseStamina(float StaminaCost);
 
-	UFUNCTION(BlueprintCallable, Blueprintpure)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	inline bool HasEnoughStamina(float StaminaCost) const { return StaminaCurrent >= StaminaCost; };
 
 	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnDie OnDie;
+
+	//non-dynamic delegate
+	//UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnHealthChanged OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnStaminaDepleted OnStaminaDepleted;
+
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnStaminaChanged OnStaminaChanged;
+
 
 	inline float GetStaminaCurrent() const { return StaminaCurrent; }
 
@@ -43,6 +66,14 @@ protected:
 	void RegenStaminaPerTick();
 
 protected:
+	// Health
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float HealthMax = 100.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
+	float HealthCurrent = 100.0f;
+
+	// Stamina
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
 	float StaminaMax = 100.0f;
 

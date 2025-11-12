@@ -6,13 +6,13 @@
 #include "GameFramework/Character.h"
 #include "Animation/AnimInstance.h"
 #include "InputActionValue.h"
-#include "Player/ResourceComponent.h"
 
 #include "ActionCharacter.generated.h"
 
 class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
+class UResourceComponent;
 
 UCLASS()
 class UNREALCPP_API AActionCharacter : public ACharacter
@@ -33,6 +33,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UResourceComponent* GetResourceComponent() const { return ResourceComponent; }
 
 protected:
 	void OnMoveInput(const FInputActionValue& Value);
