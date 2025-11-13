@@ -63,10 +63,10 @@ void AActionCharacter::Tick(float DeltaTime)
 	}
 
 	// 로그 시간 찍으면서 스태미나 확인
-	UE_LOG(LogTemp, Log, TEXT("Time : %.1f  || Stamina : %.1f"), 
-		GetWorld()->GetTimeSeconds(),
-		ResourceComponent->GetStaminaCurrent()
-	);
+	//UE_LOG(LogTemp, Log, TEXT("Time : %.1f  || Stamina : %.1f"), 
+	//	GetWorld()->GetTimeSeconds(),
+	//	ResourceComponent->GetStaminaCurrent()
+	//);
 }
 
 // Called to bind functionality to input
@@ -92,6 +92,8 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		);
 
 		enhanced->BindAction(IA_Roll, ETriggerEvent::Triggered, this, &AActionCharacter::OnRollInput);
+	
+		enhanced->BindAction(IA_Attack, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttackInput);
 	}
 }
 
@@ -125,9 +127,9 @@ void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 {
 	if (!ActionAnimInstance.IsValid() || !::IsValid(RollMontage)) return;
 	
-	if (ActionAnimInstance->IsAnyMontagePlaying()) return;
-	
 	if (!ResourceComponent->HasEnoughStamina(RollStaminaCost)) return;
+	
+	if (ActionAnimInstance->IsAnyMontagePlaying()) return;
 
 	ResourceComponent->UseStamina(RollStaminaCost);
 
@@ -141,6 +143,36 @@ void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 	}
 	PlayAnimMontage(RollMontage);
 	
+}
+
+void AActionCharacter::OnAttackInput(const FInputActionValue& Value)
+{
+	if (!ActionAnimInstance.IsValid() || !::IsValid(AttackMontage)) return;
+
+	if (!ResourceComponent->HasEnoughStamina(AttackStaminaCost)) return;
+
+	if (!ActionAnimInstance->IsAnyMontagePlaying())
+	{
+		ResourceComponent->UseStamina(AttackStaminaCost);
+		PlayAnimMontage(AttackMontage);
+	}
+	else if(ActionAnimInstance->Montage_IsPlaying(AttackMontage) && bComboReady)
+	{
+		bComboReady = false;
+		ResourceComponent->UseStamina(AttackStaminaCost);
+
+		ActionAnimInstance->Montage_JumpToSection(
+			SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
+			AttackMontage
+		);
+
+		//UAnimMontage* current = ActionAnimInstance->GetCurrentActiveMontage();
+		//ActionAnimInstance->Montage_SetNextSection(
+		//	ActionAnimInstance->Montage_GetCurrentSection(current),
+		//	SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
+		//	AttackMontage
+		//);
+	}
 }
 
 void AActionCharacter::SetSprintMode()

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Animation/AnimInstance.h"
+#include "AnimNotify/AnimNotifyState_SectionJump.h"
 #include "InputActionValue.h"
 
 #include "ActionCharacter.generated.h"
@@ -34,11 +35,16 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UResourceComponent* GetResourceComponent() const { return ResourceComponent; }
+	inline void SetSectionJumpNotify(class UAnimNotifyState_SectionJump* InNotify)
+	{
+		SectionJumpNotify = InNotify;
+		bComboReady = SectionJumpNotify != nullptr;
+	}
 
 protected:
 	void OnMoveInput(const FInputActionValue& Value);
 	void OnRollInput(const FInputActionValue& Value);
+	void OnAttackInput(const FInputActionValue& Value);
 
 	void SetSprintMode();
 	void SetWalkMode();
@@ -46,6 +52,9 @@ protected:
 private:
 	UFUNCTION()
 	void OnStaminaDepleted();
+
+public:
+	UResourceComponent* GetResourceComponent() const { return ResourceComponent; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
@@ -67,6 +76,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Roll = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Attack = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Walk")
 	float WalkSpeed = 600.0f;
 
@@ -79,8 +91,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Roll")
 	float RollStaminaCost = 40.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Attack")
+	float AttackStaminaCost = 10.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
 	TObjectPtr<UAnimMontage> RollMontage = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
+	TObjectPtr<UAnimMontage> AttackMontage = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|State")
 	bool bIsSprinting = false;
@@ -88,4 +106,11 @@ protected:
 private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
+
+	// ongoing section jump notify
+	UPROPERTY()
+	TWeakObjectPtr<UAnimNotifyState_SectionJump> SectionJumpNotify = nullptr;
+
+	// can be used combo attack
+	bool bComboReady = false;
 };
