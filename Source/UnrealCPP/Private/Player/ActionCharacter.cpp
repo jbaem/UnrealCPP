@@ -84,13 +84,19 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		enhanced->BindAction(IA_Roll, ETriggerEvent::Triggered, this, &AActionCharacter::OnRollInput);
 	
-		enhanced->BindAction(IA_Attack, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttackInput);
+		enhanced->BindAction(IA_Attack1, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack1Input);
+		enhanced->BindAction(IA_Attack2, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack2Input);
 	}
 }
 
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
+	if(ActionAnimInstance.IsValid() && ActionAnimInstance->IsAnyMontagePlaying())
+	{
+		return;
+	}
+
 	FVector2D inputDirection = InValue.Get<FVector2D>();
 	
 	// 컨트롤러의 Yaw 회전을 기준으로 이동 방향 계산
@@ -135,7 +141,7 @@ void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 	PlayAnimMontage(RollMontage);
 }
 
-void AActionCharacter::OnAttackInput(const FInputActionValue& Value)
+void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 {
 	if (!ActionAnimInstance.IsValid() || !::IsValid(AttackMontage)) return;
 
@@ -143,12 +149,32 @@ void AActionCharacter::OnAttackInput(const FInputActionValue& Value)
 
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{
-		PlayAttack();
+		PlayAttack1();
 	}
 	else if(ActionAnimInstance->Montage_IsPlaying(AttackMontage) && bComboReady)
 	{
 		bComboReady = false;
-		PlayComboAttack();
+		PlayComboAttack1();
+	}
+}
+
+void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Log, TEXT("Attack2 Input"));
+	if (!ActionAnimInstance.IsValid() || !::IsValid(Attack2Montage)) return;
+
+	if (!ResourceComponent->HasEnoughStamina(Attack2StaminaCost)) return;
+
+	UE_LOG(LogTemp, Log, TEXT("Has Enough Stamina"));
+
+	if (!ActionAnimInstance->IsAnyMontagePlaying())
+	{
+		PlayAttack2();
+	}
+	else if (ActionAnimInstance->Montage_IsPlaying(Attack2Montage) && bComboReady)
+	{
+		bComboReady = false;
+		PlayComboAttack2();
 	}
 }
 
@@ -185,13 +211,13 @@ void AActionCharacter::SpendSprintStamina(float DeltaTime)
 
 }
 
-void AActionCharacter::PlayAttack()
+void AActionCharacter::PlayAttack1()
 {
 	ResourceComponent->UseStamina(AttackStaminaCost);
 	PlayAnimMontage(AttackMontage);
 }
 
-void AActionCharacter::PlayComboAttack()
+void AActionCharacter::PlayComboAttack1()
 {
 	ResourceComponent->UseStamina(AttackStaminaCost);
 
@@ -206,6 +232,23 @@ void AActionCharacter::PlayComboAttack()
 	//	SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
 	//	AttackMontage
 	//);
+}
+
+void AActionCharacter::PlayAttack2()
+{
+	ResourceComponent->UseStamina(Attack2StaminaCost);
+	PlayAnimMontage(Attack2Montage);
+}
+
+void AActionCharacter::PlayComboAttack2()
+{
+
+	ResourceComponent->UseStamina(Attack2StaminaCost);
+
+	ActionAnimInstance->Montage_JumpToSection(
+		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
+		Attack2Montage
+	);
 }
 
 void AActionCharacter::OnStaminaDepleted()

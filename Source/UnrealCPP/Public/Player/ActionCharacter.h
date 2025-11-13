@@ -44,15 +44,19 @@ public:
 protected:
 	void OnMoveInput(const FInputActionValue& Value);
 	void OnRollInput(const FInputActionValue& Value);
-	void OnAttackInput(const FInputActionValue& Value);
+	void OnAttack1Input(const FInputActionValue& Value);
+	void OnAttack2Input(const FInputActionValue& Value);
 
 	void SetSprintMode();
 	void SetWalkMode();
 
 	void SpendSprintStamina(float DeltaTime);
 
-	void PlayAttack();
-	void PlayComboAttack();
+	void PlayAttack1();
+	void PlayComboAttack1();
+
+	void PlayAttack2();
+	void PlayComboAttack2();
 
 private:
 	UFUNCTION()
@@ -82,7 +86,10 @@ protected:
 	TObjectPtr<UInputAction> IA_Roll = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_Attack = nullptr;
+	TObjectPtr<UInputAction> IA_Attack1 = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Attack2 = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Walk")
 	float WalkSpeed = 600.0f;
@@ -99,11 +106,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Attack")
 	float AttackStaminaCost = 10.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Attack")
+	float Attack2StaminaCost = 15.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
 	TObjectPtr<UAnimMontage> RollMontage = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
 	TObjectPtr<UAnimMontage> AttackMontage = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
+	TObjectPtr<UAnimMontage> Attack2Montage = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|State")
 	bool bIsSprinting = false;
