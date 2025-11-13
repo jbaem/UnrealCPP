@@ -20,15 +20,8 @@ void UMainHudWidget::NativeConstruct()
 			resourceComponent->OnHealthChanged.AddUObject(HealthBar.Get(), &UResourceBarWidget::RefreshWidget);
 			resourceComponent->OnStaminaChanged.AddDynamic(StaminaBar.Get(), &UResourceBarWidget::RefreshWidget);
 		
-			//HealthBar->RefreshWidget(
-			//	resourceComponent->GetHealthCurrent(),
-			//	resourceComponent->GetHealthMax()
-			//);
-			//StaminaBar->RefreshWidget(
-			//	resourceComponent->GetStaminaCurrent(),
-			//	resourceComponent->GetStaminaMax()
-			//);
-
+			HealthBar->SetBarColorWithBackground(FLinearColor::Green); 
+			StaminaBar->SetBarColorWithBackground(FLinearColor::Yellow);
 		}
 	}
 }
