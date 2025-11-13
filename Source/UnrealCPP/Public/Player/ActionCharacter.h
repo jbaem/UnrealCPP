@@ -49,6 +49,11 @@ protected:
 	void SetSprintMode();
 	void SetWalkMode();
 
+	void SpendSprintStamina(float DeltaTime);
+
+	void PlayAttack();
+	void PlayComboAttack();
+
 private:
 	UFUNCTION()
 	void OnStaminaDepleted();

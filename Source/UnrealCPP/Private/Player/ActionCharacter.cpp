@@ -57,16 +57,7 @@ void AActionCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsSprinting && !GetLastMovementInputVector().IsNearlyZero())
-	{
-		ResourceComponent->UseStamina(SprintStaminaCost * DeltaTime);
-	}
-
-	// 로그 시간 찍으면서 스태미나 확인
-	//UE_LOG(LogTemp, Log, TEXT("Time : %.1f  || Stamina : %.1f"), 
-	//	GetWorld()->GetTimeSeconds(),
-	//	ResourceComponent->GetStaminaCurrent()
-	//);
+	SpendSprintStamina(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -142,7 +133,6 @@ void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 		SetActorRotation(LastMoveDir.ToOrientationRotator());
 	}
 	PlayAnimMontage(RollMontage);
-	
 }
 
 void AActionCharacter::OnAttackInput(const FInputActionValue& Value)
@@ -153,25 +143,12 @@ void AActionCharacter::OnAttackInput(const FInputActionValue& Value)
 
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{
-		ResourceComponent->UseStamina(AttackStaminaCost);
-		PlayAnimMontage(AttackMontage);
+		PlayAttack();
 	}
 	else if(ActionAnimInstance->Montage_IsPlaying(AttackMontage) && bComboReady)
 	{
 		bComboReady = false;
-		ResourceComponent->UseStamina(AttackStaminaCost);
-
-		ActionAnimInstance->Montage_JumpToSection(
-			SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
-			AttackMontage
-		);
-
-		//UAnimMontage* current = ActionAnimInstance->GetCurrentActiveMontage();
-		//ActionAnimInstance->Montage_SetNextSection(
-		//	ActionAnimInstance->Montage_GetCurrentSection(current),
-		//	SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
-		//	AttackMontage
-		//);
+		PlayComboAttack();
 	}
 }
 
@@ -188,6 +165,47 @@ void AActionCharacter::SetWalkMode()
 	//UE_LOG(LogTemp, Log, TEXT("Walk Mode"));
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	bIsSprinting = false;
+}
+
+void AActionCharacter::SpendSprintStamina(float DeltaTime)
+{
+	if (bIsSprinting && !GetVelocity().IsNearlyZero())
+	{
+		if(ActionAnimInstance.IsValid() && ActionAnimInstance->IsAnyMontagePlaying())
+		{
+			return;
+		}
+		ResourceComponent->UseStamina(SprintStaminaCost * DeltaTime);
+
+		UE_LOG(LogTemp, Warning, TEXT("Stamina : %.1f / %.1f"),
+			ResourceComponent ? ResourceComponent->GetStaminaCurrent() : 0.0f,
+			ResourceComponent ? ResourceComponent->GetStaminaMax() : 0.0f
+		);
+	}
+
+}
+
+void AActionCharacter::PlayAttack()
+{
+	ResourceComponent->UseStamina(AttackStaminaCost);
+	PlayAnimMontage(AttackMontage);
+}
+
+void AActionCharacter::PlayComboAttack()
+{
+	ResourceComponent->UseStamina(AttackStaminaCost);
+
+	ActionAnimInstance->Montage_JumpToSection(
+		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
+		AttackMontage
+	);
+
+	//UAnimMontage* current = ActionAnimInstance->GetCurrentActiveMontage();
+	//ActionAnimInstance->Montage_SetNextSection(
+	//	ActionAnimInstance->Montage_GetCurrentSection(current),
+	//	SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
+	//	AttackMontage
+	//);
 }
 
 void AActionCharacter::OnStaminaDepleted()
