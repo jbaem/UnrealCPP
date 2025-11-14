@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Player/ResourceComponent.h"
+#include "Weapon/Weapon.h"
 
 
 // Sets default values
@@ -50,6 +51,8 @@ void AActionCharacter::BeginPlay()
 	}
 
 	bIsSprinting = false;
+
+	EquipWeapon();
 }
 
 // Called every frame
@@ -89,6 +92,11 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
+inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace* InNotify)
+{
+	AttackTraceNotify = InNotify;
+	PlayerWeapon->AttackEnable(AttackTraceNotify.IsValid());
+}
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
@@ -249,6 +257,30 @@ void AActionCharacter::PlayComboAttack2()
 		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
 		Attack2Montage
 	);
+}
+
+void AActionCharacter::EquipWeapon()
+{
+	if (PlayerWeapon || !DefaultWeaponClass) return;
+
+	UWorld* world = GetWorld();
+	if (!world) return;
+
+	FActorSpawnParameters spawnParams;
+	spawnParams.Owner = this;
+	spawnParams.Instigator = GetInstigator();
+
+	AWeapon* NewWeapon = world->SpawnActor<AWeapon>(DefaultWeaponClass, spawnParams);
+	if(NewWeapon)
+	{
+		NewWeapon->AttachToComponent(
+			GetMesh(),
+			FAttachmentTransformRules::SnapToTargetIncludingScale,
+			FName("hand_rSocket"));
+
+		PlayerWeapon = NewWeapon;
+		PlayerWeapon->SetWeaponOwner(this);
+	}
 }
 
 void AActionCharacter::OnStaminaDepleted()

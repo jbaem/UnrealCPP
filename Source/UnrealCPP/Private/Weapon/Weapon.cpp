@@ -25,6 +25,15 @@ AWeapon::AWeapon()
 	WeaponCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
 	WeaponCollision->SetupAttachment(WeaponMesh);
 	WeaponCollision->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
+	
+}
+
+void AWeapon::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	// Class Default Object(CDO) : Unreal Engine에서 각 클래스에 대해 하나씩 존재하는 특별한 객체로, 해당 클래스의 기본 속성값들을 보유
+	// OverlapOnlyPawn 설정 이후에 NoCollision 설정
+	WeaponCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
@@ -54,5 +63,13 @@ void AWeapon::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	UGameplayStatics::ApplyDamage(OtherActor, finalDamage, instigator, this, DamageType);
 
 	UE_LOG(LogTemp, Log, TEXT("Weapon Overlap with %s"), *OtherActor->GetName());
+}
+
+void AWeapon::AttackEnable(bool bEnable)
+{
+	WeaponCollision->SetCollisionEnabled(
+		bEnable ? 
+		ECollisionEnabled::QueryOnly : 
+		ECollisionEnabled::NoCollision);
 }
 

@@ -17,6 +17,8 @@ public:
 	// Sets default values for this actor's properties
 	AWeapon();
 
+	virtual void PostInitializeComponents() override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -28,6 +30,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	inline void SetWeaponOwner(ACharacter* NewOwner) { WeaponOwner = NewOwner; }
 
+	UFUNCTION(BlueprintCallable)
+	void AttackEnable(bool bEnable);
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh = nullptr;

@@ -6,7 +6,9 @@
 #include "GameFramework/Character.h"
 #include "Animation/AnimInstance.h"
 #include "AnimNotify/AnimNotifyState_SectionJump.h"
+#include "AnimNotify/AnimNotifyState_AttackTrace.h"
 #include "InputActionValue.h"
+#include "Weapon/Weapon.h"
 
 #include "ActionCharacter.generated.h"
 
@@ -41,6 +43,7 @@ public:
 		bComboReady = SectionJumpNotify != nullptr;
 	}
 
+	inline void SetAttackTraceNotify(class UAnimNotifyState_AttackTrace* InNotify);
 protected:
 	void OnMoveInput(const FInputActionValue& Value);
 	void OnRollInput(const FInputActionValue& Value);
@@ -57,6 +60,8 @@ protected:
 
 	void PlayAttack2();
 	void PlayComboAttack2();
+
+	void EquipWeapon();
 
 private:
 	UFUNCTION()
@@ -75,6 +80,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Resource")
 	TObjectPtr<UResourceComponent> ResourceComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
+	TSubclassOf<AWeapon> DefaultWeaponClass = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
+	TObjectPtr<AWeapon> PlayerWeapon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Move = nullptr;
@@ -128,6 +139,9 @@ private:
 	// ongoing section jump notify
 	UPROPERTY()
 	TWeakObjectPtr<UAnimNotifyState_SectionJump> SectionJumpNotify = nullptr;
+
+	UPROPERTY()
+	TWeakObjectPtr<UAnimNotifyState_AttackTrace> AttackTraceNotify = nullptr;
 
 	// can be used combo attack
 	bool bComboReady = false;
