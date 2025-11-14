@@ -54,6 +54,12 @@ void AActionCharacter::BeginPlay()
 
 	bIsSprinting = false;
 
+	ResourceComponent->SetAllResourceByStatus(StatusComponent);
+	UE_LOG(LogTemp, Log, TEXT("Strength : %d, Agility : %d, Vitality : %d"), 
+		StatusComponent->GetStrength(), StatusComponent->GetAgility(), StatusComponent->GetVitality());
+	UE_LOG(LogTemp, Log, TEXT("HealthMax : %.1f, StaminaMax : %.1f"), 
+		ResourceComponent->GetHealthMax(), ResourceComponent->GetStaminaMax());
+
 	EquipWeapon();
 }
 
@@ -170,12 +176,12 @@ void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 
 void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Log, TEXT("Attack2 Input"));
+	//UE_LOG(LogTemp, Log, TEXT("Attack2 Input"));
 	if (!ActionAnimInstance.IsValid() || !::IsValid(Attack2Montage)) return;
 
 	if (!ResourceComponent->HasEnoughStamina(Attack2StaminaCost)) return;
 
-	UE_LOG(LogTemp, Log, TEXT("Has Enough Stamina"));
+	//UE_LOG(LogTemp, Log, TEXT("Has Enough Stamina"));
 
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{

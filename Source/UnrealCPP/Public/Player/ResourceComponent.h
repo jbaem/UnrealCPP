@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "StatusComponent.h"
 
 #include "ResourceComponent.generated.h"
 
@@ -45,6 +46,25 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	inline bool HasEnoughStamina(float StaminaCost) const { return StaminaCurrent >= StaminaCost; };
 
+protected:
+	void StartStaminaRegenTimer();
+	void RegenStaminaPerTick();
+
+public:
+	// Getters
+	inline float GetHealthCurrent() const { return HealthCurrent; }
+	inline float GetHealthMax() const { return HealthMax; }
+	inline float GetStaminaCurrent() const { return StaminaCurrent; }
+	inline float GetStaminaMax() const { return StaminaMax; }
+
+	// Setters
+	void SetAllResourceByStatus(UStatusComponent* InStatus);
+	inline void SetHealthMaxByStatus(UStatusComponent* InStatus);
+	inline void SetHealthCurrent(float NewHealth);
+	inline void SetStaminaMaxByStatus(UStatusComponent* InStatus);
+	inline void SetStaminaCurrent(float NewStamina);
+
+public:
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnDie OnDie;
 
@@ -57,31 +77,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnStaminaChanged OnStaminaChanged;
-
-	// Getters
-	inline float GetHealthCurrent() const { return HealthCurrent; }
-	inline float GetHealthMax() const { return HealthMax; }
-	inline float GetStaminaCurrent() const { return StaminaCurrent; }
-	inline float GetStaminaMax() const { return StaminaMax; }
-
-	// Setters
-	inline void SetHealthCurrent(float NewHealth)
-	{
-		HealthCurrent = FMath::Clamp(NewHealth, 0.0f, HealthMax); 
-		OnHealthChanged.Broadcast(HealthCurrent, HealthMax);
-	}
-	inline void SetStaminaCurrent(float NewStamina) 
-	{ 
-		StaminaCurrent = FMath::Clamp(NewStamina, 0.0f, StaminaMax);
-		OnStaminaChanged.Broadcast(StaminaCurrent, StaminaMax);
-	}
-
-protected:	
-	void StartStaminaRegenTimer();
-	void RegenStaminaPerTick();
-
 protected:
 	// Health
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float HealthBase = 100.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float HealthMax = 100.0f;
 
@@ -89,6 +89,9 @@ protected:
 	float HealthCurrent = 100.0f;
 
 	// Stamina
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	float StaminaBase = 100.0f;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
 	float StaminaMax = 100.0f;
 
@@ -103,6 +106,18 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina")
 	float StaminaRegenTickInterval = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier")
+	float HealthStrengthModifier = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier")
+	float HealthAgilityModifier = 0.2f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier")
+	float StaminaStrengthModifier = 0.1f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier")
+	float StaminaAgilityModifier = 0.4f;
 
 private:
 	FTimerHandle StaminaAutoRegenCoolTimerHandle;

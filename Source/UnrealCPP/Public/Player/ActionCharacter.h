@@ -70,6 +70,7 @@ private:
 
 public:
 	UResourceComponent* GetResourceComponent() const { return ResourceComponent; }
+	UStatusComponent* GetStatusComponent() const { return StatusComponent; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")

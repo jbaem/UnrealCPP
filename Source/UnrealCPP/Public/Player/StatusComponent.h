@@ -15,21 +15,23 @@ class UNREALCPP_API UStatusComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UStatusComponent();
-
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
 public:
-	inline void SetAttackPower(float InAttackPower) { AttackPower = InAttackPower; }
-	inline float GetAttackPower() const { return AttackPower; }
+	inline int32 GetStrength() const { return Strength; }
+	inline int32 GetAgility() const { return Agility; }
+	inline int32 GetVitality() const { return Vitality; }
+	float GetAttackPower();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack")
-	float AttackPower = 10.0f;
-		
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status", meta = (ClampMin = "0", ClampMax = "20"))
+	int32 Strength = 6;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status", meta = (ClampMin = "0", ClampMax = "20"))
+	int32 Agility = 4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status", meta = (ClampMin = "0", ClampMax = "20"))
+	int32 Vitality = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifires")
+	float AttackModifier = 1.0f;
 };

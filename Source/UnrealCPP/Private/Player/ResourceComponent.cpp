@@ -19,10 +19,7 @@ void UResourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetHealthCurrent(HealthMax);
-	SetStaminaCurrent(StaminaMax);
 }
-
 
 // Called every frame
 void UResourceComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -45,6 +42,9 @@ void UResourceComponent::RestoreHealth(float HealthAmount)
 {
 	SetHealthCurrent(HealthCurrent + HealthAmount);
 }
+
+
+
 
 void UResourceComponent::UseStamina(float StaminaCost)
 {
@@ -99,3 +99,40 @@ void UResourceComponent::RegenStaminaPerTick()
 	}
 }
 
+void UResourceComponent::SetAllResourceByStatus(UStatusComponent* InStatus)
+{
+	SetHealthMaxByStatus(InStatus);
+	SetStaminaMaxByStatus(InStatus);
+}
+
+inline void UResourceComponent::SetHealthMaxByStatus(UStatusComponent* InStatus)
+{
+	float AdditionalHealth =
+		(InStatus->GetStrength() * HealthStrengthModifier + InStatus->GetAgility() * HealthAgilityModifier)
+		* InStatus->GetVitality();
+
+	HealthMax = HealthBase + AdditionalHealth;
+	SetHealthCurrent(HealthMax);
+}
+
+inline void UResourceComponent::SetHealthCurrent(float NewHealth)
+{
+	HealthCurrent = FMath::Clamp(NewHealth, 0.0f, HealthMax);
+	OnHealthChanged.Broadcast(HealthCurrent, HealthMax);
+}
+
+inline void UResourceComponent::SetStaminaMaxByStatus(UStatusComponent* InStatus)
+{
+	float AdditionalStamina =
+		(InStatus->GetStrength() * StaminaStrengthModifier + InStatus->GetAgility() * StaminaAgilityModifier)
+		* InStatus->GetVitality();
+
+	StaminaMax = StaminaBase + AdditionalStamina;
+	SetStaminaCurrent(StaminaMax);
+}
+
+inline void UResourceComponent::SetStaminaCurrent(float NewStamina)
+{
+	StaminaCurrent = FMath::Clamp(NewStamina, 0.0f, StaminaMax);
+	OnStaminaChanged.Broadcast(StaminaCurrent, StaminaMax);
+}
