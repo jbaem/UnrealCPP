@@ -26,6 +26,8 @@ protected:
 	UFUNCTION()
 	void OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
+	void DestroyWeapon();
+
 public:	
 	UFUNCTION(BlueprintCallable)
 	inline void SetWeaponOwner(ACharacter* NewOwner) { WeaponOwner = NewOwner; }
@@ -33,6 +35,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AttackEnable(bool bEnable);
 	
+	UFUNCTION(BlueprintCallable)
+	void StartHoldingTimer();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh = nullptr;
@@ -46,8 +51,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
 	TSubclassOf<UDamageType> DamageType = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Duration")
+	float HoldingDuration = 30.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Duration")
+	int32 AttackCountRemain = 6;
 
 private:
 	TWeakObjectPtr<ACharacter> WeaponOwner = nullptr;
 
+	FTimerHandle HoldingTimerHandle;
 };
