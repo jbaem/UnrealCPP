@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Player/ResourceComponent.h"
+#include "Player/StatusComponent.h"
 #include "Weapon/Weapon.h"
 
 
@@ -32,6 +33,7 @@ AActionCharacter::AActionCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0, 360, 0); // 회전 속도 설정
 
 	ResourceComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
+	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 }
 
 // Called when the game starts or when spawned

@@ -16,6 +16,7 @@ class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
 class UResourceComponent;
+class UStatusComponent;
 
 UCLASS()
 class UNREALCPP_API AActionCharacter : public ACharacter
@@ -80,6 +81,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Resource")
 	TObjectPtr<UResourceComponent> ResourceComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Status")
+	TObjectPtr<UStatusComponent> StatusComponent = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TSubclassOf<AWeapon> DefaultWeaponClass = nullptr;

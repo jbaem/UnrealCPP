@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 // Kismet = Unreal의 시각적 스크립팅 시스템인 블루프린트와 상호작용하기 위한 다양한 유틸리티 함수들을 제공하는 모듈
 #include "Kismet/GameplayStatics.h"
+#include <Player/StatusComponent.h>
 
 
 // Sets default values
@@ -56,7 +57,15 @@ void AWeapon::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 			return;
 		}
 		
-		//float finalDamage += WeaponOwner->GetAttackPower();
+		UStatusComponent* statusComponent = 
+			WeaponOwner->GetComponentByClass(UStatusComponent::StaticClass()) 
+			? Cast<UStatusComponent>(WeaponOwner->GetComponentByClass(UStatusComponent::StaticClass())) 
+			: nullptr;
+
+		if (statusComponent)
+		{
+			finalDamage += statusComponent->GetAttackPower();
+		}
 		instigator = WeaponOwner->GetController();
 	}
 
