@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Pickable.h"
+#include "Common/CommonEnums.h"
 
 #include "WeaponPickUp.generated.h"
 
@@ -25,7 +26,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void OnPickup_Implementation() override;
+	virtual void OnPickup_Implementation(AActor* Target) override;
 
 private:
 	UFUNCTION()
@@ -51,6 +52,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UNiagaraComponent> Effect = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
+	EItemCode ItemCode = EItemCode::EIC_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
 	float RotateSpeed = 180.0f;

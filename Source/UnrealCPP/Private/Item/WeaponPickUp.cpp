@@ -4,6 +4,7 @@
 #include "Item/WeaponPickUp.h"
 #include "Components/SphereComponent.h"
 #include "NiagaraComponent.h"
+#include "Player/InventoryOwner.h"
 
 // Sets default values
 AWeaponPickUp::AWeaponPickUp()
@@ -57,12 +58,16 @@ void AWeaponPickUp::Tick(float DeltaTime)
 
 }
 
-void AWeaponPickUp::OnPickup_Implementation()
+void AWeaponPickUp::OnPickup_Implementation(AActor* Target)
 {
-	UE_LOG(LogTemp, Log, TEXT("Weapon Picked Up"));
+	//UE_LOG(LogTemp, Log, TEXT("Weapon Picked Up"));
+	if(Target && Target->Implements<UInventoryOwner>())
+	{
+		IInventoryOwner::Execute_AddItem(Target, ItemCode);
+	}
 }
 
 void AWeaponPickUp::OnPickupBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Log, TEXT("OnPickupBeginOverlap"));
+	//UE_LOG(LogTemp, Log, TEXT("OnPickupBeginOverlap"));
 }

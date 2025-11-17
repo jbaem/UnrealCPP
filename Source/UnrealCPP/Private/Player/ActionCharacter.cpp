@@ -108,6 +108,13 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
+void AActionCharacter::AddItem_Implementation(EItemCode Code)
+{
+	const UEnum* EnumPtr = StaticEnum<EItemCode>();
+	UE_LOG(LogTemp, Log, TEXT("ActionCharacter AddItem : %s"), *UEnum::GetValueAsString(Code));
+
+}
+
 inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace* InNotify)
 {
 	AttackTraceNotify = InNotify;
@@ -227,10 +234,10 @@ void AActionCharacter::SpendSprintStamina(float DeltaTime)
 		}
 		ResourceComponent->UseStamina(SprintStaminaCost * DeltaTime);
 
-		UE_LOG(LogTemp, Warning, TEXT("Stamina : %.1f / %.1f"),
-			ResourceComponent ? ResourceComponent->GetStaminaCurrent() : 0.0f,
-			ResourceComponent ? ResourceComponent->GetStaminaMax() : 0.0f
-		);
+		//UE_LOG(LogTemp, Warning, TEXT("Stamina : %.1f / %.1f"),
+		//	ResourceComponent ? ResourceComponent->GetStaminaCurrent() : 0.0f,
+		//	ResourceComponent ? ResourceComponent->GetStaminaMax() : 0.0f
+		//);
 	}
 
 }
@@ -301,12 +308,22 @@ void AActionCharacter::EquipWeapon()
 
 void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Log, TEXT("Character OnBeginOverlap : other is %s"), *OtherActor->GetName());
-	IPickable* pickableItem = Cast<IPickable>(OtherActor);
-	if(pickableItem)
+	//UE_LOG(LogTemp, Log, TEXT("Character OnBeginOverlap : other is %s"), *OtherActor->GetName());
+
+	// Cast case
+	//IPickable* pickableItem = Cast<IPickable>(OtherActor);
+	//if(pickableItem)
+	//{
+	//	IPickable::Execute_OnPickup(OtherActor);	// Execute blueprint if implemented
+	//	//pickableItem->OnPickup_Implementation();	// Execute only C++ implementation directly
+	//}
+
+	// Implements case
+	if(OtherActor->Implements<UPickable>())
 	{
-		IPickable::Execute_OnPickup(OtherActor);
+		IPickable::Execute_OnPickup(OtherActor, this);
 	}
+
 }
 
 void AActionCharacter::OnStaminaDepleted()

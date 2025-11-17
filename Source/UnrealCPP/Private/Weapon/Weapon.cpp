@@ -72,7 +72,7 @@ void AWeapon::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 
 	UGameplayStatics::ApplyDamage(OtherActor, finalDamage, instigator, this, DamageType);
 
-	UE_LOG(LogTemp, Log, TEXT("Weapon Overlap with %s"), *OtherActor->GetName());
+	//UE_LOG(LogTemp, Log, TEXT("Weapon Overlap with %s"), *OtherActor->GetName());
 }
 
 void AWeapon::DestroyWeapon()

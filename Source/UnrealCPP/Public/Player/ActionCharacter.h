@@ -9,6 +9,7 @@
 #include "AnimNotify/AnimNotifyState_AttackTrace.h"
 #include "InputActionValue.h"
 #include "Weapon/Weapon.h"
+#include "InventoryOwner.h"
 
 #include "ActionCharacter.generated.h"
 
@@ -19,7 +20,7 @@ class UResourceComponent;
 class UStatusComponent;
 
 UCLASS()
-class UNREALCPP_API AActionCharacter : public ACharacter
+class UNREALCPP_API AActionCharacter : public ACharacter, public IInventoryOwner
 {
 	GENERATED_BODY()
 
@@ -37,6 +38,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void AddItem_Implementation(EItemCode Code);
 
 	inline void SetSectionJumpNotify(class UAnimNotifyState_SectionJump* InNotify)
 	{
