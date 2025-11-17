@@ -39,6 +39,12 @@ private:
 		const FHitResult& SweepResult
 	);
 
+	UFUNCTION()
+	void HandleScaleProgress(float Value);
+
+	UFUNCTION()
+	void OnScaleFinished();
+
 protected:
 	// for physics simulation
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -53,9 +59,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UNiagaraComponent> Effect = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UTimelineComponent> PickupTimeline = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
 	EItemCode ItemCode = EItemCode::EIC_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
 	float RotateSpeed = 180.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
+	TObjectPtr<UCurveFloat> ScaleCurve = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
+	float PickupDuration = 0.5f;
+
+private:
+	TWeakObjectPtr<AActor> PickupTarget = nullptr;
+	
+	bool bIsPickedUp = false;
 };

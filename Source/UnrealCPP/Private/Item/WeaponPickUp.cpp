@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "NiagaraComponent.h"
 #include "Player/InventoryOwner.h"
+#include "Components/TimelineComponent.h"
 
 // Sets default values
 AWeaponPickUp::AWeaponPickUp()
@@ -36,6 +37,8 @@ AWeaponPickUp::AWeaponPickUp()
 
 	Effect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Effect"));
 	Effect->SetupAttachment(BaseRoot);
+
+	PickupTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("PickupTimeline"));
 }
 
 // Called when the game starts or when spawned
@@ -47,6 +50,24 @@ void AWeaponPickUp::BeginPlay()
 	{
 		PickupOverlap->OnComponentBeginOverlap.AddDynamic(this, &AWeaponPickUp::OnPickupBeginOverlap);
 	}
+
+	if (PickupTimeline)
+	{
+		if (ScaleCurve)
+		{
+			FOnTimelineFloat ScaleUpdateDelegate;
+			ScaleUpdateDelegate.BindUFunction(this, FName("HandleScaleProgress"));
+			PickupTimeline->AddInterpFloat(ScaleCurve, ScaleUpdateDelegate);
+			
+			FOnTimelineEvent ScaleFinishedDelegate;
+			ScaleFinishedDelegate.BindUFunction(this, FName("OnScaleFinished"));
+			PickupTimeline->SetTimelineFinishedFunc(ScaleFinishedDelegate);
+		}
+
+		PickupTimeline->SetPlayRate(1.0f / PickupDuration);
+	}
+
+	bIsPickedUp = false;
 }
 
 // Called every frame
@@ -60,14 +81,34 @@ void AWeaponPickUp::Tick(float DeltaTime)
 
 void AWeaponPickUp::OnPickup_Implementation(AActor* Target)
 {
-	//UE_LOG(LogTemp, Log, TEXT("Weapon Picked Up"));
-	if(Target && Target->Implements<UInventoryOwner>())
+	if(bIsPickedUp)
 	{
-		IInventoryOwner::Execute_AddItem(Target, ItemCode);
+		return;
 	}
+	bIsPickedUp = true;
+
+	PickupTarget = Target;
+	//UE_LOG(LogTemp, Log, TEXT("Weapon Picked Up"));
+	PickupTimeline->PlayFromStart();
 }
 
 void AWeaponPickUp::OnPickupBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+
 	//UE_LOG(LogTemp, Log, TEXT("OnPickupBeginOverlap"));
+}
+
+void AWeaponPickUp::HandleScaleProgress(float Value)
+{
+	FVector newScale = FVector(Value, Value, Value);
+	SkeletalMesh->SetRelativeScale3D(newScale);
+}
+
+void AWeaponPickUp::OnScaleFinished()
+{
+	if(PickupTarget.IsValid() && PickupTarget->Implements<UInventoryOwner>())
+	{
+		IInventoryOwner::Execute_AddItem(PickupTarget.Get(), ItemCode);
+		//Destroy();
+	}
 }
