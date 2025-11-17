@@ -27,7 +27,6 @@ AWeaponPickUp::AWeaponPickUp()
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	SkeletalMesh->SetupAttachment(BaseRoot);
 	SkeletalMesh->SetCollisionProfileName(TEXT("NoCollision"));
-	//TODO: 적용 안 됨
 	SkeletalMesh->AddRelativeRotation(FRotator(0, 0, -10.0f));
 
 	PickupOverlap = CreateDefaultSubobject<USphereComponent>(TEXT("Overlap"));
@@ -59,9 +58,20 @@ void AWeaponPickUp::BeginPlay()
 			ScaleUpdateDelegate.BindUFunction(this, FName("HandleScaleProgress"));
 			PickupTimeline->AddInterpFloat(ScaleCurve, ScaleUpdateDelegate);
 			
-			FOnTimelineEvent ScaleFinishedDelegate;
-			ScaleFinishedDelegate.BindUFunction(this, FName("OnScaleFinished"));
-			PickupTimeline->SetTimelineFinishedFunc(ScaleFinishedDelegate);
+			//FOnTimelineEvent ScaleFinishedDelegate;
+			//ScaleFinishedDelegate.BindUFunction(this, FName("OnScaleFinished"));
+			//PickupTimeline->SetTimelineFinishedFunc(ScaleFinishedDelegate);
+		}
+
+		if (DistanceCurve && HeightCurve)
+		{
+			FOnTimelineFloat DistanceUpdateDelegate;
+			DistanceUpdateDelegate.BindUFunction(this, FName("HandleDistanceProgress"));
+			PickupTimeline->AddInterpFloat(DistanceCurve, DistanceUpdateDelegate);
+
+			FOnTimelineFloat HeightUpdateDelegate;
+			HeightUpdateDelegate.BindUFunction(this, FName("HandleHeightProgress"));
+			PickupTimeline->AddInterpFloat(DistanceCurve, HeightUpdateDelegate);
 		}
 
 		PickupTimeline->SetPlayRate(1.0f / PickupDuration);
@@ -85,9 +95,11 @@ void AWeaponPickUp::OnPickup_Implementation(AActor* Target)
 	{
 		return;
 	}
-	bIsPickedUp = true;
 
+	bIsPickedUp = true;
+	PickupStartLocation = GetActorLocation();
 	PickupTarget = Target;
+	SetActorEnableCollision(false);
 	//UE_LOG(LogTemp, Log, TEXT("Weapon Picked Up"));
 	PickupTimeline->PlayFromStart();
 }
@@ -102,6 +114,18 @@ void AWeaponPickUp::HandleScaleProgress(float Value)
 {
 	FVector newScale = FVector(Value, Value, Value);
 	SkeletalMesh->SetRelativeScale3D(newScale);
+}
+
+void AWeaponPickUp::HandleDistanceProgress(float Value)
+{
+	//UE_LOG(LogTemp, Log, TEXT("Initial Location: %s"), *PickupStartLocation.ToString());
+	PickupProgressLocation = FMath::Lerp(PickupStartLocation, PickupTarget->GetActorLocation(), Value);
+}
+
+void AWeaponPickUp::HandleHeightProgress(float Value)
+{
+	PickupProgressLocation.Z += (HeightCurve->GetFloatValue(Value) * PickupHeight);
+	SetActorLocation(PickupProgressLocation);
 }
 
 void AWeaponPickUp::OnScaleFinished()

@@ -41,6 +41,12 @@ private:
 
 	UFUNCTION()
 	void HandleScaleProgress(float Value);
+	
+	UFUNCTION()
+	void HandleDistanceProgress(float Value);
+
+	UFUNCTION()
+	void HandleHeightProgress(float Value);
 
 	UFUNCTION()
 	void OnScaleFinished();
@@ -72,10 +78,22 @@ protected:
 	TObjectPtr<UCurveFloat> ScaleCurve = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
+	TObjectPtr<UCurveFloat> DistanceCurve = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
+	TObjectPtr<UCurveFloat> HeightCurve = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
 	float PickupDuration = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
+	float PickupHeight = 100.0f;
 
 private:
 	TWeakObjectPtr<AActor> PickupTarget = nullptr;
-	
+
+	FVector PickupStartLocation = FVector::ZeroVector;
+	FVector PickupProgressLocation = FVector::ZeroVector;
+
 	bool bIsPickedUp = false;
 };
