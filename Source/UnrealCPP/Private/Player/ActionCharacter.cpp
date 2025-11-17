@@ -9,6 +9,7 @@
 #include "Player/ResourceComponent.h"
 #include "Player/StatusComponent.h"
 #include "Weapon/Weapon.h"
+#include "Item/Pickable.h"
 
 
 // Sets default values
@@ -63,6 +64,9 @@ void AActionCharacter::BeginPlay()
 		//UE_LOG(LogTemp, Log, TEXT("HealthMax : %.1f, StaminaMax : %.1f"),
 		//	ResourceComponent->GetHealthMax(), ResourceComponent->GetStaminaMax());
 	}
+
+	// Register overlap event
+	OnActorBeginOverlap.AddDynamic(this, &AActionCharacter::OnBeginOverlap);
 
 	EquipWeapon();
 }
@@ -292,6 +296,16 @@ void AActionCharacter::EquipWeapon()
 
 		PlayerWeapon = NewWeapon;
 		PlayerWeapon->SetWeaponOwner(this);
+	}
+}
+
+void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+{
+	UE_LOG(LogTemp, Log, TEXT("Character OnBeginOverlap : other is %s"), *OtherActor->GetName());
+	IPickable* pickableItem = Cast<IPickable>(OtherActor);
+	if(pickableItem)
+	{
+		IPickable::Execute_OnPickup(OtherActor);
 	}
 }
 

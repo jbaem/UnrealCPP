@@ -64,6 +64,9 @@ protected:
 
 	void EquipWeapon();
 
+	UFUNCTION()
+	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+
 private:
 	UFUNCTION()
 	void OnStaminaDepleted();
