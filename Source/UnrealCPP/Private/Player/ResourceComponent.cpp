@@ -43,9 +43,6 @@ void UResourceComponent::RestoreHealth(float HealthAmount)
 	SetHealthCurrent(HealthCurrent + HealthAmount);
 }
 
-
-
-
 void UResourceComponent::UseStamina(float StaminaCost)
 {
 	SetStaminaCurrent(StaminaCurrent - StaminaCost);
@@ -107,11 +104,11 @@ void UResourceComponent::SetAllResourceByStatus(UStatusComponent* InStatus)
 
 inline void UResourceComponent::SetHealthMaxByStatus(UStatusComponent* InStatus)
 {
-	float AdditionalHealth =
-		(InStatus->GetStrength() * HealthStrengthModifier + InStatus->GetAgility() * HealthAgilityModifier)
-		* InStatus->GetVitality();
-
-	HealthMax = HealthBase + AdditionalHealth;
+	HealthMax = HealthBase;
+	if (InStatus)
+	{
+		HealthMax += InStatus->GetAdditionalHealth();
+	}
 	SetHealthCurrent(HealthMax);
 }
 
@@ -123,11 +120,11 @@ inline void UResourceComponent::SetHealthCurrent(float NewHealth)
 
 inline void UResourceComponent::SetStaminaMaxByStatus(UStatusComponent* InStatus)
 {
-	float AdditionalStamina =
-		(InStatus->GetStrength() * StaminaStrengthModifier + InStatus->GetAgility() * StaminaAgilityModifier)
-		* InStatus->GetVitality();
-
-	StaminaMax = StaminaBase + AdditionalStamina;
+	StaminaMax = StaminaBase;
+	if (InStatus)
+	{
+		StaminaMax += InStatus->GetAdditionalStamina();
+	}
 	SetStaminaCurrent(StaminaMax);
 }
 

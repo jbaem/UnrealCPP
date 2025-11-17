@@ -107,18 +107,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina")
 	float StaminaRegenTickInterval = 1.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier")
-	float HealthStrengthModifier = 0.3f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier")
-	float HealthAgilityModifier = 0.2f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier")
-	float StaminaStrengthModifier = 0.1f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Modifier")
-	float StaminaAgilityModifier = 0.4f;
-
 private:
 	FTimerHandle StaminaAutoRegenCoolTimerHandle;
 	FTimerHandle StaminaRegenTickTimerHandle;

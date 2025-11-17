@@ -54,11 +54,15 @@ void AActionCharacter::BeginPlay()
 
 	bIsSprinting = false;
 
-	ResourceComponent->SetAllResourceByStatus(StatusComponent);
-	UE_LOG(LogTemp, Log, TEXT("Strength : %d, Agility : %d, Vitality : %d"), 
-		StatusComponent->GetStrength(), StatusComponent->GetAgility(), StatusComponent->GetVitality());
-	UE_LOG(LogTemp, Log, TEXT("HealthMax : %.1f, StaminaMax : %.1f"), 
-		ResourceComponent->GetHealthMax(), ResourceComponent->GetStaminaMax());
+
+	if (ResourceComponent && StatusComponent)
+	{
+		ResourceComponent->SetAllResourceByStatus(StatusComponent);
+		//UE_LOG(LogTemp, Log, TEXT("Strength : %d, Agility : %d, Vitality : %d"),
+		//	StatusComponent->GetStrength(), StatusComponent->GetAgility(), StatusComponent->GetVitality());
+		//UE_LOG(LogTemp, Log, TEXT("HealthMax : %.1f, StaminaMax : %.1f"),
+		//	ResourceComponent->GetHealthMax(), ResourceComponent->GetStaminaMax());
+	}
 
 	EquipWeapon();
 }
