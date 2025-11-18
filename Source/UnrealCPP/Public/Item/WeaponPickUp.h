@@ -30,26 +30,10 @@ public:
 
 private:
 	UFUNCTION()
-	void OnPickupBeginOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
-
-	UFUNCTION()
-	void HandleScaleProgress(float Value);
+	void OnTimelineUpdate(float Value);
 	
 	UFUNCTION()
-	void HandleDistanceProgress(float Value);
-
-	UFUNCTION()
-	void HandleHeightProgress(float Value);
-
-	UFUNCTION()
-	void OnScaleFinished();
+	void OnTimelineFinished();
 
 protected:
 	// for physics simulation
@@ -93,7 +77,6 @@ private:
 	TWeakObjectPtr<AActor> PickupTarget = nullptr;
 
 	FVector PickupStartLocation = FVector::ZeroVector;
-	FVector PickupProgressLocation = FVector::ZeroVector;
 
 	bool bIsPickedUp = false;
 };

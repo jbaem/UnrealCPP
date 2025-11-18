@@ -45,35 +45,18 @@ void AWeaponPickUp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(PickupOverlap)
-	{
-		PickupOverlap->OnComponentBeginOverlap.AddDynamic(this, &AWeaponPickUp::OnPickupBeginOverlap);
-	}
-
 	if (PickupTimeline)
 	{
-		if (ScaleCurve)
+		if (DistanceCurve)
 		{
-			FOnTimelineFloat ScaleUpdateDelegate;
-			ScaleUpdateDelegate.BindUFunction(this, FName("HandleScaleProgress"));
-			PickupTimeline->AddInterpFloat(ScaleCurve, ScaleUpdateDelegate);
+			FOnTimelineFloat UpdateDelegate;
+			UpdateDelegate.BindUFunction(this, FName("OnTimelineUpdate"));
+			PickupTimeline->AddInterpFloat(DistanceCurve, UpdateDelegate);
 			
-			//FOnTimelineEvent ScaleFinishedDelegate;
-			//ScaleFinishedDelegate.BindUFunction(this, FName("OnScaleFinished"));
-			//PickupTimeline->SetTimelineFinishedFunc(ScaleFinishedDelegate);
+			FOnTimelineEvent FinishedDelegate;
+			FinishedDelegate.BindUFunction(this, FName("OnTimelineFinished"));
+			PickupTimeline->SetTimelineFinishedFunc(FinishedDelegate);
 		}
-
-		if (DistanceCurve && HeightCurve)
-		{
-			FOnTimelineFloat DistanceUpdateDelegate;
-			DistanceUpdateDelegate.BindUFunction(this, FName("HandleDistanceProgress"));
-			PickupTimeline->AddInterpFloat(DistanceCurve, DistanceUpdateDelegate);
-
-			FOnTimelineFloat HeightUpdateDelegate;
-			HeightUpdateDelegate.BindUFunction(this, FName("HandleHeightProgress"));
-			PickupTimeline->AddInterpFloat(DistanceCurve, HeightUpdateDelegate);
-		}
-
 		PickupTimeline->SetPlayRate(1.0f / PickupDuration);
 	}
 
@@ -97,42 +80,37 @@ void AWeaponPickUp::OnPickup_Implementation(AActor* Target)
 	}
 
 	bIsPickedUp = true;
-	PickupStartLocation = GetActorLocation();
+
 	PickupTarget = Target;
+	PickupStartLocation = GetActorLocation();
 	SetActorEnableCollision(false);
+	BaseRoot->SetSimulatePhysics(true);
 	//UE_LOG(LogTemp, Log, TEXT("Weapon Picked Up"));
 	PickupTimeline->PlayFromStart();
 }
 
-void AWeaponPickUp::OnPickupBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AWeaponPickUp::OnTimelineUpdate(float Value)
 {
+	float currentTime = PickupTimeline->GetPlaybackPosition();
 
-	//UE_LOG(LogTemp, Log, TEXT("OnPickupBeginOverlap"));
-}
+	float distanceValue = DistanceCurve->GetFloatValue(currentTime);
+	float heightValue = HeightCurve->GetFloatValue(currentTime);
 
-void AWeaponPickUp::HandleScaleProgress(float Value)
-{
-	FVector newScale = FVector(Value, Value, Value);
+	FVector pickupProgressLocation
+		= FMath::Lerp(PickupStartLocation, PickupTarget->GetActorLocation(), distanceValue);
+	pickupProgressLocation.Z += (heightValue * PickupHeight);
+	SetActorLocation(pickupProgressLocation);
+
+	float scaleValue = ScaleCurve->GetFloatValue(currentTime);
+	FVector newScale = FVector(scaleValue);
 	SkeletalMesh->SetRelativeScale3D(newScale);
 }
 
-void AWeaponPickUp::HandleDistanceProgress(float Value)
-{
-	//UE_LOG(LogTemp, Log, TEXT("Initial Location: %s"), *PickupStartLocation.ToString());
-	PickupProgressLocation = FMath::Lerp(PickupStartLocation, PickupTarget->GetActorLocation(), Value);
-}
-
-void AWeaponPickUp::HandleHeightProgress(float Value)
-{
-	PickupProgressLocation.Z += (HeightCurve->GetFloatValue(Value) * PickupHeight);
-	SetActorLocation(PickupProgressLocation);
-}
-
-void AWeaponPickUp::OnScaleFinished()
+void AWeaponPickUp::OnTimelineFinished()
 {
 	if(PickupTarget.IsValid() && PickupTarget->Implements<UInventoryOwner>())
 	{
 		IInventoryOwner::Execute_AddItem(PickupTarget.Get(), ItemCode);
-		//Destroy();
 	}
+	Destroy();
 }
