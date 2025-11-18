@@ -175,8 +175,8 @@ void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 {
 	if (!ActionAnimInstance.IsValid() || !::IsValid(AttackMontage)) return;
-
 	if (!ResourceComponent->HasEnoughStamina(AttackStaminaCost)) return;
+	if (!PlayerWeapon->CanAttack()) return;
 
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{
@@ -246,6 +246,15 @@ void AActionCharacter::PlayAttack1()
 {
 	ResourceComponent->UseStamina(AttackStaminaCost);
 	PlayAnimMontage(AttackMontage);
+
+	FOnMontageEnded onMontageEnded;
+	onMontageEnded.BindUObject(this, &AActionCharacter::OnAttackMontageEnded);
+	ActionAnimInstance->Montage_SetEndDelegate(onMontageEnded);
+
+	if (PlayerWeapon)
+	{
+		PlayerWeapon->OnAttack();
+	}
 }
 
 void AActionCharacter::PlayComboAttack1()
@@ -263,23 +272,37 @@ void AActionCharacter::PlayComboAttack1()
 	//	SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
 	//	AttackMontage
 	//);
+
+	if (PlayerWeapon)
+	{
+		PlayerWeapon->OnAttack();
+	}
 }
 
 void AActionCharacter::PlayAttack2()
 {
 	ResourceComponent->UseStamina(Attack2StaminaCost);
 	PlayAnimMontage(Attack2Montage);
+
+	if (PlayerWeapon)
+	{
+		PlayerWeapon->OnAttack();
+	}
 }
 
 void AActionCharacter::PlayComboAttack2()
 {
-
 	ResourceComponent->UseStamina(Attack2StaminaCost);
 
 	ActionAnimInstance->Montage_JumpToSection(
 		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
 		Attack2Montage
 	);
+	
+	if (PlayerWeapon)
+	{
+		PlayerWeapon->OnAttack();
+	}
 }
 
 void AActionCharacter::EquipWeapon()
@@ -302,7 +325,7 @@ void AActionCharacter::EquipWeapon()
 			FName("hand_rSocket"));
 
 		PlayerWeapon = NewWeapon;
-		PlayerWeapon->SetWeaponOwner(this);
+		PlayerWeapon->OnWeaponPickuped(this);
 	}
 }
 
@@ -329,4 +352,25 @@ void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActo
 void AActionCharacter::OnStaminaDepleted()
 {
 	SetWalkMode();
+}
+
+void AActionCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	UE_LOG(LogTemp, Log, TEXT("Attack Montage Ended"));
+	UE_LOG(LogTemp, Log, TEXT("AttackCount : %d"), PlayerWeapon->GetUsedCountRemain());
+	if (::IsValid(PlayerWeapon) && !PlayerWeapon->CanAttack())
+	{
+		TSubclassOf<AActor>* usedClass = UsedWeapon.Find(PlayerWeapon->GetWeaponID());
+
+		AActor* used = GetWorld()->SpawnActor<AActor>(
+			*usedClass,
+			GetActorLocation() + GetActorForwardVector() * 100.0f,
+			FRotator()
+		);
+
+		UPrimitiveComponent* primitive = used->FindComponentByClass<UPrimitiveComponent>();
+		primitive->AddImpulse((GetActorForwardVector() + GetActorUpVector()) * 500.0f, NAME_None, true);
+
+		// TODO: 기본 무기 장착
+	}
 }

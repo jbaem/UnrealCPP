@@ -8,7 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include <Player/StatusComponent.h>
 #include <TimerManager.h>
-
+#include "Player/ActionCharacter.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -103,5 +103,10 @@ void AWeapon::StartHoldingTimer()
 		HoldingDuration, 
 		false
 	);
+}
+
+void AWeapon::OnWeaponPickuped(AActionCharacter* Picker)
+{
+	WeaponOwner = Picker;
 }
 
