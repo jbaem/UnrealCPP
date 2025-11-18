@@ -1,7 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Player/ActionCharacter.h"
+
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -12,10 +10,8 @@
 #include "Item/Pickable.h"
 
 
-// Sets default values
 AActionCharacter::AActionCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -37,12 +33,10 @@ AActionCharacter::AActionCharacter()
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 }
 
-// Called when the game starts or when spawned
 void AActionCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//Get Animation Blueprint Instance
 	if (GetMesh())
 	{
 		ActionAnimInstance = GetMesh()->GetAnimInstance(); 
@@ -55,23 +49,16 @@ void AActionCharacter::BeginPlay()
 
 	bIsSprinting = false;
 
-
 	if (ResourceComponent && StatusComponent)
 	{
 		ResourceComponent->SetAllResourceByStatus(StatusComponent);
-		//UE_LOG(LogTemp, Log, TEXT("Strength : %d, Agility : %d, Vitality : %d"),
-		//	StatusComponent->GetStrength(), StatusComponent->GetAgility(), StatusComponent->GetVitality());
-		//UE_LOG(LogTemp, Log, TEXT("HealthMax : %.1f, StaminaMax : %.1f"),
-		//	ResourceComponent->GetHealthMax(), ResourceComponent->GetStaminaMax());
 	}
 
-	// Register overlap event
 	OnActorBeginOverlap.AddDynamic(this, &AActionCharacter::OnBeginOverlap);
 
 	EquipWeapon();
 }
 
-// Called every frame
 void AActionCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -79,7 +66,6 @@ void AActionCharacter::Tick(float DeltaTime)
 	SpendSprintStamina(DeltaTime);
 }
 
-// Called to bind functionality to input
 void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -87,7 +73,6 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (enhanced)
 	{
-		//여기에 Input Action Bindings 추가
 		enhanced->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
 		
 		enhanced->BindActionValueLambda(IA_Sprint, ETriggerEvent::Started, 
@@ -111,8 +96,6 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void AActionCharacter::AddItem_Implementation(EItemCode Code)
 {
 	const UEnum* EnumPtr = StaticEnum<EItemCode>();
-	UE_LOG(LogTemp, Log, TEXT("ActionCharacter AddItem : %s"), *UEnum::GetValueAsString(Code));
-
 }
 
 inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace* InNotify)
@@ -146,25 +129,17 @@ void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 	//const FVector right = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
 	//AddMovementInput(right, inputDirection.X);	
 	*/
-
-	//UE_LOG(LogTemp, Log, TEXT("Dir : (%.1f, %.1f)"), inputDirection.X, inputDirection.Y);
-	//UE_LOG(LogTemp, Log, TEXT("Dir : (%s)"), *inputDirection.ToString());
 }
 
 void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 {
 	if (!ActionAnimInstance.IsValid() || !::IsValid(RollMontage)) return;
-	
 	if (!ResourceComponent->HasEnoughStamina(RollStaminaCost)) return;
-	
 	if (ActionAnimInstance->IsAnyMontagePlaying()) return;
 
 	ResourceComponent->UseStamina(RollStaminaCost);
 
 	FVector LastMoveDir = GetLastMovementInputVector();
-	//UE_LOG(LogTemp, Log, TEXT("Roll Input"));
-	//UE_LOG(LogTemp, Log, TEXT("Last Movement Input Vector : %s"), *LastMoveDir.ToString());
-	
 	if (!LastMoveDir.IsNearlyZero())
 	{
 		SetActorRotation(LastMoveDir.ToOrientationRotator());
@@ -191,12 +166,8 @@ void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 
 void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
 {
-	//UE_LOG(LogTemp, Log, TEXT("Attack2 Input"));
 	if (!ActionAnimInstance.IsValid() || !::IsValid(Attack2Montage)) return;
-
 	if (!ResourceComponent->HasEnoughStamina(Attack2StaminaCost)) return;
-
-	//UE_LOG(LogTemp, Log, TEXT("Has Enough Stamina"));
 
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{
@@ -212,14 +183,12 @@ void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
 void AActionCharacter::SetSprintMode()
 {
 	if (ResourceComponent->GetStaminaCurrent() <= 0) return;
-	//UE_LOG(LogTemp, Log, TEXT("Sprint Mode"));
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 	bIsSprinting = true;
 }
 
 void AActionCharacter::SetWalkMode()
 {
-	//UE_LOG(LogTemp, Log, TEXT("Walk Mode"));
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	bIsSprinting = false;
 }
@@ -233,13 +202,7 @@ void AActionCharacter::SpendSprintStamina(float DeltaTime)
 			return;
 		}
 		ResourceComponent->UseStamina(SprintStaminaCost * DeltaTime);
-
-		//UE_LOG(LogTemp, Warning, TEXT("Stamina : %.1f / %.1f"),
-		//	ResourceComponent ? ResourceComponent->GetStaminaCurrent() : 0.0f,
-		//	ResourceComponent ? ResourceComponent->GetStaminaMax() : 0.0f
-		//);
 	}
-
 }
 
 void AActionCharacter::PlayAttack1()
@@ -266,12 +229,14 @@ void AActionCharacter::PlayComboAttack1()
 		AttackMontage
 	);
 
-	//UAnimMontage* current = ActionAnimInstance->GetCurrentActiveMontage();
-	//ActionAnimInstance->Montage_SetNextSection(
-	//	ActionAnimInstance->Montage_GetCurrentSection(current),
-	//	SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
-	//	AttackMontage
-	//);
+	/* use case: Montage_SetNextSection
+	UAnimMontage* current = ActionAnimInstance->GetCurrentActiveMontage();
+	ActionAnimInstance->Montage_SetNextSection(
+		ActionAnimInstance->Montage_GetCurrentSection(current),
+		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
+		AttackMontage
+	);
+	*/
 
 	if (PlayerWeapon)
 	{
@@ -331,22 +296,20 @@ void AActionCharacter::EquipWeapon()
 
 void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	//UE_LOG(LogTemp, Log, TEXT("Character OnBeginOverlap : other is %s"), *OtherActor->GetName());
-
-	// Cast case
-	//IPickable* pickableItem = Cast<IPickable>(OtherActor);
-	//if(pickableItem)
-	//{
-	//	IPickable::Execute_OnPickup(OtherActor);	// Execute blueprint if implemented
-	//	//pickableItem->OnPickup_Implementation();	// Execute only C++ implementation directly
-	//}
+	/* Cast case
+	IPickable* pickableItem = Cast<IPickable>(OtherActor);
+	if(pickableItem)
+	{
+		IPickable::Execute_OnPickup(OtherActor);	// Execute blueprint if implemented
+		//pickableItem->OnPickup_Implementation();	// Execute only C++ implementation directly
+	}
+	*/
 
 	// Implements case
 	if(OtherActor->Implements<UPickable>())
 	{
 		IPickable::Execute_OnPickup(OtherActor, this);
 	}
-
 }
 
 void AActionCharacter::OnStaminaDepleted()

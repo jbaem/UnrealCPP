@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -23,20 +21,15 @@ UCLASS()
 class UNREALCPP_API AActionCharacter : public ACharacter, public IInventoryOwner
 {
 	GENERATED_BODY()
-
 public:
-	// Sets default values for this character's properties
 	AActionCharacter();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void AddItem_Implementation(EItemCode Code);
@@ -84,7 +77,6 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
-	//TObjectPtr<class USpringArmComponent> SpringArm = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<UCameraComponent> PlayerCamera = nullptr;
@@ -153,7 +145,6 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
 
-	// ongoing section jump notify
 	UPROPERTY()
 	TWeakObjectPtr<UAnimNotifyState_SectionJump> SectionJumpNotify = nullptr;
 
@@ -163,6 +154,5 @@ private:
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon", meta = (AllowPrivateAccess = "true"))
 	//bool bWeaponUseEnded = false;
 
-	// can be used combo attack
 	bool bComboReady = false;
 };

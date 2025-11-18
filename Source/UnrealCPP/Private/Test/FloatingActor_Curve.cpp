@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Test/FloatingActor_Curve.h"
 
 void AFloatingActor_Curve::OnFloatingMeshUpdate(float DeltaTime)

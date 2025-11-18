@@ -1,12 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 
-/**
- * 
- */
 UENUM(BlueprintType)
 enum class EItemCode : uint8
 {
@@ -16,6 +11,12 @@ enum class EItemCode : uint8
 	EIC_HellHammer		UMETA(DisplayName = "HellHammer"),
 };
 
+// Example usage: C++
+// UPROPERTY(EditAnywhere, meta = (Bitmask, BitmaskEnum = "ETestBitFlag"))
+// uint8 testBitFlag;
+// 
+// Example usage: blueprint
+// int 로 변수를 만들고 bitflag 체크한 후 enum 타입 설정
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ETestBitFlag : uint8
 {
@@ -26,9 +27,3 @@ enum class ETestBitFlag : uint8
 	Test4 = 1 << 3
 };
 
-// Example usage: C++
-//UPROPERTY(EditAnywhere, meta = (Bitmask, BitmaskEnum = "ETestBitFlag"))
-//uint8 testBitFlag;
-
-// Example usage: blueprint
-// int 로 변수를 만들고 bitflag 체크한 후 enum 타입 설정

@@ -1,10 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Player/ActionPlayerController.h"
+
 #include "InputMappingContext.h"
-#include <EnhancedInputComponent.h>
-#include <EnhancedInputSubsystems.h>
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 
 void AActionPlayerController::BeginPlay()
 {
@@ -32,7 +30,6 @@ void AActionPlayerController::SetupInputComponent()
 
 	if (enhanced)
 	{
-		//여기에 Input Action Bindings 추가
 		enhanced->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AActionPlayerController::OnLookInput);
 	}
 }
@@ -42,6 +39,4 @@ void AActionPlayerController::OnLookInput(const FInputActionValue& InValue)
 	FVector2D lookAxis = InValue.Get<FVector2D>();
 	AddYawInput(lookAxis.X);
 	AddPitchInput(lookAxis.Y);
-	//UE_LOG(LogTemp, Log, TEXT("Dir : (%.1f, %.1f)"), lookAxis.X, lookAxis.Y);
-	//UE_LOG(LogTemp, Log, TEXT("Dir : (%s)"), *lookAxis.ToString());
 }

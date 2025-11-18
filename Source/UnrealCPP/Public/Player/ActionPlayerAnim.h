@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,14 +7,10 @@
 
 class ACharacter;
 
-/**
- * 
- */
 UCLASS()
 class UNREALCPP_API UActionPlayerAnim : public UAnimInstance
 {
 	GENERATED_BODY()
-	
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;

@@ -1,16 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Item/WeaponPickUp.h"
-#include "Components/SphereComponent.h"
-#include "NiagaraComponent.h"
-#include "Player/InventoryOwner.h"
-#include "Components/TimelineComponent.h"
 
-// Sets default values
+#include "NiagaraComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/TimelineComponent.h"
+#include "Player/InventoryOwner.h"
+
 AWeaponPickUp::AWeaponPickUp()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	BaseRoot = CreateDefaultSubobject<USphereComponent>(TEXT("BaseRoot"));

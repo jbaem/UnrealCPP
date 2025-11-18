@@ -1,7 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Player/ActionPlayerAnim.h"
+
 #include "GameFramework/PawnMovementComponent.h"
 
 void UActionPlayerAnim::NativeInitializeAnimation()
@@ -13,7 +11,6 @@ void UActionPlayerAnim::NativeInitializeAnimation()
 	{
 		MovementComponent = OwnerPawn->GetMovementComponent();
 	}
-
 }
 
 void UActionPlayerAnim::NativeUpdateAnimation(float DeltaSeconds)

@@ -1,12 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Test/FloatingActor.h"
 
-// Sets default values
 AFloatingActor::AFloatingActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	USceneComponent* root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -16,12 +11,9 @@ AFloatingActor::AFloatingActor()
 	BodyMesh->SetupAttachment(root);
 }
 
-// Called when the game starts or when spawned
 void AFloatingActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	//BodyMesh->SetRelativeLocation(FVector(0, 0, 100));
 }
 
 void AFloatingActor::OnFloatingMeshUpdate(float DeltaTime)
@@ -37,14 +29,12 @@ void AFloatingActor::OnFloatingMeshUpdate(float DeltaTime)
 	BodyMesh->AddRelativeRotation(DeltaTime * SpinSpeed * FRotator::MakeFromEuler(FVector::UpVector));
 }
 
-// Called every frame
 void AFloatingActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	ElapsedTime += DeltaTime;
 	OnFloatingMeshUpdate(DeltaTime);
-
 }
 
 void AFloatingActor::ChangeMoveDirection()

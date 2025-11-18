@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -18,17 +16,13 @@ UCLASS( Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UNREALCPP_API UResourceComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
 public:	
-	// Sets default values for this component's properties
 	UResourceComponent();
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -51,13 +45,11 @@ protected:
 	void RegenStaminaPerTick();
 
 public:
-	// Getters
 	inline float GetHealthCurrent() const { return HealthCurrent; }
 	inline float GetHealthMax() const { return HealthMax; }
 	inline float GetStaminaCurrent() const { return StaminaCurrent; }
 	inline float GetStaminaMax() const { return StaminaMax; }
 
-	// Setters
 	void SetAllResourceByStatus(UStatusComponent* InStatus);
 	inline void SetHealthMaxByStatus(UStatusComponent* InStatus);
 	inline void SetHealthCurrent(float NewHealth);
@@ -98,6 +90,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stamina")
 	float StaminaCurrent = 100.0f;
 
+	// Stamina Regen
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
 	float StaminaRegenAmountPerTick = 10.0f;
 

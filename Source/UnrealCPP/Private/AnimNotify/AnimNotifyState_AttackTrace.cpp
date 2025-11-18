@@ -1,7 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "AnimNotify/AnimNotifyState_AttackTrace.h"
+
 #include "Player/ActionCharacter.h"
 
 void UAnimNotifyState_AttackTrace::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
@@ -21,10 +19,7 @@ void UAnimNotifyState_AttackTrace::NotifyEnd(USkeletalMeshComponent* MeshComp, U
 
 	if(OwnerCharacter.IsValid())
 	{
-		// OwnerCharacter 설정 해제
 		OwnerCharacter->SetAttackTraceNotify(nullptr);
 		OwnerCharacter = nullptr;
 	}
-
-
 }
