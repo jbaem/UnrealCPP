@@ -8,6 +8,8 @@
 #include "InputActionValue.h"
 #include "Weapon/Weapon.h"
 #include "InventoryOwner.h"
+#include "Weapon/UsedWeapon.h"
+#include "Item/WeaponPickUp.h"
 
 #include "ActionCharacter.generated.h"
 
@@ -41,6 +43,12 @@ public:
 	}
 
 	inline void SetAttackTraceNotify(class UAnimNotifyState_AttackTrace* InNotify);
+
+	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
+	void TestDropUsedWeapon();
+	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
+	void TestDropCurrentWeapon();
+
 protected:
 	void OnMoveInput(const FInputActionValue& Value);
 	void OnRollInput(const FInputActionValue& Value);
@@ -59,6 +67,8 @@ protected:
 	void PlayComboAttack2();
 
 	void EquipWeapon();
+	void DropUsedWeapon();
+	void DropCurrentWeapon();
 
 	UFUNCTION()
 	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
@@ -87,6 +97,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Status")
 	TObjectPtr<UStatusComponent> StatusComponent = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
+	TObjectPtr<USceneComponent> DropLocation = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TSubclassOf<AWeapon> DefaultWeaponClass = nullptr;
 
@@ -94,7 +107,10 @@ protected:
 	TObjectPtr<AWeapon> PlayerWeapon = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
-	TMap<EItemCode, TSubclassOf<AActor>> UsedWeapon;
+	TMap<EItemCode, TSubclassOf<AUsedWeapon>> UsedWeapons;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
+	TMap<EItemCode, TSubclassOf<AWeaponPickUp>> PickupWeapons;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Move = nullptr;

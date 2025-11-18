@@ -22,13 +22,13 @@ AWeaponPickUp::AWeaponPickUp()
 
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	SkeletalMesh->SetupAttachment(BaseRoot);
-	SkeletalMesh->SetCollisionProfileName(TEXT("NoCollision"));
+	SkeletalMesh->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
 	SkeletalMesh->AddRelativeRotation(FRotator(0, 0, -10.0f));
 
 	PickupOverlap = CreateDefaultSubobject<USphereComponent>(TEXT("Overlap"));
 	PickupOverlap->SetupAttachment(BaseRoot);
 	PickupOverlap->SetSphereRadius(100.0f);
-	SkeletalMesh->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
+	SkeletalMesh->SetCollisionProfileName(TEXT("NoCollision")); // 생성 직후는 바로 먹을 수 없음
 
 	Effect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Effect"));
 	Effect->SetupAttachment(BaseRoot);
@@ -56,7 +56,16 @@ void AWeaponPickUp::BeginPlay()
 		PickupTimeline->SetPlayRate(1.0f / PickupDuration);
 	}
 
-	bIsPickedUp = false;
+	bIsPickedUp = true;
+
+	FTimerManager& timerManager = GetWorld()->GetTimerManager();
+	timerManager.ClearTimer(PickupTimerHandle);
+	timerManager.SetTimer(
+		PickupTimerHandle,
+		[this]() { bIsPickedUp = false; },
+		PickupTime,
+		false
+	);
 }
 
 // Called every frame
@@ -83,6 +92,13 @@ void AWeaponPickUp::OnPickup_Implementation(AActor* Target)
 	BaseRoot->SetSimulatePhysics(true);
 	//UE_LOG(LogTemp, Log, TEXT("Weapon Picked Up"));
 	PickupTimeline->PlayFromStart();
+}
+
+void AWeaponPickUp::AddImpulse(FVector& Impulse)
+{
+	UE_LOG(LogTemp, Log, TEXT("Impulse Added: %s"), *Impulse.ToString());
+	UE_LOG(LogTemp, Log, TEXT("Before Velocity: %s"), *BaseRoot->GetPhysicsLinearVelocity().ToString());
+	BaseRoot->AddImpulse(Impulse, NAME_None, true);
 }
 
 void AWeaponPickUp::OnTimelineUpdate(float Value)

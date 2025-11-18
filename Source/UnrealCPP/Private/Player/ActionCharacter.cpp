@@ -24,13 +24,15 @@ AActionCharacter::AActionCharacter()
 	PlayerCamera->SetupAttachment(SpringArm);
 	PlayerCamera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 	
-	bUseControllerRotationYaw = false; // Character가 Controller의 Yaw 회전을 따르지 않도록 설정
-	
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character가 이동 방향으로 회전하도록 설정
-	GetCharacterMovement()->RotationRate = FRotator(0, 360, 0); // 회전 속도 설정
-
 	ResourceComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
+
+	DropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("DropLocation"));
+	DropLocation->SetupAttachment(RootComponent);
+
+	bUseControllerRotationYaw = false; // Character가 Controller의 Yaw 회전을 따르지 않도록 설정
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character가 이동 방향으로 회전하도록 설정
+	GetCharacterMovement()->RotationRate = FRotator(0, 360, 0); // 회전 속도 설정
 }
 
 void AActionCharacter::BeginPlay()
@@ -102,6 +104,16 @@ inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace*
 {
 	AttackTraceNotify = InNotify;
 	PlayerWeapon->AttackEnable(AttackTraceNotify.IsValid());
+}
+
+void AActionCharacter::TestDropUsedWeapon()
+{
+	DropUsedWeapon();
+}
+
+void AActionCharacter::TestDropCurrentWeapon()
+{
+	DropCurrentWeapon();
 }
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
@@ -294,6 +306,39 @@ void AActionCharacter::EquipWeapon()
 	}
 }
 
+void AActionCharacter::DropUsedWeapon()
+{
+	if (!::IsValid(PlayerWeapon) 
+		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_Basic
+		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_None) return;
+
+	TSubclassOf<AUsedWeapon>* usedClass = UsedWeapons.Find(PlayerWeapon->GetWeaponID());
+
+	GetWorld()->SpawnActor<AActor>(
+		*usedClass,
+		DropLocation->GetComponentLocation(),
+		GetActorRotation()
+	);
+}
+
+void AActionCharacter::DropCurrentWeapon()
+{
+	if (!::IsValid(PlayerWeapon) 
+		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_Basic
+		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_None) return;
+
+	TSubclassOf<AWeaponPickUp>* pickupClass = PickupWeapons.Find(PlayerWeapon->GetWeaponID());
+
+	AWeaponPickUp* pickup = GetWorld()->SpawnActor<AWeaponPickUp>(
+		*pickupClass,
+		DropLocation->GetComponentLocation(),
+		GetActorRotation()
+	);
+	FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
+	UE_LOG(LogTemp, Warning, TEXT("Drop Velocity: %s"), *velocity.ToString());
+	pickup->AddImpulse(velocity);
+}
+
 void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	/* Cast case
@@ -319,18 +364,8 @@ void AActionCharacter::OnStaminaDepleted()
 
 void AActionCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	UE_LOG(LogTemp, Log, TEXT("Attack Montage Ended"));
-	UE_LOG(LogTemp, Log, TEXT("AttackCount : %d"), PlayerWeapon->GetUsedCountRemain());
 	if (::IsValid(PlayerWeapon) && !PlayerWeapon->CanAttack())
 	{
-		TSubclassOf<AActor>* usedClass = UsedWeapon.Find(PlayerWeapon->GetWeaponID());
-
-		AActor* used = GetWorld()->SpawnActor<AActor>(
-			*usedClass,
-			GetActorLocation() + GetActorForwardVector() * 100.0f,
-			FRotator()
-		);
-
-		// TODO: 기본 무기 장착
+		DropUsedWeapon();
 	}
 }

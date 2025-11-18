@@ -21,6 +21,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnPickup_Implementation(AActor* Target) override;
 
+	void AddImpulse(FVector& Impulse);
+
 private:
 	UFUNCTION()
 	void OnTimelineUpdate(float Value);
@@ -61,6 +63,9 @@ protected:
 	TObjectPtr<UCurveFloat> HeightCurve = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
+	float PickupTime = 3.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
 	float PickupDuration = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
@@ -68,6 +73,8 @@ protected:
 
 private:
 	TWeakObjectPtr<AActor> PickupTarget = nullptr;
+
+	FTimerHandle PickupTimerHandle;
 
 	FVector PickupStartLocation = FVector::ZeroVector;
 
