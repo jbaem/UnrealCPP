@@ -368,9 +368,6 @@ void AActionCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterru
 			FRotator()
 		);
 
-		UPrimitiveComponent* primitive = used->FindComponentByClass<UPrimitiveComponent>();
-		primitive->AddImpulse((GetActorForwardVector() + GetActorUpVector()) * 500.0f, NAME_None, true);
-
 		// TODO: 기본 무기 장착
 	}
 }

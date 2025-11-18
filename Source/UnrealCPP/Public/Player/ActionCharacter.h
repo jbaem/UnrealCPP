@@ -160,7 +160,8 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimNotifyState_AttackTrace> AttackTraceNotify = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon", meta = (AllowPrivateAccess = "true"))
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon", meta = (AllowPrivateAccess = "true"))
+	//bool bWeaponUseEnded = false;
 
 	// can be used combo attack
 	bool bComboReady = false;
