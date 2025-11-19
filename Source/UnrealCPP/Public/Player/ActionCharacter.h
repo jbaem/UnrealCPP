@@ -36,12 +36,7 @@ public:
 
 	virtual void AddItem_Implementation(EItemCode Code, int32 Count);
 
-	inline void SetSectionJumpNotify(class UAnimNotifyState_SectionJump* InNotify)
-	{
-		SectionJumpNotify = InNotify;
-		bComboReady = SectionJumpNotify != nullptr;
-	}
-
+	inline void SetSectionJumpNotify(class UAnimNotifyState_SectionJump* InNotify);
 	inline void SetAttackTraceNotify(class UAnimNotifyState_AttackTrace* InNotify);
 
 	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
@@ -90,74 +85,30 @@ public:
 	UStatusComponent* GetStatusComponent() const { return StatusComponent; }
 
 protected:
+	// Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<USpringArmComponent> SpringArm = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Camera")
 	TObjectPtr<UCameraComponent> PlayerCamera = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Resource")
 	TObjectPtr<UResourceComponent> ResourceComponent = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Status")
 	TObjectPtr<UStatusComponent> StatusComponent = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<USceneComponent> DropLocation = nullptr;
-
+	// Manager
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<class UWeaponManagerComponent> WeaponManager = nullptr;
+	// Data
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<class UPlayerInputData> InputData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
+	TObjectPtr<class UPlayerData> PlayerData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage")
+	TObjectPtr<class UPlayerMontageData> MontageData;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<AWeapon> PlayerWeapon = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
-	TMap<EItemCode, TSubclassOf<AUsedWeapon>> UsedWeapons;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player|Weapon")
-	TMap<EItemCode, TSubclassOf<AWeaponPickUp>> PickupWeapons;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_Move = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_Sprint = nullptr;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_Roll = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_Attack1 = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_Attack2 = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Walk")
-	float WalkSpeed = 600.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Sprint")
-	float SprintSpeed = 1200.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Sprint")
-	float SprintStaminaCost = 20.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Roll")
-	float RollStaminaCost = 40.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Attack")
-	float AttackStaminaCost = 10.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Movement|Attack")
-	float Attack2StaminaCost = 15.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
-	TObjectPtr<UAnimMontage> RollMontage = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
-	TObjectPtr<UAnimMontage> AttackMontage = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Animation|Montage")
-	TObjectPtr<UAnimMontage> Attack2Montage = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|State")
 	bool bIsSprinting = false;
@@ -165,15 +116,10 @@ protected:
 private:
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
-
 	UPROPERTY()
 	TWeakObjectPtr<UAnimNotifyState_SectionJump> SectionJumpNotify = nullptr;
-
 	UPROPERTY()
 	TWeakObjectPtr<UAnimNotifyState_AttackTrace> AttackTraceNotify = nullptr;
-
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon", meta = (AllowPrivateAccess = "true"))
-	//bool bWeaponUseEnded = false;
-
+	
 	bool bComboReady = false;
 };

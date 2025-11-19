@@ -18,6 +18,7 @@ public:
 
 	AWeapon* GetEquippedWeaponByItemCode(EItemCode ItemCode) const;
 	TSubclassOf<AUsedWeapon> GetUsedWeaponClassByItemCode(EItemCode ItemCode) const;
+	TSubclassOf<AWeaponPickUp> GetPickupWeaponClassByItemCode(EItemCode ItemCode) const;
 protected:
 	virtual void BeginPlay() override;
 

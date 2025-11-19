@@ -9,7 +9,6 @@ void UAnimNotifyState_SectionJump::NotifyBegin(USkeletalMeshComponent* MeshComp,
 	OwnerCharacter = Cast<AActionCharacter>(MeshComp->GetOwner());
 	if(OwnerCharacter.IsValid())
 	{
-		// OwnerCharacter 에 자기 자신을 설정
 		OwnerCharacter->SetSectionJumpNotify(this);
 	}
 }
@@ -20,7 +19,6 @@ void UAnimNotifyState_SectionJump::NotifyEnd(USkeletalMeshComponent* MeshComp, U
 
 	if (OwnerCharacter.IsValid())
 	{
-		// OwnerCharacter 설정 해제
 		OwnerCharacter->SetSectionJumpNotify(nullptr);
 		OwnerCharacter = nullptr;
 	}

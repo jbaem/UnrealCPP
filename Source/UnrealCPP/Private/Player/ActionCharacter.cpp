@@ -9,7 +9,9 @@
 #include "Player/WeaponManagerComponent.h"
 #include "Weapon/Weapon.h"
 #include "Item/Pickable.h"
-
+#include "Player/PlayerInputData.h"
+#include "Player/PlayerData.h"
+#include "Player/PlayerMontageData.h"
 
 AActionCharacter::AActionCharacter()
 {
@@ -74,31 +76,54 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
 	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	if (enhanced)
+	if (!enhanced || !InputData) return;
+
+	if (InputData->Move)
 	{
-		enhanced->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
-		
-		enhanced->BindActionValueLambda(IA_Sprint, ETriggerEvent::Started, 
-			[this](const FInputActionValue& _) {
+		enhanced->BindAction(InputData->Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
+	}
+
+	if (InputData->Sprint)
+	{
+		enhanced->BindActionValueLambda(InputData->Sprint, ETriggerEvent::Started,
+			[this](const FInputActionValue& _)
+			{
 				SetSprintMode();
 			}
 		);
-		enhanced->BindActionValueLambda(IA_Sprint, ETriggerEvent::Completed,
-			[this](const FInputActionValue& _) {
+		enhanced->BindActionValueLambda(InputData->Sprint, ETriggerEvent::Completed,
+			[this](const FInputActionValue& _)
+			{
 				SetWalkMode();
 			}
 		);
+	}
 
-		enhanced->BindAction(IA_Roll, ETriggerEvent::Triggered, this, &AActionCharacter::OnRollInput);
-	
-		enhanced->BindAction(IA_Attack1, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack1Input);
-		enhanced->BindAction(IA_Attack2, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack2Input);
+	if (InputData->Roll)
+	{
+		enhanced->BindAction(InputData->Roll, ETriggerEvent::Triggered, this, &AActionCharacter::OnRollInput);
+	}
+
+	if (InputData->Attack1)
+	{
+		enhanced->BindAction(InputData->Attack1, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack1Input);
+	}
+
+	if (InputData->Attack2)
+	{
+		enhanced->BindAction(InputData->Attack2, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack1Input);
 	}
 }
 
 void AActionCharacter::AddItem_Implementation(EItemCode Code, int32 Count)
 {
 	EquipWeapon(Code, Count);
+}
+
+inline void AActionCharacter::SetSectionJumpNotify(UAnimNotifyState_SectionJump* InNotify)
+{
+	SectionJumpNotify = InNotify;
+	bComboReady = SectionJumpNotify != nullptr;
 }
 
 inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace* InNotify)
@@ -149,31 +174,31 @@ void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 
 void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 {
-	if (!ActionAnimInstance.IsValid() || !::IsValid(RollMontage)) return;
-	if (!ResourceComponent->HasEnoughStamina(RollStaminaCost)) return;
+	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Roll)) return;
+	if (!ResourceComponent->HasEnoughStamina(PlayerData->RollStaminaCost)) return;
 	if (ActionAnimInstance->IsAnyMontagePlaying()) return;
 
-	ResourceComponent->UseStamina(RollStaminaCost);
+	ResourceComponent->UseStamina(PlayerData->RollStaminaCost);
 
 	FVector LastMoveDir = GetLastMovementInputVector();
 	if (!LastMoveDir.IsNearlyZero())
 	{
 		SetActorRotation(LastMoveDir.ToOrientationRotator());
 	}
-	PlayAnimMontage(RollMontage);
+	PlayAnimMontage(MontageData->Roll);
 }
 
 void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 {
-	if (!ActionAnimInstance.IsValid() || !::IsValid(AttackMontage)) return;
-	if (!ResourceComponent->HasEnoughStamina(AttackStaminaCost)) return;
+	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack1)) return;
+	if (!ResourceComponent->HasEnoughStamina(PlayerData->AttackStaminaCost)) return;
 	if (!PlayerWeapon->CanAttack()) return;
 
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{
 		PlayAttack1();
 	}
-	else if(ActionAnimInstance->Montage_IsPlaying(AttackMontage) && bComboReady)
+	else if(ActionAnimInstance->Montage_IsPlaying(MontageData->Attack1) && bComboReady)
 	{
 		bComboReady = false;
 		PlayComboAttack1();
@@ -182,14 +207,14 @@ void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 
 void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
 {
-	if (!ActionAnimInstance.IsValid() || !::IsValid(Attack2Montage)) return;
-	if (!ResourceComponent->HasEnoughStamina(Attack2StaminaCost)) return;
+	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack2)) return;
+	if (!ResourceComponent->HasEnoughStamina(PlayerData->Attack2StaminaCost)) return;
 
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{
 		PlayAttack2();
 	}
-	else if (ActionAnimInstance->Montage_IsPlaying(Attack2Montage) && bComboReady)
+	else if (ActionAnimInstance->Montage_IsPlaying(MontageData->Attack2) && bComboReady)
 	{
 		bComboReady = false;
 		PlayComboAttack2();
@@ -199,13 +224,13 @@ void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
 void AActionCharacter::SetSprintMode()
 {
 	if (ResourceComponent->GetStaminaCurrent() <= 0) return;
-	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = PlayerData->SprintSpeed;
 	bIsSprinting = true;
 }
 
 void AActionCharacter::SetWalkMode()
 {
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = PlayerData->WalkSpeed;
 	bIsSprinting = false;
 }
 
@@ -217,14 +242,14 @@ void AActionCharacter::SpendSprintStamina(float DeltaTime)
 		{
 			return;
 		}
-		ResourceComponent->UseStamina(SprintStaminaCost * DeltaTime);
+		ResourceComponent->UseStamina(PlayerData->SprintStaminaCost * DeltaTime);
 	}
 }
 
 void AActionCharacter::PlayAttack1()
 {
-	ResourceComponent->UseStamina(AttackStaminaCost);
-	PlayAnimMontage(AttackMontage);
+	ResourceComponent->UseStamina(PlayerData->AttackStaminaCost);
+	PlayAnimMontage(MontageData->Attack1);
 
 	FOnMontageEnded onMontageEnded;
 	onMontageEnded.BindUObject(this, &AActionCharacter::OnAttackMontageEnded);
@@ -238,11 +263,11 @@ void AActionCharacter::PlayAttack1()
 
 void AActionCharacter::PlayComboAttack1()
 {
-	ResourceComponent->UseStamina(AttackStaminaCost);
+	ResourceComponent->UseStamina(PlayerData->AttackStaminaCost);
 
 	ActionAnimInstance->Montage_JumpToSection(
 		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
-		AttackMontage
+		MontageData->Attack1
 	);
 
 	/* use case: Montage_SetNextSection
@@ -262,8 +287,8 @@ void AActionCharacter::PlayComboAttack1()
 
 void AActionCharacter::PlayAttack2()
 {
-	ResourceComponent->UseStamina(Attack2StaminaCost);
-	PlayAnimMontage(Attack2Montage);
+	ResourceComponent->UseStamina(PlayerData->Attack2StaminaCost);
+	PlayAnimMontage(MontageData->Attack2);
 
 	if (PlayerWeapon)
 	{
@@ -273,11 +298,11 @@ void AActionCharacter::PlayAttack2()
 
 void AActionCharacter::PlayComboAttack2()
 {
-	ResourceComponent->UseStamina(Attack2StaminaCost);
+	ResourceComponent->UseStamina(PlayerData->Attack2StaminaCost);
 
 	ActionAnimInstance->Montage_JumpToSection(
 		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
-		Attack2Montage
+		MontageData->Attack2
 	);
 	
 	if (PlayerWeapon)
@@ -308,10 +333,10 @@ void AActionCharacter::EquipWeapon(EItemCode WeaponCode, int32 Count)
 
 void AActionCharacter::DropWeapon(EItemCode WeaponCode)
 {
-	if(TSubclassOf<AUsedWeapon>* usedClass = UsedWeapons.Find(WeaponCode))
+	if(TSubclassOf<AUsedWeapon> usedClass = WeaponManager->GetUsedWeaponClassByItemCode(WeaponCode))
 	{
 		AUsedWeapon* used = GetWorld()->SpawnActor<AUsedWeapon>(
-			*usedClass,
+			usedClass,
 			DropLocation->GetComponentLocation(),
 			GetActorRotation()
 		);
@@ -329,10 +354,10 @@ void AActionCharacter::DropCurrentWeapon()
 
 	int32 usedCount = PlayerWeapon->GetUsedCountRemain();
 
-	TSubclassOf<AWeaponPickUp>* pickupClass = PickupWeapons.Find(PlayerWeapon->GetWeaponID());
+	TSubclassOf<AWeaponPickUp> pickupClass = WeaponManager->GetPickupWeaponClassByItemCode(PlayerWeapon->GetWeaponID());
 
 	AWeaponPickUp* pickup = GetWorld()->SpawnActor<AWeaponPickUp>(
-		*pickupClass,
+		pickupClass,
 		DropLocation->GetComponentLocation(),
 		GetActorRotation()
 	);

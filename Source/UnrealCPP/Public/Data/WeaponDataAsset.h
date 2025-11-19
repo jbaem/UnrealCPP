@@ -24,11 +24,11 @@ public:
 	EItemCode WeaponType = EItemCode::EIC_Basic;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Actor Classes")
-	TSubclassOf<AWeapon> EquippedWeaponClass;
+	TSubclassOf<AWeapon> EquippedWeaponClass = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Actor Classes")
-	TSubclassOf<AUsedWeapon> UsedWeaponClass;
+	TSubclassOf<AUsedWeapon> UsedWeaponClass = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Actor Classes")
-	TSubclassOf<AWeaponPickUp> PickupWeaponClass;
+	TSubclassOf<AWeaponPickUp> PickupWeaponClass = nullptr;
 };

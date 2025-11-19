@@ -2,8 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Pickable.h"
 #include "Common/CommonEnums.h"
+#include "Pickable.h"
 
 #include "WeaponPickUp.generated.h"
 
