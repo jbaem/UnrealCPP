@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Player/ResourceComponent.h"
 #include "Player/StatusComponent.h"
+#include "Player/WeaponManagerComponent.h"
 #include "Weapon/Weapon.h"
 #include "Item/Pickable.h"
 
@@ -26,6 +27,7 @@ AActionCharacter::AActionCharacter()
 	
 	ResourceComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
+	WeaponManager = CreateDefaultSubobject<UWeaponManagerComponent>(TEXT("WeaponManager"));
 
 	DropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("DropLocation"));
 	DropLocation->SetupAttachment(RootComponent);

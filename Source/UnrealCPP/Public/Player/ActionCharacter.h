@@ -100,6 +100,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<USceneComponent> DropLocation = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
+	TObjectPtr<class UWeaponManagerComponent> WeaponManager = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TSubclassOf<AWeapon> DefaultWeaponClass = nullptr;
 

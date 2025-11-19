@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Common/CommonEnums.h"
+#include "Data/WeaponDataAsset.h"
 
 #include "WeaponManagerComponent.generated.h"
 
@@ -16,5 +18,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Database")
+	TMap<EItemCode, TObjectPtr<UWeaponDataAsset>> WeaponDatabase;
 };
