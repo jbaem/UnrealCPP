@@ -73,6 +73,44 @@ void AWeapon::DestroyWeapon()
 	// TODO: 캐릭터에게 알려야 함.
 }
 
+void AWeapon::WeaponActivate(bool bActivate)
+{
+	/*
+	* < Activate / Deactivate >
+	* Visibility - o
+	* Collision - x
+	* Actor's Tick - x
+	* Actor's Components Tick - x
+	* Physics Simulation - x
+	* Timer - x
+	* Audio - x
+	* Particle System - x
+	* Animation - x
+	* Movement Component - x
+	* AI Logic - x
+	*/
+
+	if(bActivate)
+	{
+		AttachToComponent(
+			WeaponOwner->GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			FName("hand_rSocket")
+		);
+		SetActorHiddenInGame(false);
+	}
+	else
+	{
+		SetActorHiddenInGame(true);
+		AttachToComponent(
+			WeaponOwner->GetMesh(),
+			FAttachmentTransformRules::KeepWorldTransform,
+			FName("root") // 임시로 root 소켓에 부착
+		);
+		SetActorRelativeLocation(FVector(0, 0, -10000));
+	}
+}
+
 void AWeapon::AttackEnable(bool bEnable)
 {
 	WeaponCollision->SetCollisionEnabled(
@@ -98,8 +136,7 @@ void AWeapon::StartHoldingTimer()
 	);
 }
 
-void AWeapon::OnWeaponPickuped(AActionCharacter* Picker)
+void AWeapon::OnWeaponPickuped()
 {
-	WeaponOwner = Picker;
 }
 

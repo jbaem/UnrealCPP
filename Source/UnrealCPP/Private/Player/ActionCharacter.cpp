@@ -59,8 +59,6 @@ void AActionCharacter::BeginPlay()
 	}
 
 	OnActorBeginOverlap.AddDynamic(this, &AActionCharacter::OnBeginOverlap);
-
-	EquipWeapon();
 }
 
 void AActionCharacter::Tick(float DeltaTime)
@@ -99,7 +97,7 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void AActionCharacter::AddItem_Implementation(EItemCode Code)
 {
-	const UEnum* EnumPtr = StaticEnum<EItemCode>();
+	EquipWeapon(Code);
 }
 
 inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace* InNotify)
@@ -110,7 +108,10 @@ inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace*
 
 void AActionCharacter::TestDropUsedWeapon()
 {
-	DropUsedWeapon();
+	if (PlayerWeapon)
+	{
+		DropWeapon(PlayerWeapon->GetWeaponID());
+	}
 }
 
 void AActionCharacter::TestDropCurrentWeapon()
@@ -284,43 +285,32 @@ void AActionCharacter::PlayComboAttack2()
 	}
 }
 
-void AActionCharacter::EquipWeapon()
+void AActionCharacter::EquipWeapon(EItemCode WeaponCode)
 {
-	if (PlayerWeapon || !DefaultWeaponClass) return;
-
-	UWorld* world = GetWorld();
-	if (!world) return;
-
-	FActorSpawnParameters spawnParams;
-	spawnParams.Owner = this;
-	spawnParams.Instigator = GetInstigator();
-
-	AWeapon* NewWeapon = world->SpawnActor<AWeapon>(DefaultWeaponClass, spawnParams);
-	if(NewWeapon)
+	if (::IsValid(PlayerWeapon))
 	{
-		NewWeapon->AttachToComponent(
-			GetMesh(),
-			FAttachmentTransformRules::SnapToTargetIncludingScale,
-			FName("hand_rSocket"));
+		PlayerWeapon->WeaponActivate(false);
 
-		PlayerWeapon = NewWeapon;
-		PlayerWeapon->OnWeaponPickuped(this);
+		DropCurrentWeapon();
 	}
+
+	PlayerWeapon = WeaponManager->GetEquippedWeaponByItemCode(WeaponCode);
+	PlayerWeapon->WeaponActivate(true);
 }
 
-void AActionCharacter::DropUsedWeapon()
+void AActionCharacter::DropWeapon(EItemCode WeaponCode)
 {
-	if (!::IsValid(PlayerWeapon) 
-		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_Basic
-		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_None) return;
-
-	TSubclassOf<AUsedWeapon>* usedClass = UsedWeapons.Find(PlayerWeapon->GetWeaponID());
-
-	GetWorld()->SpawnActor<AActor>(
-		*usedClass,
-		DropLocation->GetComponentLocation(),
-		GetActorRotation()
-	);
+	if(TSubclassOf<AWeaponPickUp>* usedClass = PickupWeapons.Find(WeaponCode))
+	{
+		AWeaponPickUp* pickup = GetWorld()->SpawnActor<AWeaponPickUp>(
+			*usedClass,
+			DropLocation->GetComponentLocation(),
+			GetActorRotation()
+		);
+		FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
+		UE_LOG(LogTemp, Warning, TEXT("Drop Velocity: %s"), *velocity.ToString());
+		pickup->AddImpulse(velocity);
+	}
 }
 
 void AActionCharacter::DropCurrentWeapon()
@@ -368,6 +358,6 @@ void AActionCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterru
 {
 	if (::IsValid(PlayerWeapon) && !PlayerWeapon->CanAttack())
 	{
-		DropUsedWeapon();
+		DropWeapon(PlayerWeapon->GetWeaponID());
 	}
 }

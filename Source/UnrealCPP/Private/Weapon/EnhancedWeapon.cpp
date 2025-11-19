@@ -1,17 +1,18 @@
 #include "Weapon/EnhancedWeapon.h"
 
+
 void AEnhancedWeapon::OnAttack()
 {
 	UseCountRemain--;
 	if (UseCountRemain <= 0)
 	{
-		OnWeaponUseEnded.Broadcast();
+		OnConsumeDelegate.Broadcast(WeaponID);
 	}
 }
 
-void AEnhancedWeapon::OnWeaponPickuped(AActionCharacter* Picker)
+void AEnhancedWeapon::OnWeaponPickuped()
 {
-	Super::OnWeaponPickuped(Picker);
+	Super::OnWeaponPickuped();
 
 	UseCountRemain = UseCountMax;
 }

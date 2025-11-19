@@ -49,6 +49,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
 	void TestDropCurrentWeapon();
 
+	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
+	void EquipWeapon(EItemCode WeaponCode);
+
+	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
+	void DropWeapon(EItemCode WeaponCode);
+
+	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
+	void DropCurrentWeapon();
+
 protected:
 	void OnMoveInput(const FInputActionValue& Value);
 	void OnRollInput(const FInputActionValue& Value);
@@ -65,10 +74,6 @@ protected:
 
 	void PlayAttack2();
 	void PlayComboAttack2();
-
-	void EquipWeapon();
-	void DropUsedWeapon();
-	void DropCurrentWeapon();
 
 	UFUNCTION()
 	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
@@ -102,9 +107,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<class UWeaponManagerComponent> WeaponManager = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
-	TSubclassOf<AWeapon> DefaultWeaponClass = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<AWeapon> PlayerWeapon = nullptr;

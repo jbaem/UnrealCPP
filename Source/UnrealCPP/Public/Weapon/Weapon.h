@@ -29,6 +29,10 @@ protected:
 	void DestroyWeapon();
 
 public:	
+	// visability, collision, attack enable/disable
+	UFUNCTION(BlueprintCallable)
+	void WeaponActivate(bool bActivate);
+	
 	UFUNCTION(BlueprintCallable)
 	void AttackEnable(bool bEnable);
 	
@@ -42,9 +46,11 @@ public:
 	virtual bool CanAttack() { return true; }
 
 	UFUNCTION(BlueprintCallable)
-	virtual void OnWeaponPickuped(AActionCharacter* Picker);
+	virtual void OnWeaponPickuped();
 
 	virtual int32 GetUsedCountRemain() { return -1; }
+
+	inline void SetWeaponOwner(ACharacter* NewOwner) { WeaponOwner = NewOwner; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
