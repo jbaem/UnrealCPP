@@ -19,6 +19,7 @@ public:
 	virtual void OnWeaponPickuped() override;
 	virtual bool CanAttack() override { return UseCountRemain > 0; }
 	virtual int32 GetUsedCountRemain() override { return UseCountRemain; }
+	virtual void SetUsedCountRemain(int32 Count) override { UseCountRemain = Count; };
 
 	virtual void OnWeaponActivate() override;
 

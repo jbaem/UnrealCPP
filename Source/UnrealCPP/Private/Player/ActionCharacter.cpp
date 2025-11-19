@@ -96,9 +96,9 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	}
 }
 
-void AActionCharacter::AddItem_Implementation(EItemCode Code)
+void AActionCharacter::AddItem_Implementation(EItemCode Code, int32 Count)
 {
-	EquipWeapon(Code);
+	EquipWeapon(Code, Count);
 }
 
 inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace* InNotify)
@@ -286,13 +286,16 @@ void AActionCharacter::PlayComboAttack2()
 	}
 }
 
-void AActionCharacter::EquipWeapon(EItemCode WeaponCode)
+void AActionCharacter::EquipWeapon(EItemCode WeaponCode, int32 Count)
 {
+	UE_LOG(LogTemp, Warning, TEXT("EquipWeapon: %d, Count: %d"), static_cast<uint8>(WeaponCode), Count);
+	 
 	if (::IsValid(PlayerWeapon))
 	{
 		PlayerWeapon->WeaponActivate(false);
 
-		if (WeaponCode != EItemCode::EIC_Basic && WeaponCode != PlayerWeapon->GetWeaponID())
+		if (WeaponCode != EItemCode::EIC_Basic 
+			&& WeaponCode != PlayerWeapon->GetWeaponID())
 		{
 			DropCurrentWeapon();
 		}
@@ -300,6 +303,7 @@ void AActionCharacter::EquipWeapon(EItemCode WeaponCode)
 
 	PlayerWeapon = WeaponManager->GetEquippedWeaponByItemCode(WeaponCode);
 	PlayerWeapon->WeaponActivate(true);
+	PlayerWeapon->SetUsedCountRemain(Count);
 }
 
 void AActionCharacter::DropWeapon(EItemCode WeaponCode)
@@ -323,6 +327,8 @@ void AActionCharacter::DropCurrentWeapon()
 		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_Basic
 		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_None) return;
 
+	int32 usedCount = PlayerWeapon->GetUsedCountRemain();
+
 	TSubclassOf<AWeaponPickUp>* pickupClass = PickupWeapons.Find(PlayerWeapon->GetWeaponID());
 
 	AWeaponPickUp* pickup = GetWorld()->SpawnActor<AWeaponPickUp>(
@@ -330,6 +336,7 @@ void AActionCharacter::DropCurrentWeapon()
 		DropLocation->GetComponentLocation(),
 		GetActorRotation()
 	);
+	pickup->SetPickupCount(usedCount);
 	FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
 	UE_LOG(LogTemp, Warning, TEXT("Drop Velocity: %s"), *velocity.ToString());
 	pickup->AddImpulse(velocity);
@@ -363,6 +370,6 @@ void AActionCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterru
 	if (::IsValid(PlayerWeapon) && !PlayerWeapon->CanAttack())
 	{
 		DropWeapon(PlayerWeapon->GetWeaponID());
-		EquipWeapon(EItemCode::EIC_Basic);
+		EquipWeapon(EItemCode::EIC_Basic, 10);
 	}
 }

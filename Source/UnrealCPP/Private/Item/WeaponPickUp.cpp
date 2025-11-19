@@ -122,7 +122,7 @@ void AWeaponPickUp::OnTimelineFinished()
 {
 	if(PickupTarget.IsValid() && PickupTarget->Implements<UInventoryOwner>())
 	{
-		IInventoryOwner::Execute_AddItem(PickupTarget.Get(), ItemCode);
+		IInventoryOwner::Execute_AddItem(PickupTarget.Get(), ItemCode, PickupCount);
 	}
 	Destroy();
 }

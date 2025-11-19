@@ -20,6 +20,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnPickup_Implementation(AActor* Target) override;
+	virtual void SetPickupCount(int32 Count) { PickupCount = Count; };
 
 	void AddImpulse(FVector& Impulse);
 
@@ -70,6 +71,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
 	float PickupHeight = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
+	int32 PickupCount = 3;
 
 private:
 	TWeakObjectPtr<AActor> PickupTarget = nullptr;

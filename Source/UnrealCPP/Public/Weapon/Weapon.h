@@ -52,6 +52,7 @@ public:
 	virtual void OnWeaponPickuped();
 
 	virtual int32 GetUsedCountRemain() { return -1; }
+	virtual void SetUsedCountRemain(int32 Count) { }
 
 	inline void SetWeaponOwner(ACharacter* NewOwner) { WeaponOwner = NewOwner; }
 

@@ -34,7 +34,7 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	virtual void AddItem_Implementation(EItemCode Code);
+	virtual void AddItem_Implementation(EItemCode Code, int32 Count);
 
 	inline void SetSectionJumpNotify(class UAnimNotifyState_SectionJump* InNotify)
 	{
@@ -50,7 +50,7 @@ public:
 	void TestDropCurrentWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
-	void EquipWeapon(EItemCode WeaponCode);
+	void EquipWeapon(EItemCode WeaponCode, int32 Count);
 
 	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
 	void DropWeapon(EItemCode WeaponCode);

@@ -32,7 +32,7 @@ void UWeaponManagerComponent::BeginPlay()
 	AWeapon* basicWeapon = GetEquippedWeaponByItemCode(EItemCode::EIC_Basic);
 	basicWeapon->WeaponActivate(true);
 
-	OwnerPlayer->EquipWeapon(EItemCode::EIC_Basic);
+	OwnerPlayer->EquipWeapon(EItemCode::EIC_Basic, 10);
 }
 
 void UWeaponManagerComponent::ValidateWeaponDatabase()
