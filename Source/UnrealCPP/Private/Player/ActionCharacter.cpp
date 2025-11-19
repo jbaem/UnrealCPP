@@ -31,6 +31,7 @@ AActionCharacter::AActionCharacter()
 
 	DropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("DropLocation"));
 	DropLocation->SetupAttachment(RootComponent);
+	DropLocation->SetRelativeLocation(FVector(80.0f, 30.0f, 50.0f));
 
 	bUseControllerRotationYaw = false; // Character가 Controller의 Yaw 회전을 따르지 않도록 설정
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character가 이동 방향으로 회전하도록 설정
@@ -291,7 +292,10 @@ void AActionCharacter::EquipWeapon(EItemCode WeaponCode)
 	{
 		PlayerWeapon->WeaponActivate(false);
 
-		DropCurrentWeapon();
+		if (WeaponCode != EItemCode::EIC_Basic && WeaponCode != PlayerWeapon->GetWeaponID())
+		{
+			DropCurrentWeapon();
+		}
 	}
 
 	PlayerWeapon = WeaponManager->GetEquippedWeaponByItemCode(WeaponCode);
@@ -300,16 +304,16 @@ void AActionCharacter::EquipWeapon(EItemCode WeaponCode)
 
 void AActionCharacter::DropWeapon(EItemCode WeaponCode)
 {
-	if(TSubclassOf<AWeaponPickUp>* usedClass = PickupWeapons.Find(WeaponCode))
+	if(TSubclassOf<AUsedWeapon>* usedClass = UsedWeapons.Find(WeaponCode))
 	{
-		AWeaponPickUp* pickup = GetWorld()->SpawnActor<AWeaponPickUp>(
+		AUsedWeapon* used = GetWorld()->SpawnActor<AUsedWeapon>(
 			*usedClass,
 			DropLocation->GetComponentLocation(),
 			GetActorRotation()
 		);
-		FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
-		UE_LOG(LogTemp, Warning, TEXT("Drop Velocity: %s"), *velocity.ToString());
-		pickup->AddImpulse(velocity);
+		//FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
+		//UE_LOG(LogTemp, Warning, TEXT("Drop Velocity: %s"), *velocity.ToString());
+		//used->AddImpulse(velocity);
 	}
 }
 
@@ -359,5 +363,6 @@ void AActionCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterru
 	if (::IsValid(PlayerWeapon) && !PlayerWeapon->CanAttack())
 	{
 		DropWeapon(PlayerWeapon->GetWeaponID());
+		EquipWeapon(EItemCode::EIC_Basic);
 	}
 }

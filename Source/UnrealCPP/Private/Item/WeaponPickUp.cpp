@@ -34,6 +34,8 @@ AWeaponPickUp::AWeaponPickUp()
 	Effect->SetupAttachment(BaseRoot);
 
 	PickupTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("PickupTimeline"));
+	
+	bIsPickedUp = true;
 }
 
 // Called when the game starts or when spawned
@@ -55,8 +57,6 @@ void AWeaponPickUp::BeginPlay()
 		}
 		PickupTimeline->SetPlayRate(1.0f / PickupDuration);
 	}
-
-	bIsPickedUp = true;
 
 	FTimerManager& timerManager = GetWorld()->GetTimerManager();
 	timerManager.ClearTimer(PickupTimerHandle);

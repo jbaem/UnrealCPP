@@ -98,6 +98,8 @@ void AWeapon::WeaponActivate(bool bActivate)
 			FName("hand_rSocket")
 		);
 		SetActorHiddenInGame(false);
+
+		OnWeaponActivate();
 	}
 	else
 	{
@@ -108,6 +110,8 @@ void AWeapon::WeaponActivate(bool bActivate)
 			FName("root") // 임시로 root 소켓에 부착
 		);
 		SetActorRelativeLocation(FVector(0, 0, -10000));
+
+		OnWeaponDeactivate();
 	}
 }
 

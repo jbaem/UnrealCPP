@@ -26,6 +26,9 @@ protected:
 	UFUNCTION()
 	void OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
+	virtual void OnWeaponActivate() {};
+	virtual void OnWeaponDeactivate() {};
+
 	void DestroyWeapon();
 
 public:	

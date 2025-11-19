@@ -78,5 +78,5 @@ private:
 
 	FVector PickupStartLocation = FVector::ZeroVector;
 
-	bool bIsPickedUp = false;
+	bool bIsPickedUp = true;
 };

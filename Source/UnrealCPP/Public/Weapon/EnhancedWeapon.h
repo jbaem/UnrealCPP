@@ -12,11 +12,15 @@ UCLASS()
 class UNREALCPP_API AEnhancedWeapon : public AWeapon
 {
 	GENERATED_BODY()
+protected:
+	virtual void BeginPlay() override;
 public:
 	virtual void OnAttack() override;
 	virtual void OnWeaponPickuped() override;
 	virtual bool CanAttack() override { return UseCountRemain > 0; }
 	virtual int32 GetUsedCountRemain() override { return UseCountRemain; }
+
+	virtual void OnWeaponActivate() override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
