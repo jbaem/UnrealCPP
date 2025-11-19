@@ -22,27 +22,27 @@ public:
 	inline int32 GetVitality() const { return Vitality; }
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status|Data", meta = (ClampMin = "0", ClampMax = "20"))
+	// Primitive
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Status|Primitive", meta = (ClampMin = "0", ClampMax = "20"))
 	int32 Strength = 6;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status|Data", meta = (ClampMin = "0", ClampMax = "20"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Status|Primitive", meta = (ClampMin = "0", ClampMax = "20"))
 	int32 Agility = 4;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status|Data", meta = (ClampMin = "0", ClampMax = "20"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Status|Primitive", meta = (ClampMin = "0", ClampMax = "20"))
 	int32 Vitality = 10;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status|Modifier|Health")
+	// Modifier - Health
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Status|Modifier|Health")
 	float HealthStrengthModifier = 0.3f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status|Modifier|Health")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Status|Modifier|Health")
 	float HealthAgilityModifier = 0.2f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status|Modifier|Stamina")
+	// Modifier - Stamina
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Status|Modifier|Stamina")
 	float StaminaStrengthModifier = 0.1f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status|Modifier|Stamina")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Status|Modifier|Stamina")
 	float StaminaAgilityModifier = 0.4f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Status|Modifier|Attack")
+	// Modifier - Attack
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Status|Modifier|Attack")
 	float AttackModifier = 1.0f;
 };

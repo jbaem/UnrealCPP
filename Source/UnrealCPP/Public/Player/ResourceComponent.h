@@ -71,33 +71,27 @@ public:
 	FOnStaminaChanged OnStaminaChanged;
 protected:
 	// Health
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Resource|Health")
 	float HealthBase = 100.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Resource|Health")
 	float HealthMax = 100.0f;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Resource|Health")
 	float HealthCurrent = 100.0f;
 
 	// Stamina
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Resource|Stamina")
 	float StaminaBase = 100.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Resource|Stamina")
 	float StaminaMax = 100.0f;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stamina")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data|Resource|Stamina")
 	float StaminaCurrent = 100.0f;
 
 	// Stamina Regen
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Resource|Stamina Regen")
 	float StaminaRegenAmountPerTick = 10.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Resource|Stamina Regen")
 	float StaminaRegenCoolTime = 3.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stamina")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Resource|Stamina Regen")
 	float StaminaRegenTickInterval = 1.0f;
 
 private:
