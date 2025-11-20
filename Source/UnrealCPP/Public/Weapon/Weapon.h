@@ -40,6 +40,9 @@ public:
 	void AttackEnable(bool bEnable);
 	
 	UFUNCTION(BlueprintCallable)
+	void ActivateSlashEffect(bool bAtivate);
+
+	UFUNCTION(BlueprintCallable)
 	void StartHoldingTimer();
 
 	UFUNCTION(BlueprintCallable)

@@ -12,6 +12,7 @@
 #include "Player/PlayerInputData.h"
 #include "Player/PlayerData.h"
 #include "Player/PlayerMontageData.h"
+#include "AnimNotify/AnimNotifyState_SlashEffect.h"
 
 AActionCharacter::AActionCharacter()
 {
@@ -130,6 +131,12 @@ inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace*
 {
 	AttackTraceNotify = InNotify;
 	PlayerWeapon->AttackEnable(AttackTraceNotify.IsValid());
+}
+
+inline void AActionCharacter::SetSlashEffectNotify(UAnimNotifyState_SlashEffect* InNotify)
+{
+	SlashEffectNotify = InNotify;
+	PlayerWeapon->ActivateSlashEffect(SlashEffectNotify.IsValid());
 }
 
 void AActionCharacter::TestDropUsedWeapon()

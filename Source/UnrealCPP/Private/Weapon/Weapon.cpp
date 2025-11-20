@@ -42,6 +42,7 @@ void AWeapon::BeginPlay()
 	Super::BeginPlay();
 	
 	OnActorBeginOverlap.AddDynamic(this, &AWeapon::OnWeaponBeginOverlap);
+	WeaponEffect->Deactivate();
 }
 
 void AWeapon::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
@@ -124,6 +125,21 @@ void AWeapon::AttackEnable(bool bEnable)
 		bEnable ? 
 		ECollisionEnabled::QueryOnly : 
 		ECollisionEnabled::NoCollision);
+}
+
+void AWeapon::ActivateSlashEffect(bool bAtivate)
+{
+	if (WeaponEffect)
+	{
+		if (bAtivate)
+		{
+			WeaponEffect->Activate(true);
+		}
+		else
+		{
+			WeaponEffect->Deactivate();
+		}
+	}
 }
 
 void AWeapon::StartHoldingTimer()
