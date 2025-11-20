@@ -7,6 +7,7 @@
 #include <Player/StatusComponent.h>
 #include <TimerManager.h>
 #include "Player/ActionCharacter.h"
+#include "NiagaraComponent.h"
 
 AWeapon::AWeapon()
 {
@@ -24,6 +25,8 @@ AWeapon::AWeapon()
 	WeaponCollision->SetupAttachment(WeaponMesh);
 	WeaponCollision->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
 	
+	WeaponEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponEffect"));
+	WeaponEffect->SetupAttachment(WeaponMesh);
 }
 
 void AWeapon::PostInitializeComponents()
