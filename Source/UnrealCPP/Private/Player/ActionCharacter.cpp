@@ -318,6 +318,14 @@ void AActionCharacter::PlayComboAttack2()
 	}
 }
 
+void AActionCharacter::OnAreaAttack()
+{
+	if (::IsValid(PlayerWeapon))
+	{
+		PlayerWeapon->DamageToArea();
+	}
+}
+
 void AActionCharacter::EquipWeapon(EItemCode WeaponCode, int32 Count)
 {
 	UE_LOG(LogTemp, Warning, TEXT("EquipWeapon: %d, Count: %d"), static_cast<uint8>(WeaponCode), Count);

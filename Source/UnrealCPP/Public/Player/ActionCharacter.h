@@ -54,6 +54,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
 	void DropCurrentWeapon();
 
+	void OnAreaAttack();
+
 protected:
 	void OnMoveInput(const FInputActionValue& Value);
 	void OnRollInput(const FInputActionValue& Value);
@@ -67,7 +69,6 @@ protected:
 
 	void PlayAttack1();
 	void PlayComboAttack1();
-
 	void PlayAttack2();
 	void PlayComboAttack2();
 

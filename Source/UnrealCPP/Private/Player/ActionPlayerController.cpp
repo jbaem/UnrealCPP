@@ -40,3 +40,11 @@ void AActionPlayerController::OnLookInput(const FInputActionValue& InValue)
 	AddYawInput(lookAxis.X);
 	AddPitchInput(lookAxis.Y);
 }
+
+void AActionPlayerController::OnAreaAttack()
+{
+	PlayerCameraManager->StartCameraShake(
+		AreaAttackCameraShakeClass,
+		1.0f
+	);
+}

@@ -18,6 +18,7 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
+
 	inline EItemCode GetWeaponID() const { return WeaponID; }
 
 protected:
@@ -29,7 +30,7 @@ protected:
 	virtual void OnWeaponActivate() {};
 	virtual void OnWeaponDeactivate() {};
 
-	void DestroyWeapon();
+	virtual void DestroyWeapon() {};
 
 public:	
 	// visability, collision, attack enable/disable
@@ -52,6 +53,12 @@ public:
 	virtual bool CanAttack() { return true; }
 
 	UFUNCTION(BlueprintCallable)
+	virtual void DamageToTarget(AActor* Target);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void DamageToArea();
+
+	UFUNCTION(BlueprintCallable)
 	virtual void OnWeaponPickuped();
 
 	virtual int32 GetUsedCountRemain() { return -1; }
@@ -69,6 +76,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<class UNiagaraComponent> WeaponEffect = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UNiagaraSystem> AreaAttackEffect = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
 	EItemCode WeaponID = EItemCode::EIC_None;
@@ -78,6 +87,18 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
 	TSubclassOf<UDamageType> DamageType = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Area")
+	float AreaInnerRadius = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Area")
+	float AreaOuterRadius = 300.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Area")
+	float Falloff = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Area")
+	float DebugDurtaion = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Duration")
 	float HoldingDuration = 30.0f;

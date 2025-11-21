@@ -8,6 +8,8 @@
 #include <TimerManager.h>
 #include "Player/ActionCharacter.h"
 #include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 AWeapon::AWeapon()
 {
@@ -27,6 +29,8 @@ AWeapon::AWeapon()
 	
 	WeaponEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponEffect"));
 	WeaponEffect->SetupAttachment(WeaponMesh);
+
+	//TODO: 나이아가라 시스템 추가하기
 }
 
 void AWeapon::PostInitializeComponents()
@@ -47,12 +51,17 @@ void AWeapon::BeginPlay()
 
 void AWeapon::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
+	DamageToTarget(OtherActor);
+}
+
+void AWeapon::DamageToTarget(AActor* Target)
+{
 	float finalDamage = Damage;
 	AController* instigator = nullptr;
 	
 	if (WeaponOwner.IsValid())
 	{
-		if(WeaponOwner == OtherActor)
+		if(WeaponOwner == Target)
 		{
 			return;
 		}
@@ -68,13 +77,103 @@ void AWeapon::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 		}
 		instigator = WeaponOwner->GetController();
 	}
-
-	UGameplayStatics::ApplyDamage(OtherActor, finalDamage, instigator, this, DamageType);
+	UGameplayStatics::ApplyDamage(Target, finalDamage, instigator, this, DamageType);
 }
 
-void AWeapon::DestroyWeapon()
+void AWeapon::DamageToArea()
 {
-	// TODO: 캐릭터에게 알려야 함.
+	float finalDamage = Damage;
+	AController* instigator = nullptr;
+	if (WeaponOwner.IsValid())
+	{
+		//TODO: 캐릭터 클래스 변경
+		AActionCharacter* weaponOwner = Cast<AActionCharacter>(WeaponOwner);
+		if (weaponOwner->GetStatusComponent() != nullptr)
+		{
+			finalDamage += weaponOwner->GetStatusComponent()->GetAttackPower();
+		}
+		instigator = WeaponOwner->GetController();
+	}
+	finalDamage *= 2.0f; // Area damage is stronger
+
+	FVector center = FMath::Lerp(
+		WeaponMesh->GetSocketLocation(TEXT("Blade_Base")),
+		WeaponMesh->GetSocketLocation(TEXT("Blade_Tip")),
+		0.5f
+	);
+
+	DrawDebugSphere(
+		GetWorld(),
+		center,
+		AreaInnerRadius,
+		12,
+		FColor::Red,
+		false,
+		DebugDurtaion,
+		0,
+		1.0f
+	);
+
+	DrawDebugSphere(
+		GetWorld(),
+		center,
+		AreaOuterRadius,
+		12,
+		FColor::Yellow,
+		false,
+		DebugDurtaion,
+		0,
+		1.0f
+	);
+
+	if(AreaAttackEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			AreaAttackEffect,
+			center,
+			WeaponOwner->GetActorRotation()
+		);
+	}
+
+	TArray<AActor*> ignoreActors = { WeaponOwner.Get(), this };
+	UGameplayStatics::ApplyRadialDamageWithFalloff(
+		GetWorld(),
+		finalDamage,
+		Damage,
+		center,
+		AreaInnerRadius,
+		AreaOuterRadius,
+		Falloff,
+		DamageType,
+		ignoreActors,
+		this,
+		instigator,
+		ECollisionChannel::ECC_Pawn
+	);
+
+	if (AreaAttackEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			AreaAttackEffect,
+			center,
+			WeaponOwner->GetActorRotation()
+		);
+	}
+
+	UGameplayStatics::ApplyRadialDamage(
+		this,
+		finalDamage,
+		center,
+		AreaOuterRadius,
+		DamageType,
+		ignoreActors,
+		this,
+		instigator,
+		true,
+		ECC_Visibility
+	);
 }
 
 void AWeapon::WeaponActivate(bool bActivate)
