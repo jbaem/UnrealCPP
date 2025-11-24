@@ -14,16 +14,34 @@ void UEnemyCountSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	}
 }
 
-void UEnemyCountSubsystem::IncreaseEnemyCount()
+void UEnemyCountSubsystem::RegisterEnemy(ATestEnemyDamage* Enemy)
 {
-	EnemyCount++;
+	if(!IsValid(Enemy) || RegisteredEnemies.Contains(Enemy))
+	{
+		return;
+	}
+
+	RegisteredEnemies.Add(Enemy);
+	int32 EnemyCount = RegisteredEnemies.Num();
 	UE_LOG(LogTemp, Warning, TEXT("Enemy Count Increased: %d"), EnemyCount);
-	OnIncreaseEnemyCount.Broadcast();
+	OnEnemyCountChanged.Broadcast(EnemyCount);
 }
 
-void UEnemyCountSubsystem::DecreaseEnemyCount()
+void UEnemyCountSubsystem::UnregisterEnemy(ATestEnemyDamage* Enemy)
 {
-	EnemyCount--;
+	if(!RegisteredEnemies.Contains(Enemy))
+	{
+		return;
+	}
+
+	RegisteredEnemies.Remove(Enemy);
+	int32 EnemyCount = RegisteredEnemies.Num();
+
+	OnEnemyCountChanged.Broadcast(EnemyCount);
 	UE_LOG(LogTemp, Warning, TEXT("Enemy Count Decreased: %d"), EnemyCount);
-	OnDecreaseEnemyCount.Broadcast();
+	if(EnemyCount <= 0)
+	{
+		OnAllEnemiesCleared.Broadcast();
+		UE_LOG(LogTemp, Warning, TEXT("All Enemies Cleared!"));
+	}
 }

@@ -26,24 +26,24 @@ void ATestEnemyDamage::BeginPlay()
 	{
 		if (UEnemyCountSubsystem* subsystem = world->GetSubsystem<UEnemyCountSubsystem>())
 		{
-			subsystem->IncreaseEnemyCount();
+			subsystem->RegisterEnemy(this);
 		}
 	}
 	
 	OnTakeAnyDamage.AddDynamic(this, &ATestEnemyDamage::OnTakeDamage);
 }
 
-void ATestEnemyDamage::Destroyed()
+void ATestEnemyDamage::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if(UWorld* world = GetWorld())
+	if (UWorld* world = GetWorld())
 	{
 		if (UEnemyCountSubsystem* subsystem = world->GetSubsystem<UEnemyCountSubsystem>())
 		{
-			subsystem->DecreaseEnemyCount();
+			subsystem->UnregisterEnemy(this);
 		}
 	}
 
-	Super::Destroyed();
+	Super::EndPlay(EndPlayReason);
 }
 
 void ATestEnemyDamage::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)

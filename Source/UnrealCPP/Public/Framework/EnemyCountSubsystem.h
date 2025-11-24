@@ -7,8 +7,8 @@
 
 class ATestEnemyDamage;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnIncreaseEnemyCount);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDecreaseEnemyCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyCountChanged, int32, NewCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllEnemiesCleared);
 
 UCLASS()
 class UNREALCPP_API UEnemyCountSubsystem : public UWorldSubsystem
@@ -19,19 +19,24 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy Count")
-	void IncreaseEnemyCount();
+	void RegisterEnemy(ATestEnemyDamage* Enemy);
 	UFUNCTION(BlueprintCallable, Category = "Enemy Count")
-	void DecreaseEnemyCount();
+	void UnregisterEnemy(ATestEnemyDamage* Enemy);
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy Count")
+	int32 GetEnemyCount() const { return RegisteredEnemies.Num(); }
 
 protected:
 	UPROPERTY()
 	TSubclassOf<ATestEnemyDamage> EnemyClass;
 
-	UPROPERTY()
-	FOnIncreaseEnemyCount OnIncreaseEnemyCount;
-	UPROPERTY()
-	FOnDecreaseEnemyCount OnDecreaseEnemyCount;
+	UPROPERTY(BlueprintAssignable, Category = "Enemy Count")
+	FOnEnemyCountChanged OnEnemyCountChanged;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Enemy Count")
+	FOnAllEnemiesCleared OnAllEnemiesCleared;
 
 private:
-	uint32 EnemyCount = 0;
+	UPROPERTY(VisibleAnywhere, Category = "Enemy Count")
+	TSet<TObjectPtr<ATestEnemyDamage>> RegisteredEnemies;
 };

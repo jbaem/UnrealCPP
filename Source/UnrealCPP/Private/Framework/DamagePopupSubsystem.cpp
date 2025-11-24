@@ -24,7 +24,7 @@ void UDamagePopupSubsystem::ShowDamagePopup(float Damage, FVector Location)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("UDamagePopupSubsystem::ShowDamagePopup - Reusing DamagePopupActor from Pool"));
 		selected = Pool.Pop();
-		selected->SetActorHiddenInGame(false);
+		//selected->SetActorHiddenInGame(false);
 	}
 	else
 	{
@@ -58,7 +58,7 @@ void UDamagePopupSubsystem::ReturnToPool(ADamagePopupActor * DamagePopup)
 {
 	if (IsValid(DamagePopup))
 	{
-		DamagePopup->SetActorHiddenInGame(true);
+		//DamagePopup->SetActorHiddenInGame(true);
 		Pool.Add(DamagePopup);
 	}
 }
