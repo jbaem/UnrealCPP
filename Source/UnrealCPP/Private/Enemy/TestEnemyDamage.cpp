@@ -2,6 +2,7 @@
 
 #include "Enemy/DamagePopupActor.h"
 #include "GameFramework/Controller.h"
+#include "Framework/DamagePopupSubsystem.h"
 
 ATestEnemyDamage::ATestEnemyDamage()
 {
@@ -26,14 +27,20 @@ void ATestEnemyDamage::BeginPlay()
 void ATestEnemyDamage::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("ATestEnemyDamage::OnTakeDamage Damage : %f"), Damage));
-	ADamagePopupActor* actor = GetWorld()->SpawnActor<ADamagePopupActor>(
-		DamagePopupClass,
-		PopupLocation->GetComponentLocation(),
-		FRotator::ZeroRotator
-	);
-	if (actor)
+	//ADamagePopupActor* actor = GetWorld()->SpawnActor<ADamagePopupActor>(
+	//	DamagePopupClass,
+	//	PopupLocation->GetComponentLocation(),
+	//	FRotator::ZeroRotator
+	//);
+	//if (actor)
+	//{
+	//	actor->PopupActivate(Damage);
+	//}
+
+	UDamagePopupSubsystem* subsystem = GetWorld()->GetSubsystem<UDamagePopupSubsystem>();
+	if (subsystem)
 	{
-		actor->PopupActivate(Damage);
+		subsystem->ShowDamagePopup(Damage, PopupLocation->GetComponentLocation());
 	}
 }
 

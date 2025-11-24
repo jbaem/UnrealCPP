@@ -6,7 +6,7 @@
 
 #include "DamagePopupActor.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class UNREALCPP_API ADamagePopupActor : public AActor
 {
 	GENERATED_BODY()

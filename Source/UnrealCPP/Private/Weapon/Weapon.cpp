@@ -53,7 +53,7 @@ void AWeapon::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 
 void AWeapon::DamageToTarget(AActor* Target)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Target Actor: %s"), *Target->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("Target Actor: %s"), *Target->GetName());
 	float finalDamage = Damage;
 	AController* instigator = nullptr;
 	
@@ -75,14 +75,14 @@ void AWeapon::DamageToTarget(AActor* Target)
 		}
 		instigator = WeaponOwner->GetController();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Final Damage: %f"), finalDamage);
+	//UE_LOG(LogTemp, Warning, TEXT("Final Damage: %f"), finalDamage);
 	UGameplayStatics::ApplyDamage(Target, finalDamage, instigator, this, DamageType);
-	UE_LOG(LogTemp, Warning, TEXT("Damage applied to target: %s"), *Target->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("Damage applied to target: %s"), *Target->GetName());
 }
 
 void AWeapon::DamageToArea()
 {
-	UE_LOG(LogTemp, Warning, TEXT("AWeapon::DamageToArea called"));
+	//UE_LOG(LogTemp, Warning, TEXT("AWeapon::DamageToArea called"));
 	float finalDamage = Damage;
 	AController* instigator = nullptr;
 	if (WeaponOwner.IsValid())

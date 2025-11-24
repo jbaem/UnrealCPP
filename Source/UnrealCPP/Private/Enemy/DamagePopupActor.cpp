@@ -2,6 +2,7 @@
 
 #include "Components/WidgetComponent.h"
 #include "Widget/DamageWidget.h"
+#include "Framework/DamagePopupSubsystem.h"
 
 ADamagePopupActor::ADamagePopupActor()
 {
@@ -44,5 +45,19 @@ void ADamagePopupActor::PopupActivate(float Damage)
 
 void ADamagePopupActor::PopupDeactivate()
 {
-	Destroy();
+	if(UWorld* world = GetWorld())
+	{
+		if (UDamagePopupSubsystem* subsystem = world->GetSubsystem<UDamagePopupSubsystem>())
+		{
+			subsystem->ReturnToPool(this);
+		}
+		else
+		{
+			Destroy();	// 안전장치
+		}
+	}
+	else
+	{
+		Destroy();	// 안전장치
+	}
 }
