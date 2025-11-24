@@ -23,7 +23,6 @@ void ADamagePopupActor::BeginPlay()
 	{
 		DamageWidgetInstance = Cast<UDamageWidget>(DamageWidgetComponent->GetUserWidgetObject());
 	}
-
 }
 
 void ADamagePopupActor::PopupActivate(float Damage)

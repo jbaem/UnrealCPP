@@ -15,9 +15,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 
 	UFUNCTION()
 	void OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
 
 public:	
 	virtual void Tick(float DeltaTime) override;

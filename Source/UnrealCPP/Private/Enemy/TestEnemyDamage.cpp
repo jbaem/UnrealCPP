@@ -3,6 +3,7 @@
 #include "Enemy/DamagePopupActor.h"
 #include "GameFramework/Controller.h"
 #include "Framework/DamagePopupSubsystem.h"
+#include "Framework/EnemyCountSubsystem.h"
 
 ATestEnemyDamage::ATestEnemyDamage()
 {
@@ -21,7 +22,28 @@ void ATestEnemyDamage::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (UWorld* world = GetWorld())
+	{
+		if (UEnemyCountSubsystem* subsystem = world->GetSubsystem<UEnemyCountSubsystem>())
+		{
+			subsystem->IncreaseEnemyCount();
+		}
+	}
+	
 	OnTakeAnyDamage.AddDynamic(this, &ATestEnemyDamage::OnTakeDamage);
+}
+
+void ATestEnemyDamage::Destroyed()
+{
+	if(UWorld* world = GetWorld())
+	{
+		if (UEnemyCountSubsystem* subsystem = world->GetSubsystem<UEnemyCountSubsystem>())
+		{
+			subsystem->DecreaseEnemyCount();
+		}
+	}
+
+	Super::Destroyed();
 }
 
 void ATestEnemyDamage::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
