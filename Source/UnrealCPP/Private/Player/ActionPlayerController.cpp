@@ -43,6 +43,8 @@ void AActionPlayerController::OnLookInput(const FInputActionValue& InValue)
 
 void AActionPlayerController::OnAreaAttack()
 {
+	if (!AreaAttackCameraShakeClass) return;
+
 	PlayerCameraManager->StartCameraShake(
 		AreaAttackCameraShakeClass,
 		1.0f

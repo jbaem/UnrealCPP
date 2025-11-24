@@ -7,7 +7,7 @@ void UAnimNotify_AreaAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 {
 	Super::Notify(MeshComp, Animation);
 	
-	UE_LOG(LogTemp, Warning, TEXT("AnimNotify_AreaAttack::Notify called"));
+	//UE_LOG(LogTemp, Warning, TEXT("AnimNotify_AreaAttack::Notify called"));
 
 	OwnerCharacter = Cast<AActionCharacter>(MeshComp->GetOwner());
 	if(OwnerCharacter.IsValid())
