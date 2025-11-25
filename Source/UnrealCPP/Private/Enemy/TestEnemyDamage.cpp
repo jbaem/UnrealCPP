@@ -4,6 +4,7 @@
 #include "GameFramework/Controller.h"
 #include "Framework/DamagePopupSubsystem.h"
 #include "Framework/EnemyCountSubsystem.h"
+#include "Player/ResourceComponent.h"
 
 ATestEnemyDamage::ATestEnemyDamage()
 {
@@ -12,6 +13,8 @@ ATestEnemyDamage::ATestEnemyDamage()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetCollisionProfileName(TEXT("Pawn"));
 	SetRootComponent(Mesh);
+
+	ResourceComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
 
 	PopupLocation = CreateDefaultSubobject<USceneComponent>(TEXT("PopupLocation"));
 	PopupLocation->SetupAttachment(Mesh);
@@ -22,6 +25,8 @@ void ATestEnemyDamage::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	OnTakeAnyDamage.AddDynamic(this, &ATestEnemyDamage::OnTakeDamage);
+	
 	if (UWorld* world = GetWorld())
 	{
 		if (UEnemyCountSubsystem* subsystem = world->GetSubsystem<UEnemyCountSubsystem>())
@@ -29,8 +34,6 @@ void ATestEnemyDamage::BeginPlay()
 			subsystem->RegisterEnemy(this);
 		}
 	}
-	
-	OnTakeAnyDamage.AddDynamic(this, &ATestEnemyDamage::OnTakeDamage);
 }
 
 void ATestEnemyDamage::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -58,11 +61,45 @@ void ATestEnemyDamage::OnTakeDamage(AActor* DamagedActor, float Damage, const UD
 	//{
 	//	actor->PopupActivate(Damage);
 	//}
-
-	UDamagePopupSubsystem* subsystem = GetWorld()->GetSubsystem<UDamagePopupSubsystem>();
-	if (subsystem)
+	
+	if(ResourceComponent && ResourceComponent->IsAlive())
 	{
-		subsystem->ShowDamagePopup(Damage, PopupLocation->GetComponentLocation());
+		if(!bInvincible || !FMath::IsNearlyEqual(LastDamage, Damage))
+		{
+			UDamagePopupSubsystem* subsystem = GetWorld()->GetSubsystem<UDamagePopupSubsystem>();
+			if (subsystem)
+			{
+				subsystem->ShowDamagePopup(Damage, PopupLocation->GetComponentLocation());
+			}
+
+			ResourceComponent->TakeDamage(Damage);
+
+			if(ResourceComponent->IsAlive())
+			{
+				bInvincible = true;
+				LastDamage = Damage;
+
+				FTimerDelegate resetInvincibleDelegate = FTimerDelegate::CreateWeakLambda(
+					this,
+					[this]()
+					{
+						bInvincible = false;
+					}
+				);
+
+				GetWorldTimerManager().ClearTimer(InvincibleTimerHandle);
+				GetWorldTimerManager().SetTimer(
+					InvincibleTimerHandle,
+					resetInvincibleDelegate,
+					0.1f,
+					false
+				);
+			}
+			else
+			{
+				Destroy();
+			}
+		}
 	}
 }
 

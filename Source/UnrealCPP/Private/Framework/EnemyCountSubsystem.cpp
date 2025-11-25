@@ -23,7 +23,7 @@ void UEnemyCountSubsystem::RegisterEnemy(ATestEnemyDamage* Enemy)
 
 	RegisteredEnemies.Add(Enemy);
 	int32 EnemyCount = RegisteredEnemies.Num();
-	UE_LOG(LogTemp, Warning, TEXT("Enemy Count Increased: %d"), EnemyCount);
+	//UE_LOG(LogTemp, Warning, TEXT("Enemy Count Increased: %d"), EnemyCount);
 	OnEnemyCountChanged.Broadcast(EnemyCount);
 }
 
@@ -38,10 +38,10 @@ void UEnemyCountSubsystem::UnregisterEnemy(ATestEnemyDamage* Enemy)
 	int32 EnemyCount = RegisteredEnemies.Num();
 
 	OnEnemyCountChanged.Broadcast(EnemyCount);
-	UE_LOG(LogTemp, Warning, TEXT("Enemy Count Decreased: %d"), EnemyCount);
+	//UE_LOG(LogTemp, Warning, TEXT("Enemy Count Decreased: %d"), EnemyCount);
 	if(EnemyCount <= 0)
 	{
 		OnAllEnemiesCleared.Broadcast();
-		UE_LOG(LogTemp, Warning, TEXT("All Enemies Cleared!"));
+		//UE_LOG(LogTemp, Warning, TEXT("All Enemies Cleared!"));
 	}
 }

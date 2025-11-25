@@ -30,8 +30,17 @@ protected:
 	TObjectPtr<UStaticMeshComponent> Mesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UResourceComponent> ResourceComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> PopupLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<class ADamagePopupActor> DamagePopupClass;
+
+private:
+	FTimerHandle InvincibleTimerHandle;
+
+	bool bInvincible = false;
+	float LastDamage = 0.0f;
 };
