@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Common/CommonStructs.h"
 
 #include "TestEnemyDamage.generated.h"
 
@@ -13,6 +14,10 @@ class UNREALCPP_API ATestEnemyDamage : public APawn
 public:
 	ATestEnemyDamage();
 
+public:
+	virtual void Tick(float DeltaTime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -20,10 +25,9 @@ protected:
 	UFUNCTION()
 	void OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-
-public:	
-	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+private:
+	void OnDie();
+	void DropItem();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
@@ -37,6 +41,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<class ADamagePopupActor> DamagePopupClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Drop Item")
+	TObjectPtr<class UDataTable> DropItemTable = nullptr;
 
 private:
 	FTimerHandle InvincibleTimerHandle;

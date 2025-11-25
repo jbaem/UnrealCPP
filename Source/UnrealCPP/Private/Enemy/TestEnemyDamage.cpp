@@ -5,6 +5,8 @@
 #include "Framework/DamagePopupSubsystem.h"
 #include "Framework/EnemyCountSubsystem.h"
 #include "Player/ResourceComponent.h"
+#include "Data/DropItemData_TableRow.h"
+#include "Item/WeaponPickUp.h"
 
 ATestEnemyDamage::ATestEnemyDamage()
 {
@@ -62,44 +64,69 @@ void ATestEnemyDamage::OnTakeDamage(AActor* DamagedActor, float Damage, const UD
 	//	actor->PopupActivate(Damage);
 	//}
 	
-	if(ResourceComponent && ResourceComponent->IsAlive())
+	// Early returns
+	if (!ResourceComponent || !ResourceComponent->IsAlive()) return;
+	if (bInvincible && FMath::IsNearlyEqual(LastDamage, Damage)) return;
+
+	UDamagePopupSubsystem* subsystem = GetWorld()->GetSubsystem<UDamagePopupSubsystem>();
+	if (subsystem)
 	{
-		if(!bInvincible || !FMath::IsNearlyEqual(LastDamage, Damage))
-		{
-			UDamagePopupSubsystem* subsystem = GetWorld()->GetSubsystem<UDamagePopupSubsystem>();
-			if (subsystem)
+		subsystem->ShowDamagePopup(Damage, PopupLocation->GetComponentLocation());
+	}
+
+	ResourceComponent->TakeDamage(Damage);
+
+	if (ResourceComponent->IsAlive())
+	{
+		bInvincible = true;
+		LastDamage = Damage;
+
+		FTimerDelegate resetInvincibleDelegate = FTimerDelegate::CreateWeakLambda(
+			this,
+			[this]()
 			{
-				subsystem->ShowDamagePopup(Damage, PopupLocation->GetComponentLocation());
+				bInvincible = false;
 			}
+		);
 
-			ResourceComponent->TakeDamage(Damage);
+		GetWorldTimerManager().ClearTimer(InvincibleTimerHandle);
+		GetWorldTimerManager().SetTimer(
+			InvincibleTimerHandle,
+			resetInvincibleDelegate,
+			0.1f,
+			false
+		);
+	}
+	else
+	{
+		OnDie();
+	}
+}
 
-			if(ResourceComponent->IsAlive())
-			{
-				bInvincible = true;
-				LastDamage = Damage;
+void ATestEnemyDamage::OnDie()
+{
+	DropItem();
+	Destroy();
+}
 
-				FTimerDelegate resetInvincibleDelegate = FTimerDelegate::CreateWeakLambda(
-					this,
-					[this]()
-					{
-						bInvincible = false;
-					}
-				);
+void ATestEnemyDamage::DropItem()
+{
+	if (!DropItemTable) return;
+	TMap<FName, uint8*> rowMap = DropItemTable->GetRowMap();
+	for (auto& element : rowMap)
+	{
+		FDropItemData_TableRow* row = reinterpret_cast<FDropItemData_TableRow*>(element.Value);
+		if (FMath::FRand() > row->DropItemRate) continue;
+		
+		AWeaponPickUp* actor = GetWorld()->SpawnActor<AWeaponPickUp>(
+			row->DropItemClass,
+			GetActorLocation() + FVector::UpVector * 100.0f,
+			GetActorRotation()
+		);
 
-				GetWorldTimerManager().ClearTimer(InvincibleTimerHandle);
-				GetWorldTimerManager().SetTimer(
-					InvincibleTimerHandle,
-					resetInvincibleDelegate,
-					0.1f,
-					false
-				);
-			}
-			else
-			{
-				Destroy();
-			}
-		}
+		if (!actor) continue;
+		FVector impulse = FVector(200.0f, 0.0f, 200.0f);
+		actor->AddImpulse(impulse);
 	}
 }
 
