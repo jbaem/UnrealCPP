@@ -81,6 +81,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
 	void EquipWeapon(EItemCode WeaponCode, int32 Count);
 
+	void EquipNewWeapon(EItemCode WeaponCode, int32 Count);
+
+	bool ShouldDropCurrentWeapon(EItemCode WeaponCode);
+
 	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
 	void DropWeapon(EItemCode WeaponCode);
 
