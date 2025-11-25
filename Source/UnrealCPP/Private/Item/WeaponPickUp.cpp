@@ -35,7 +35,7 @@ AWeaponPickUp::AWeaponPickUp()
 
 	PickupTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("PickupTimeline"));
 	
-	bIsPickedUp = true;
+	bCanPickedUp = false;
 }
 
 // Called when the game starts or when spawned
@@ -62,7 +62,7 @@ void AWeaponPickUp::BeginPlay()
 	timerManager.ClearTimer(PickupTimerHandle);
 	timerManager.SetTimer(
 		PickupTimerHandle,
-		[this]() { bIsPickedUp = false; },
+		[this]() { bCanPickedUp = true; },
 		PickupTime,
 		false
 	);
@@ -79,30 +79,26 @@ void AWeaponPickUp::Tick(float DeltaTime)
 
 void AWeaponPickUp::OnPickup_Implementation(AActor* Target)
 {
-	if(bIsPickedUp)
-	{
-		return;
-	}
-
-	bIsPickedUp = true;
+	UE_LOG(LogTemp, Log, TEXT("Weapon PickUp OnPickup_Implementation"));
+	if (!bCanPickedUp) return;
+	UE_LOG(LogTemp, Log, TEXT("Weapon PickUp OnPickup_Implementation"));
 
 	PickupTarget = Target;
 	PickupStartLocation = GetActorLocation();
 	SetActorEnableCollision(false);
-	BaseRoot->SetSimulatePhysics(true);
+	BaseRoot->SetSimulatePhysics(false);
 	//UE_LOG(LogTemp, Log, TEXT("Weapon Picked Up"));
 	PickupTimeline->PlayFromStart();
 }
 
 void AWeaponPickUp::AddImpulse(FVector& Impulse)
 {
-	UE_LOG(LogTemp, Log, TEXT("Impulse Added: %s"), *Impulse.ToString());
-	UE_LOG(LogTemp, Log, TEXT("Before Velocity: %s"), *BaseRoot->GetPhysicsLinearVelocity().ToString());
 	BaseRoot->AddImpulse(Impulse, NAME_None, true);
 }
 
 void AWeaponPickUp::OnTimelineUpdate(float Value)
 {
+	UE_LOG(LogTemp, Log, TEXT("Weapon PickUp OnTimelineUpdate: %f"), Value);
 	float currentTime = PickupTimeline->GetPlaybackPosition();
 
 	float distanceValue = DistanceCurve->GetFloatValue(currentTime);
@@ -120,8 +116,10 @@ void AWeaponPickUp::OnTimelineUpdate(float Value)
 
 void AWeaponPickUp::OnTimelineFinished()
 {
+	UE_LOG(LogTemp, Log, TEXT("Weapon PickUp OnTimelineFinished"));
 	if(PickupTarget.IsValid() && PickupTarget->Implements<UInventoryOwner>())
 	{
+		UE_LOG(LogTemp, Log, TEXT("Weapon PickUp Added to Inventory"));
 		IInventoryOwner::Execute_AddItem(PickupTarget.Get(), ItemCode, PickupCount);
 	}
 	Destroy();

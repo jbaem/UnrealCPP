@@ -29,15 +29,12 @@ AWeapon::AWeapon()
 	
 	WeaponEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponEffect"));
 	WeaponEffect->SetupAttachment(WeaponMesh);
-
-	//TODO: 나이아가라 시스템 추가하기
 }
 
 void AWeapon::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	// Class Default Object(CDO) : Unreal Engine에서 각 클래스에 대해 하나씩 존재하는 특별한 객체로, 해당 클래스의 기본 속성값들을 보유
-	// OverlapOnlyPawn 설정 이후에 NoCollision 설정
 	WeaponCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -56,6 +53,7 @@ void AWeapon::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 
 void AWeapon::DamageToTarget(AActor* Target)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Target Actor: %s"), *Target->GetName());
 	float finalDamage = Damage;
 	AController* instigator = nullptr;
 	
@@ -77,16 +75,18 @@ void AWeapon::DamageToTarget(AActor* Target)
 		}
 		instigator = WeaponOwner->GetController();
 	}
+	//UE_LOG(LogTemp, Warning, TEXT("Final Damage: %f"), finalDamage);
 	UGameplayStatics::ApplyDamage(Target, finalDamage, instigator, this, DamageType);
+	//UE_LOG(LogTemp, Warning, TEXT("Damage applied to target: %s"), *Target->GetName());
 }
 
 void AWeapon::DamageToArea()
 {
+	//UE_LOG(LogTemp, Warning, TEXT("AWeapon::DamageToArea called"));
 	float finalDamage = Damage;
 	AController* instigator = nullptr;
 	if (WeaponOwner.IsValid())
 	{
-		//TODO: 캐릭터 클래스 변경
 		AActionCharacter* weaponOwner = Cast<AActionCharacter>(WeaponOwner);
 		if (weaponOwner->GetStatusComponent() != nullptr)
 		{
@@ -137,6 +137,7 @@ void AWeapon::DamageToArea()
 	}
 
 	TArray<AActor*> ignoreActors = { WeaponOwner.Get(), this };
+	// Falloff : 거리에 따른 데미지 감소 정도
 	UGameplayStatics::ApplyRadialDamageWithFalloff(
 		GetWorld(),
 		finalDamage,
@@ -162,18 +163,19 @@ void AWeapon::DamageToArea()
 		);
 	}
 
-	UGameplayStatics::ApplyRadialDamage(
-		this,
-		finalDamage,
-		center,
-		AreaOuterRadius,
-		DamageType,
-		ignoreActors,
-		this,
-		instigator,
-		true,
-		ECC_Visibility
-	);
+	// 범위 내 고정 데미지
+	//UGameplayStatics::ApplyRadialDamage(
+	//	this,
+	//	finalDamage,
+	//	center,
+	//	AreaOuterRadius,
+	//	DamageType,
+	//	ignoreActors,
+	//	this,
+	//	instigator,
+	//	true,
+	//	ECC_Visibility
+	//);
 }
 
 void AWeapon::WeaponActivate(bool bActivate)

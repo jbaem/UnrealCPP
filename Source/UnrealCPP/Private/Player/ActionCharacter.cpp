@@ -13,6 +13,7 @@
 #include "Player/PlayerData.h"
 #include "Player/PlayerMontageData.h"
 #include "AnimNotify/AnimNotifyState_SlashEffect.h"
+#include "Framework/PickupFactorySubsystem.h"
 
 AActionCharacter::AActionCharacter()
 {
@@ -348,38 +349,35 @@ void AActionCharacter::EquipWeapon(EItemCode WeaponCode, int32 Count)
 
 void AActionCharacter::DropWeapon(EItemCode WeaponCode)
 {
-	if(TSubclassOf<AUsedWeapon> usedClass = WeaponManager->GetUsedWeaponClassByItemCode(WeaponCode))
+	UPickupFactorySubsystem* subsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>();
+	if (subsystem)
 	{
-		AUsedWeapon* used = GetWorld()->SpawnActor<AUsedWeapon>(
-			usedClass,
+		subsystem->SpawnUsedWeaponByItemCode(
+			WeaponCode,
 			DropLocation->GetComponentLocation(),
 			GetActorRotation()
 		);
-		//FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
-		//UE_LOG(LogTemp, Warning, TEXT("Drop Velocity: %s"), *velocity.ToString());
-		//used->AddImpulse(velocity);
 	}
 }
 
 void AActionCharacter::DropCurrentWeapon()
 {
-	if (!::IsValid(PlayerWeapon) 
-		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_Basic
-		|| PlayerWeapon->GetWeaponID() == EItemCode::EIC_None) return;
+	UPickupFactorySubsystem* subsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>();
+	if (subsystem)
+	{
+		int32 usedCount = PlayerWeapon->GetUsedCountRemain();
 
-	int32 usedCount = PlayerWeapon->GetUsedCountRemain();
+		AWeaponPickUp* pickup = subsystem->SpawnCurrentWeaponByItemCode(
+			PlayerWeapon->GetWeaponID(),
+			DropLocation->GetComponentLocation(),
+			GetActorRotation(),
+			(GetActorForwardVector() + GetActorUpVector()) * 300.0f
+		);
+		
+		if (!pickup) return;
 
-	TSubclassOf<AWeaponPickUp> pickupClass = WeaponManager->GetPickupWeaponClassByItemCode(PlayerWeapon->GetWeaponID());
-
-	AWeaponPickUp* pickup = GetWorld()->SpawnActor<AWeaponPickUp>(
-		pickupClass,
-		DropLocation->GetComponentLocation(),
-		GetActorRotation()
-	);
-	pickup->SetPickupCount(usedCount);
-	FVector velocity = (GetActorForwardVector() + GetActorUpVector()) * 300.0f;
-	UE_LOG(LogTemp, Warning, TEXT("Drop Velocity: %s"), *velocity.ToString());
-	pickup->AddImpulse(velocity);
+		pickup->SetPickupCount(usedCount);
+	}
 }
 
 void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
