@@ -7,6 +7,7 @@
 #include "Player/ResourceComponent.h"
 #include "Data/DropItemData_TableRow.h"
 #include "Item/WeaponPickUp.h"
+#include "Framework/PickupFactorySubsystem.h"
 
 ATestEnemyDamage::ATestEnemyDamage()
 {
@@ -118,15 +119,17 @@ void ATestEnemyDamage::DropItem()
 		FDropItemData_TableRow* row = reinterpret_cast<FDropItemData_TableRow*>(element.Value);
 		if (FMath::FRand() > row->DropItemRate) continue;
 		
-		AWeaponPickUp* actor = GetWorld()->SpawnActor<AWeaponPickUp>(
-			row->DropItemClass,
-			GetActorLocation() + FVector::UpVector * 100.0f,
-			GetActorRotation()
-		);
-
-		if (!actor) continue;
-		FVector impulse = FVector(200.0f, 0.0f, 200.0f);
-		actor->AddImpulse(impulse);
+		UPickupFactorySubsystem* subsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>();
+		if (subsystem)
+		{
+			FVector velocity = FVector(200.0f, 0.0f, 200.0f);
+			subsystem->SpawnItem(
+				row->ItemCode,
+				GetActorLocation() + FVector::UpVector * 100.0f,
+				GetActorRotation(),
+				velocity
+			);
+		}
 	}
 }
 
