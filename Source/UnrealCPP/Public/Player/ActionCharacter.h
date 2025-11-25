@@ -26,13 +26,46 @@ class UNREALCPP_API AActionCharacter : public ACharacter, public IInventoryOwner
 public:
 	AActionCharacter();
 
+	void InitMovementRotation();
+	void InitDropLocation();
+	void InitCameraSystem();
+	void InitCamera();
+	void InitSpringArm();
+	void InitComponents();
+
 protected:
 	virtual void BeginPlay() override;
+
+	void BindBeginOverlap();
+
+	void InitResourceByStatus();
+
+	void InitIsSprinting();
+
+	void InitAnimInstance();
+
+	void BindStaminaDepleted();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void BindActions(class UEnhancedInputComponent* enhanced);
+
+	void BindActionAttack2(UEnhancedInputComponent* enhanced);
+
+	void BindActionAttack1(UEnhancedInputComponent* enhanced);
+
+	void BindActionRoll(UEnhancedInputComponent* enhanced);
+
+	void BindActionSprint(UEnhancedInputComponent* enhanced);
+
+	void BindActionSprintDeactivate(UEnhancedInputComponent* enhanced);
+
+	void BindActionSprintActivate(UEnhancedInputComponent* enhanced);
+
+	void BindActionMove(UEnhancedInputComponent* enhanced);
 
 	virtual void AddItem_Implementation(EItemCode Code, int32 Count);
 
@@ -58,7 +91,12 @@ public:
 
 protected:
 	void OnMoveInput(const FInputActionValue& Value);
+	FVector InputToMoveDirection(const FInputActionValue& InValue);
+	bool IsAnimMontagePlaying();
 	void OnRollInput(const FInputActionValue& Value);
+	void PlayRoll();
+	void RotateActorByLastInput();
+	bool IsUsingStamina(float StaminaCost);
 	void OnAttack1Input(const FInputActionValue& Value);
 	void OnAttack2Input(const FInputActionValue& Value);
 
@@ -68,6 +106,8 @@ protected:
 	void SpendSprintStamina(float DeltaTime);
 
 	void PlayAttack1();
+	void SetWeaponToAttack();
+	void BindMontageEnded();
 	void PlayComboAttack1();
 	void PlayAttack2();
 	void PlayComboAttack2();

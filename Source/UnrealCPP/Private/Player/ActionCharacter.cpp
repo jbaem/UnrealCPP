@@ -19,24 +19,50 @@ AActionCharacter::AActionCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
+	InitCameraSystem();
+	InitComponents();
+	InitDropLocation();
+	InitMovementRotation();
+}
+
+void AActionCharacter::InitCameraSystem()
+{
+	InitSpringArm();
+	InitCamera();
+}
+
+void AActionCharacter::InitSpringArm()
+{
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 350.0f;
 	SpringArm->SocketOffset = FVector(0, 0, 250);
 	SpringArm->bUsePawnControlRotation = true; // SpringArm이 Pawn의 컨트롤 회전을 따르도록 설정
-	
+}
+
+void AActionCharacter::InitCamera()
+{
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	PlayerCamera->SetupAttachment(SpringArm);
 	PlayerCamera->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
-	
+}
+
+void AActionCharacter::InitComponents()
+{
 	ResourceComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 	WeaponManager = CreateDefaultSubobject<UWeaponManagerComponent>(TEXT("WeaponManager"));
+}
 
+void AActionCharacter::InitDropLocation()
+{
 	DropLocation = CreateDefaultSubobject<USceneComponent>(TEXT("DropLocation"));
 	DropLocation->SetupAttachment(RootComponent);
 	DropLocation->SetRelativeLocation(FVector(80.0f, 30.0f, 50.0f));
+}
 
+void AActionCharacter::InitMovementRotation()
+{
 	bUseControllerRotationYaw = false; // Character가 Controller의 Yaw 회전을 따르지 않도록 설정
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character가 이동 방향으로 회전하도록 설정
 	GetCharacterMovement()->RotationRate = FRotator(0, 360, 0); // 회전 속도 설정
@@ -46,23 +72,39 @@ void AActionCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (GetMesh())
-	{
-		ActionAnimInstance = GetMesh()->GetAnimInstance(); 
-	}
+	InitIsSprinting();
+	InitAnimInstance();
+	InitResourceByStatus();
+	
+	BindStaminaDepleted();
+	BindBeginOverlap();
+}
 
-	if (ResourceComponent)
-	{
-		ResourceComponent->OnStaminaDepleted.AddDynamic(this, &AActionCharacter::OnStaminaDepleted);
-	}
-
+void AActionCharacter::InitIsSprinting()
+{
 	bIsSprinting = false;
+}
 
-	if (ResourceComponent && StatusComponent)
-	{
-		ResourceComponent->SetAllResourceByStatus(StatusComponent);
-	}
+void AActionCharacter::InitAnimInstance()
+{
+	if (!GetMesh()) return;
+	ActionAnimInstance = GetMesh()->GetAnimInstance();
+}
 
+void AActionCharacter::InitResourceByStatus()
+{
+	if (!ResourceComponent || !StatusComponent) return;
+	ResourceComponent->SetAllResourceByStatus(StatusComponent);
+}
+
+void AActionCharacter::BindStaminaDepleted()
+{
+	if (!ResourceComponent) return;
+	ResourceComponent->OnStaminaDepleted.AddDynamic(this, &AActionCharacter::OnStaminaDepleted);
+}
+
+void AActionCharacter::BindBeginOverlap()
+{
 	OnActorBeginOverlap.AddDynamic(this, &AActionCharacter::OnBeginOverlap);
 }
 
@@ -78,43 +120,63 @@ void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
 	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	BindActions(enhanced);
+}
+
+void AActionCharacter::BindActions(UEnhancedInputComponent* enhanced)
+{
 	if (!enhanced || !InputData) return;
+	
+	BindActionMove(enhanced);
+	BindActionSprint(enhanced);
+	BindActionRoll(enhanced);
+	BindActionAttack1(enhanced);
+	BindActionAttack2(enhanced);
+}
 
-	if (InputData->Move)
-	{
-		enhanced->BindAction(InputData->Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
-	}
+void AActionCharacter::BindActionAttack2(UEnhancedInputComponent* enhanced)
+{
+	if (!InputData->Attack2) return;
+	enhanced->BindAction(InputData->Attack2, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack2Input);
+}
 
-	if (InputData->Sprint)
-	{
-		enhanced->BindActionValueLambda(InputData->Sprint, ETriggerEvent::Started,
-			[this](const FInputActionValue& _)
-			{
-				SetSprintMode();
-			}
-		);
-		enhanced->BindActionValueLambda(InputData->Sprint, ETriggerEvent::Completed,
-			[this](const FInputActionValue& _)
-			{
-				SetWalkMode();
-			}
-		);
-	}
+void AActionCharacter::BindActionAttack1(UEnhancedInputComponent* enhanced)
+{
+	if (!InputData->Attack1) return;
+	enhanced->BindAction(InputData->Attack1, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack1Input);
+}
 
-	if (InputData->Roll)
-	{
-		enhanced->BindAction(InputData->Roll, ETriggerEvent::Triggered, this, &AActionCharacter::OnRollInput);
-	}
+void AActionCharacter::BindActionRoll(UEnhancedInputComponent* enhanced)
+{
+	if (!InputData->Roll) return;
+	enhanced->BindAction(InputData->Roll, ETriggerEvent::Triggered, this, &AActionCharacter::OnRollInput);
+}
 
-	if (InputData->Attack1)
-	{
-		enhanced->BindAction(InputData->Attack1, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack1Input);
-	}
+void AActionCharacter::BindActionSprint(UEnhancedInputComponent* enhanced)
+{
+	if (!InputData->Sprint) return;
+	BindActionSprintActivate(enhanced);
+	BindActionSprintDeactivate(enhanced);
+}
 
-	if (InputData->Attack2)
-	{
-		enhanced->BindAction(InputData->Attack2, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack2Input);
-	}
+void AActionCharacter::BindActionSprintDeactivate(UEnhancedInputComponent* enhanced)
+{
+	enhanced->BindActionValueLambda(InputData->Sprint, ETriggerEvent::Completed,
+		[this](const FInputActionValue& _) { SetWalkMode(); }
+	);
+}
+
+void AActionCharacter::BindActionSprintActivate(UEnhancedInputComponent* enhanced)
+{
+	enhanced->BindActionValueLambda(InputData->Sprint, ETriggerEvent::Started,
+		[this](const FInputActionValue& _) { SetSprintMode(); }
+	);
+}
+
+void AActionCharacter::BindActionMove(UEnhancedInputComponent* enhanced)
+{
+	if (!InputData->Move) return;
+	enhanced->BindAction(InputData->Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
 }
 
 void AActionCharacter::AddItem_Implementation(EItemCode Code, int32 Count)
@@ -125,7 +187,7 @@ void AActionCharacter::AddItem_Implementation(EItemCode Code, int32 Count)
 inline void AActionCharacter::SetSectionJumpNotify(UAnimNotifyState_SectionJump* InNotify)
 {
 	SectionJumpNotify = InNotify;
-	bComboReady = SectionJumpNotify != nullptr;
+	bComboReady = SectionJumpNotify.IsValid();
 }
 
 inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace* InNotify)
@@ -140,68 +202,64 @@ inline void AActionCharacter::SetSlashEffectNotify(UAnimNotifyState_SlashEffect*
 	PlayerWeapon->ActivateSlashEffect(SlashEffectNotify.IsValid());
 }
 
-void AActionCharacter::TestDropUsedWeapon()
-{
-	if (PlayerWeapon)
-	{
-		DropWeapon(PlayerWeapon->GetWeaponID());
-	}
-}
-
-void AActionCharacter::TestDropCurrentWeapon()
-{
-	DropCurrentWeapon();
-}
-
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
-	if(ActionAnimInstance.IsValid() && ActionAnimInstance->IsAnyMontagePlaying())
-	{
-		return;
-	}
+	if (IsAnimMontagePlaying()) return;
+	AddMovementInput(InputToMoveDirection(InValue));
+}
 
+FVector AActionCharacter::InputToMoveDirection(const FInputActionValue& InValue)
+{
 	FVector2D inputDirection = InValue.Get<FVector2D>();
-	
-	// 컨트롤러의 Yaw 회전을 기준으로 이동 방향 계산
 	FVector moveDirection = FVector(inputDirection.Y, inputDirection.X, 0.0f);
-	FQuat controlYawRotation = FQuat(FRotator(0, GetControlRotation().Yaw, 0));
+	FQuat controlYawRotation = FQuat(FRotator(0, GetControlRotation().Yaw, 0)); 	// 컨트롤러의 Yaw 회전을 기준으로 이동 방향 계산
+	return controlYawRotation.RotateVector(moveDirection);
+}
 
-	moveDirection = controlYawRotation.RotateVector(moveDirection);
-	AddMovementInput(moveDirection);
-
-	// Forward/Right 벡터를 사용하여 이동
-	/*
-	//const FRotator controlRotation = GetControlRotation();
-	//const FRotator yawRotation(0.0f, controlRotation.Yaw, 0.0f);
-	//const FVector forward = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
-	//AddMovementInput(forward, inputDirection.Y);
-	//const FVector right = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
-	//AddMovementInput(right, inputDirection.X);	
-	*/
+bool AActionCharacter::IsAnimMontagePlaying()
+{
+	return ActionAnimInstance.IsValid() && ActionAnimInstance->IsAnyMontagePlaying();
 }
 
 void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 {
-	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Roll)) return;
-	if (!ResourceComponent->HasEnoughStamina(PlayerData->RollStaminaCost)) return;
-	if (ActionAnimInstance->IsAnyMontagePlaying()) return;
+	if (IsAnimMontagePlaying()) return;
+	if (!::IsValid(MontageData->Roll)) return;
+	
+	PlayRoll();
+}
 
-	ResourceComponent->UseStamina(PlayerData->RollStaminaCost);
+void AActionCharacter::PlayRoll()
+{
+	if (!IsUsingStamina(PlayerData->RollStaminaCost)) return;
 
+	RotateActorByLastInput();
+	PlayAnimMontage(MontageData->Roll);
+}
+
+void AActionCharacter::RotateActorByLastInput()
+{
 	FVector LastMoveDir = GetLastMovementInputVector();
 	if (!LastMoveDir.IsNearlyZero())
 	{
 		SetActorRotation(LastMoveDir.ToOrientationRotator());
 	}
-	PlayAnimMontage(MontageData->Roll);
+}
+
+bool AActionCharacter::IsUsingStamina(float StaminaCost)
+{
+	if (!ResourceComponent->HasEnoughStamina(StaminaCost)) return false;
+	ResourceComponent->UseStamina(StaminaCost);
+	return true;
 }
 
 void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 {
 	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack1)) return;
-	if (!ResourceComponent->HasEnoughStamina(PlayerData->AttackStaminaCost)) return;
 	if (!PlayerWeapon->CanAttack()) return;
 
+	if (!ResourceComponent->HasEnoughStamina(PlayerData->AttackStaminaCost)) return;
+	
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{
 		PlayAttack1();
@@ -244,79 +302,60 @@ void AActionCharacter::SetWalkMode()
 
 void AActionCharacter::SpendSprintStamina(float DeltaTime)
 {
-	if (bIsSprinting && !GetVelocity().IsNearlyZero())
-	{
-		if(ActionAnimInstance.IsValid() && ActionAnimInstance->IsAnyMontagePlaying())
-		{
-			return;
-		}
-		ResourceComponent->UseStamina(PlayerData->SprintStaminaCost * DeltaTime);
-	}
+	if (!bIsSprinting || GetVelocity().IsNearlyZero()) return;
+	if (IsAnimMontagePlaying()) return;
+
+	ResourceComponent->UseStamina(PlayerData->SprintStaminaCost * DeltaTime);
 }
 
 void AActionCharacter::PlayAttack1()
 {
-	ResourceComponent->UseStamina(PlayerData->AttackStaminaCost);
+	if (!IsUsingStamina(PlayerData->AttackStaminaCost)) return;
 	PlayAnimMontage(MontageData->Attack1);
+	BindMontageEnded();
+	SetWeaponToAttack();
+}
 
+void AActionCharacter::SetWeaponToAttack()
+{
+	if (!PlayerWeapon) return;
+	PlayerWeapon->OnAttack();
+}
+
+void AActionCharacter::BindMontageEnded()
+{
 	FOnMontageEnded onMontageEnded;
 	onMontageEnded.BindUObject(this, &AActionCharacter::OnAttackMontageEnded);
 	ActionAnimInstance->Montage_SetEndDelegate(onMontageEnded);
-
-	if (PlayerWeapon)
-	{
-		PlayerWeapon->OnAttack();
-	}
 }
 
 void AActionCharacter::PlayComboAttack1()
 {
-	ResourceComponent->UseStamina(PlayerData->AttackStaminaCost);
-
+	if (!IsUsingStamina(PlayerData->AttackStaminaCost)) return;
+	
 	ActionAnimInstance->Montage_JumpToSection(
 		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
 		MontageData->Attack1
 	);
-
-	/* use case: Montage_SetNextSection
-	UAnimMontage* current = ActionAnimInstance->GetCurrentActiveMontage();
-	ActionAnimInstance->Montage_SetNextSection(
-		ActionAnimInstance->Montage_GetCurrentSection(current),
-		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
-		AttackMontage
-	);
-	*/
-
-	if (PlayerWeapon)
-	{
-		PlayerWeapon->OnAttack();
-	}
+	SetWeaponToAttack();
 }
 
 void AActionCharacter::PlayAttack2()
 {
-	ResourceComponent->UseStamina(PlayerData->Attack2StaminaCost);
+	if (!IsUsingStamina(PlayerData->Attack2StaminaCost)) return;
 	PlayAnimMontage(MontageData->Attack2);
-
-	if (PlayerWeapon)
-	{
-		PlayerWeapon->OnAttack();
-	}
+	SetWeaponToAttack();
 }
 
 void AActionCharacter::PlayComboAttack2()
 {
-	ResourceComponent->UseStamina(PlayerData->Attack2StaminaCost);
+	if (!IsUsingStamina(PlayerData->Attack2StaminaCost)) return;
 
 	ActionAnimInstance->Montage_JumpToSection(
 		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
 		MontageData->Attack2
 	);
-	
-	if (PlayerWeapon)
-	{
-		PlayerWeapon->OnAttack();
-	}
+	SetWeaponToAttack();
 }
 
 void AActionCharacter::OnAreaAttack()
@@ -329,22 +368,27 @@ void AActionCharacter::OnAreaAttack()
 
 void AActionCharacter::EquipWeapon(EItemCode WeaponCode, int32 Count)
 {
-	UE_LOG(LogTemp, Warning, TEXT("EquipWeapon: %d, Count: %d"), static_cast<uint8>(WeaponCode), Count);
-	 
-	if (::IsValid(PlayerWeapon))
+	if (!::IsValid(PlayerWeapon)) return;
+	
+	PlayerWeapon->WeaponActivate(false);
+
+	if (ShouldDropCurrentWeapon(WeaponCode))
 	{
-		PlayerWeapon->WeaponActivate(false);
-
-		if (WeaponCode != EItemCode::EIC_Basic 
-			&& WeaponCode != PlayerWeapon->GetWeaponID())
-		{
-			DropCurrentWeapon();
-		}
+		DropCurrentWeapon();
 	}
+	EquipNewWeapon(WeaponCode, Count);
+}
 
+void AActionCharacter::EquipNewWeapon(EItemCode WeaponCode, int32 Count)
+{
 	PlayerWeapon = WeaponManager->GetEquippedWeaponByItemCode(WeaponCode);
 	PlayerWeapon->WeaponActivate(true);
 	PlayerWeapon->SetUsedCountRemain(Count);
+}
+
+bool AActionCharacter::ShouldDropCurrentWeapon(EItemCode WeaponCode)
+{
+	return WeaponCode != EItemCode::EIC_Basic && WeaponCode != PlayerWeapon->GetWeaponID();
 }
 
 void AActionCharacter::DropWeapon(EItemCode WeaponCode)
@@ -382,7 +426,7 @@ void AActionCharacter::DropCurrentWeapon()
 
 void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	/* Cast case
+	/* // Cast case
 	IPickable* pickableItem = Cast<IPickable>(OtherActor);
 	if(pickableItem)
 	{
