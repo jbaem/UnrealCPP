@@ -78,6 +78,8 @@ void AActionCharacter::BeginPlay()
 	
 	BindStaminaDepleted();
 	BindBeginOverlap();
+
+	EquipNewWeapon(EItemCode::EIC_Basic, 10);
 }
 
 void AActionCharacter::InitIsSprinting()
@@ -256,7 +258,7 @@ bool AActionCharacter::IsUsingStamina(float StaminaCost)
 void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 {
 	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack1)) return;
-	if (!PlayerWeapon->CanAttack()) return;
+	if (!PlayerWeapon || !PlayerWeapon->CanAttack()) return;
 
 	if (!ResourceComponent->HasEnoughStamina(PlayerData->AttackStaminaCost)) return;
 	
