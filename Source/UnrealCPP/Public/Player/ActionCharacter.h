@@ -72,12 +72,7 @@ public:
 	inline void SetSectionJumpNotify(class UAnimNotifyState_SectionJump* InNotify);
 	inline void SetAttackTraceNotify(class UAnimNotifyState_AttackTrace* InNotify);
 	inline void SetSlashEffectNotify(class UAnimNotifyState_SlashEffect* InNotify);
-
-	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
-	void TestDropUsedWeapon();
-	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
-	void TestDropCurrentWeapon();
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
 	void EquipWeapon(EItemCode WeaponCode, int32 Count);
 
