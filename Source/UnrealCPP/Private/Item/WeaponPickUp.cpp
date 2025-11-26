@@ -31,7 +31,7 @@ AWeaponPickUp::AWeaponPickUp()
 	SkeletalMesh->SetCollisionProfileName(TEXT("NoCollision")); // 생성 직후는 바로 먹을 수 없음
 
 	Effect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Effect"));
-	Effect->SetupAttachment(BaseRoot);
+	Effect->SetupAttachment(SkeletalMesh);
 
 	PickupTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("PickupTimeline"));
 	
