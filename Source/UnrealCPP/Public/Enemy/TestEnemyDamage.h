@@ -25,6 +25,9 @@ protected:
 	UFUNCTION()
 	void OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
+	UFUNCTION(BlueprintCallable)
+	void TestDropItem() { DropItem(); }
+
 private:
 	void OnDie();
 	void DropItem();

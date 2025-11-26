@@ -122,7 +122,10 @@ void ATestEnemyDamage::DropItem()
 		UPickupFactorySubsystem* subsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>();
 		if (subsystem)
 		{
-			FVector velocity = FVector(200.0f, 0.0f, 200.0f);
+
+			FVector velocity = FVector::UpVector * 500.0f;
+			velocity = velocity.RotateAngleAxis(FMath::FRandRange(-15.0f, 15.0f), FVector::RightVector);
+			velocity = velocity.RotateAngleAxis(FMath::FRandRange(0.0f, 360.0f), FVector::UpVector);
 			subsystem->SpawnItem(
 				row->ItemCode,
 				GetActorLocation() + FVector::UpVector * 100.0f,
