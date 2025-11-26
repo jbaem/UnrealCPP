@@ -35,36 +35,24 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	
 	void BindBeginOverlap();
-
 	void InitResourceByStatus();
-
 	void InitIsSprinting();
-
 	void InitAnimInstance();
-
 	void BindStaminaDepleted();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	void BindActions(class UEnhancedInputComponent* enhanced);
-
 	void BindActionAttack2(UEnhancedInputComponent* enhanced);
-
 	void BindActionAttack1(UEnhancedInputComponent* enhanced);
-
 	void BindActionRoll(UEnhancedInputComponent* enhanced);
-
 	void BindActionSprint(UEnhancedInputComponent* enhanced);
-
 	void BindActionSprintDeactivate(UEnhancedInputComponent* enhanced);
-
 	void BindActionSprintActivate(UEnhancedInputComponent* enhanced);
-
 	void BindActionMove(UEnhancedInputComponent* enhanced);
 
 	virtual void AddItem_Implementation(EItemCode Code, int32 Count);

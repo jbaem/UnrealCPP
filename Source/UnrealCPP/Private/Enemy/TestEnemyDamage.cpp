@@ -5,7 +5,7 @@
 #include "Framework/DamagePopupSubsystem.h"
 #include "Framework/EnemyCountSubsystem.h"
 #include "Player/ResourceComponent.h"
-#include "Data/DropItemData_TableRow.h"
+#include "Data/DataTableRows.h"
 #include "Item/WeaponPickUp.h"
 #include "Framework/PickupFactorySubsystem.h"
 

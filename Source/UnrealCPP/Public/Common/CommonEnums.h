@@ -11,6 +11,15 @@ enum class EItemCode : uint8
 	EIC_HellHammer		UMETA(DisplayName = "HellHammer"),
 };
 
+UENUM(BlueprintType)
+enum class EWeaponCode : uint8
+{
+	EWC_None			UMETA(DisplayName = "None"),
+	EWC_Basic			UMETA(DisplayName = "Basic"),
+	EWC_IceBlade		UMETA(DisplayName = "IceBlade"),
+	EWC_HellHammer		UMETA(DisplayName = "HellHammer"),
+};
+
 // Example usage: C++
 // UPROPERTY(EditAnywhere, meta = (Bitmask, BitmaskEnum = "ETestBitFlag"))
 // uint8 testBitFlag;

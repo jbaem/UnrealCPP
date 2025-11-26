@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Common/CommonEnums.h"
 //#include "Item/WeaponPickUp.h"
 
 #include "CommonStructs.generated.h"
