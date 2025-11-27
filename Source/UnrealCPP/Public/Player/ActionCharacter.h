@@ -126,20 +126,31 @@ protected:
 	TObjectPtr<UStatusComponent> StatusComponent = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<USceneComponent> DropLocation = nullptr;
-	// Manager
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
-	TObjectPtr<class UWeaponManagerComponent> WeaponManager = nullptr;
-	// Data
+	// DataAssets
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<class UPlayerInputData> InputData;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")
-	TObjectPtr<class UPlayerData> PlayerData;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montage")
 	TObjectPtr<class UPlayerMontageData> MontageData;
-
+	// Data
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Movement|Walk")
+	float WalkSpeed = 600.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Movement|Sprint")
+	float SprintSpeed = 1200.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Movement|Sprint")
+	float SprintStaminaCost = 20.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Movement|Roll")
+	float RollStaminaCost = 40.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Combat|Attack")
+	float AttackStaminaCost = 10.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Combat|Attack")
+	float Attack2StaminaCost = 15.0f;
+	// Managers
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
+	TObjectPtr<class UWeaponManagerComponent> WeaponManager = nullptr;
+	// Current Weapon
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<AWeapon> PlayerWeapon = nullptr;
-
+	// States
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|State")
 	bool bIsSprinting = false;
 

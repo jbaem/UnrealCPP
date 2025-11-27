@@ -13,7 +13,6 @@
 #include "Item/Pickable.h"
 #include "Item/PickupWeapon.h"
 #include "Player/PlayerInputData.h"
-#include "Player/PlayerData.h"
 #include "Player/PlayerMontageData.h"
 #include "AnimNotify/AnimNotifyState_SlashEffect.h"
 #include "Framework/PickupFactorySubsystem.h"
@@ -241,7 +240,7 @@ void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 
 void AActionCharacter::PlayRoll()
 {
-	if (!IsUsingStamina(PlayerData->RollStaminaCost)) return;
+	if (!IsUsingStamina(RollStaminaCost)) return;
 
 	RotateActorByLastInput();
 	PlayAnimMontage(MontageData->Roll);
@@ -268,7 +267,7 @@ void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack1)) return;
 	if (!PlayerWeapon || !PlayerWeapon->CanAttack()) return;
 
-	if (!ResourceComponent->HasEnoughStamina(PlayerData->AttackStaminaCost)) return;
+	if (!ResourceComponent->HasEnoughStamina(AttackStaminaCost)) return;
 	
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{
@@ -284,7 +283,7 @@ void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
 {
 	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack2)) return;
-	if (!ResourceComponent->HasEnoughStamina(PlayerData->Attack2StaminaCost)) return;
+	if (!ResourceComponent->HasEnoughStamina(Attack2StaminaCost)) return;
 
 	if (!ActionAnimInstance->IsAnyMontagePlaying())
 	{
@@ -300,13 +299,13 @@ void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
 void AActionCharacter::SetSprintMode()
 {
 	if (ResourceComponent->GetStaminaCurrent() <= 0) return;
-	GetCharacterMovement()->MaxWalkSpeed = PlayerData->SprintSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 	bIsSprinting = true;
 }
 
 void AActionCharacter::SetWalkMode()
 {
-	GetCharacterMovement()->MaxWalkSpeed = PlayerData->WalkSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	bIsSprinting = false;
 }
 
@@ -315,12 +314,12 @@ void AActionCharacter::SpendSprintStamina(float DeltaTime)
 	if (!bIsSprinting || GetVelocity().IsNearlyZero()) return;
 	if (IsAnimMontagePlaying()) return;
 
-	ResourceComponent->UseStamina(PlayerData->SprintStaminaCost * DeltaTime);
+	ResourceComponent->UseStamina(SprintStaminaCost * DeltaTime);
 }
 
 void AActionCharacter::PlayAttack1()
 {
-	if (!IsUsingStamina(PlayerData->AttackStaminaCost)) return;
+	if (!IsUsingStamina(AttackStaminaCost)) return;
 	PlayAnimMontage(MontageData->Attack1);
 	BindMontageEnded();
 	SetWeaponToAttack();
@@ -341,7 +340,7 @@ void AActionCharacter::BindMontageEnded()
 
 void AActionCharacter::PlayComboAttack1()
 {
-	if (!IsUsingStamina(PlayerData->AttackStaminaCost)) return;
+	if (!IsUsingStamina(AttackStaminaCost)) return;
 	
 	ActionAnimInstance->Montage_JumpToSection(
 		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
@@ -352,14 +351,14 @@ void AActionCharacter::PlayComboAttack1()
 
 void AActionCharacter::PlayAttack2()
 {
-	if (!IsUsingStamina(PlayerData->Attack2StaminaCost)) return;
+	if (!IsUsingStamina(Attack2StaminaCost)) return;
 	PlayAnimMontage(MontageData->Attack2);
 	SetWeaponToAttack();
 }
 
 void AActionCharacter::PlayComboAttack2()
 {
-	if (!IsUsingStamina(PlayerData->Attack2StaminaCost)) return;
+	if (!IsUsingStamina(Attack2StaminaCost)) return;
 
 	ActionAnimInstance->Montage_JumpToSection(
 		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
