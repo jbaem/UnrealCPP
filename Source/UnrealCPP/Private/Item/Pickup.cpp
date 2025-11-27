@@ -103,9 +103,7 @@ void APickup::AddImpulse(FVector& Impulse)
 
 void APickup::OnTimelineUpdate(float Value)
 {
-	UE_LOG(LogTemp, Log, TEXT("Weapon PickUp OnTimelineUpdate: %f"), Value);
 	float currentTime = PickupTimeline->GetPlaybackPosition();
-
 	float distanceValue = DistanceCurve->GetFloatValue(currentTime);
 	float heightValue = HeightCurve->GetFloatValue(currentTime);
 

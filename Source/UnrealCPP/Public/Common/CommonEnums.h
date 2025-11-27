@@ -13,6 +13,7 @@ enum class EItemCode : uint8
 	EIC_HealthPotion	UMETA(DisplayName = "HealthPotion"),
 	EIC_StaminaPotion	UMETA(DisplayName = "StaminaPotion"),
 	EIC_MiscItem		UMETA(DisplayName = "MiscItem"),
+	EIC_Gold			UMETA(DisplayName = "Gold"),
 };
 
 UENUM(BlueprintType)
