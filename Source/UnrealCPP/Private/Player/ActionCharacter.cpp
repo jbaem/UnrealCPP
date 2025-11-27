@@ -1,5 +1,7 @@
 #include "Player/ActionCharacter.h"
 
+#include "UnrealCPP/UnrealCPP.h"
+
 #include "EnhancedInputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -376,6 +378,7 @@ void AActionCharacter::OnAreaAttack()
 
 void AActionCharacter::EquipWeapon(EItemCode WeaponCode, int32 Count)
 {
+	LOG_MESSAGE(Warning, TEXT("EquipWeapon: %d"), static_cast<uint8>(WeaponCode));
 	if (!::IsValid(PlayerWeapon)) return;
 	
 	PlayerWeapon->WeaponActivate(false);
