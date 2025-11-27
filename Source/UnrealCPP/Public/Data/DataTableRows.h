@@ -27,5 +27,5 @@ public:
 	EItemCode ItemCode = EItemCode::EIC_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "1"))
-	TSubclassOf<class AWeaponPickUp> PickupClass;
+	TSubclassOf<class APickup> PickupClass;
 };

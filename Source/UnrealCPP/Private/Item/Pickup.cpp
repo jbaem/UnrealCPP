@@ -1,11 +1,11 @@
-#include "Item/WeaponPickUp.h"
+#include "Item/Pickup.h"
 
 #include "NiagaraComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/TimelineComponent.h"
 #include "Player/InventoryOwner.h"
 
-AWeaponPickUp::AWeaponPickUp()
+APickup::APickup()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -39,7 +39,7 @@ AWeaponPickUp::AWeaponPickUp()
 }
 
 // Called when the game starts or when spawned
-void AWeaponPickUp::BeginPlay()
+void APickup::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -69,7 +69,7 @@ void AWeaponPickUp::BeginPlay()
 }
 
 // Called every frame
-void AWeaponPickUp::Tick(float DeltaTime)
+void APickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 		
@@ -77,7 +77,7 @@ void AWeaponPickUp::Tick(float DeltaTime)
 
 }
 
-void AWeaponPickUp::OnPickup_Implementation(AActor* Target)
+void APickup::OnPickup_Implementation(AActor* Target)
 {
 	UE_LOG(LogTemp, Log, TEXT("Weapon PickUp OnPickup_Implementation"));
 	if (!bCanPickedUp) return;
@@ -91,12 +91,17 @@ void AWeaponPickUp::OnPickup_Implementation(AActor* Target)
 	PickupTimeline->PlayFromStart();
 }
 
-void AWeaponPickUp::AddImpulse(FVector& Impulse)
+void APickup::OnPickupComplete_Implementation()
+{
+	Destroy();
+}
+
+void APickup::AddImpulse(FVector& Impulse)
 {
 	BaseRoot->AddImpulse(Impulse, NAME_None, true);
 }
 
-void AWeaponPickUp::OnTimelineUpdate(float Value)
+void APickup::OnTimelineUpdate(float Value)
 {
 	UE_LOG(LogTemp, Log, TEXT("Weapon PickUp OnTimelineUpdate: %f"), Value);
 	float currentTime = PickupTimeline->GetPlaybackPosition();
@@ -114,13 +119,7 @@ void AWeaponPickUp::OnTimelineUpdate(float Value)
 	SkeletalMesh->SetRelativeScale3D(newScale);
 }
 
-void AWeaponPickUp::OnTimelineFinished()
+void APickup::OnTimelineFinished()
 {
-	UE_LOG(LogTemp, Log, TEXT("Weapon PickUp OnTimelineFinished"));
-	if(PickupTarget.IsValid() && PickupTarget->Implements<UInventoryOwner>())
-	{
-		UE_LOG(LogTemp, Log, TEXT("Weapon PickUp Added to Inventory"));
-		IInventoryOwner::Execute_AddItem(PickupTarget.Get(), ItemCode, PickupCount);
-	}
-	Destroy();
+	Execute_OnPickupComplete(this);
 }

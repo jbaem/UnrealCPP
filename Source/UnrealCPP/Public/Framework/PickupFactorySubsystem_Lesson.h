@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
-#include "Item/WeaponPickUp.h"
+#include "Item/Pickup.h"
 #include "Common/CommonEnums.h"
 
 #include "PickupFactorySubsystem_Lesson.generated.h"
@@ -15,12 +15,12 @@ class UNREALCPP_API UPickupFactorySubsystem_Lesson : public UWorldSubsystem
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	
-	AWeaponPickUp* SpawnPickup(EItemCode ItemCode, FVector Location, FRotator Rotator);
+	APickup* SpawnPickup(EItemCode ItemCode, FVector Location, FRotator Rotator);
 
 protected:
 	void LoadPickupClassesMap();
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Pickup")
-	TMap<EItemCode, TSubclassOf<AWeaponPickUp>> PickupClasses;
+	TMap<EItemCode, TSubclassOf<APickup>> PickupClasses;
 };

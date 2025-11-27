@@ -6,7 +6,8 @@
 
 #include "PickupFactorySubsystem.generated.h"
 
-class AWeaponPickUp;
+class APickup;
+class APickupWeapon;
 class UWeaponDataAsset;
 
 UCLASS()
@@ -23,7 +24,7 @@ public:
 	void SpawnUsedWeaponByItemCode(EItemCode ItemCode, FVector Location, FRotator Rotation);
 
 	UFUNCTION(BlueprintCallable)
-	AWeaponPickUp* SpawnCurrentWeaponByItemCode(EItemCode ItemCode, FVector Location, FRotator Rotation, FVector Velocity);
+	APickup* SpawnCurrentWeaponByItemCode(EItemCode ItemCode, FVector Location, FRotator Rotation, FVector Velocity);
 
 private:
 	bool IsValidItemCode(EItemCode ItemCode);

@@ -10,14 +10,14 @@ void UPickupFactorySubsystem_Lesson::Initialize(FSubsystemCollectionBase& Collec
 	LoadPickupClassesMap();
 }
 
-AWeaponPickUp* UPickupFactorySubsystem_Lesson::SpawnPickup(EItemCode ItemCode, FVector Location, FRotator Rotator)
+APickup* UPickupFactorySubsystem_Lesson::SpawnPickup(EItemCode ItemCode, FVector Location, FRotator Rotator)
 {
-	AWeaponPickUp* pickup = nullptr;
+	APickup* pickup = nullptr;
 	if(PickupClasses.Contains(ItemCode))
 	{
 		if (UWorld* world = GetWorld())
 		{
-			pickup = world->SpawnActor<AWeaponPickUp>(
+			pickup = world->SpawnActor<APickup>(
 				PickupClasses[ItemCode],
 				Location,
 				Rotator

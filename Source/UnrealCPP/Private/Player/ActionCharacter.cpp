@@ -9,6 +9,7 @@
 #include "Player/WeaponManagerComponent.h"
 #include "Weapon/Weapon.h"
 #include "Item/Pickable.h"
+#include "Item/PickupWeapon.h"
 #include "Player/PlayerInputData.h"
 #include "Player/PlayerData.h"
 #include "Player/PlayerMontageData.h"
@@ -183,7 +184,12 @@ void AActionCharacter::BindActionMove(UEnhancedInputComponent* enhanced)
 
 void AActionCharacter::AddItem_Implementation(EItemCode Code, int32 Count)
 {
-	EquipWeapon(Code, Count);
+	//EquipWeapon(Code, Count);
+}
+
+void AActionCharacter::AddWeapon_Implementation(EItemCode Code, int32 AttackCount)
+{
+	EquipWeapon(Code, AttackCount);
 }
 
 inline void AActionCharacter::SetSectionJumpNotify(UAnimNotifyState_SectionJump* InNotify)
@@ -413,7 +419,7 @@ void AActionCharacter::DropCurrentWeapon()
 	{
 		int32 usedCount = PlayerWeapon->GetUsedCountRemain();
 
-		AWeaponPickUp* pickup = subsystem->SpawnCurrentWeaponByItemCode(
+		APickup* pickup = subsystem->SpawnCurrentWeaponByItemCode(
 			PlayerWeapon->GetWeaponID(),
 			DropLocation->GetComponentLocation(),
 			GetActorRotation(),
@@ -422,7 +428,7 @@ void AActionCharacter::DropCurrentWeapon()
 		
 		if (!pickup) return;
 
-		pickup->SetPickupCount(usedCount);
+		Cast<APickupWeapon>(pickup)->SetAttackCountRemain(usedCount);
 	}
 }
 

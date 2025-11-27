@@ -5,14 +5,14 @@
 #include "Common/CommonEnums.h"
 #include "Pickable.h"
 
-#include "WeaponPickUp.generated.h"
+#include "Pickup.generated.h"
 
 UCLASS()
-class UNREALCPP_API AWeaponPickUp : public AActor, public IPickable
+class UNREALCPP_API APickup : public AActor, public IPickable
 {
 	GENERATED_BODY()
 public:	
-	AWeaponPickUp();
+	APickup();
 
 protected:
 	virtual void BeginPlay() override;
@@ -20,7 +20,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnPickup_Implementation(AActor* Target) override;
-	virtual void SetPickupCount(int32 Count) { PickupCount = Count; };
+	virtual void OnPickupComplete_Implementation() override;
 
 	void AddImpulse(FVector& Impulse);
 
@@ -72,15 +72,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
 	float PickupHeight = 100.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup")
-	int32 PickupCount = 3;
-
-private:
+	UPROPERTY()
 	TWeakObjectPtr<AActor> PickupTarget = nullptr;
 
+private:
 	FTimerHandle PickupTimerHandle;
-
 	FVector PickupStartLocation = FVector::ZeroVector;
-
 	bool bCanPickedUp = false;
 };

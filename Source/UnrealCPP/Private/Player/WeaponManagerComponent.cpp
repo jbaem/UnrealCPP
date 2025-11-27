@@ -20,7 +20,7 @@ TSubclassOf<AUsedWeapon> UWeaponManagerComponent::GetUsedWeaponClassByItemCode(E
 	return weaponData->UsedWeaponClass;
 }
 
-TSubclassOf<AWeaponPickUp> UWeaponManagerComponent::GetPickupWeaponClassByItemCode(EItemCode ItemCode) const
+TSubclassOf<APickupWeapon> UWeaponManagerComponent::GetPickupWeaponClassByItemCode(EItemCode ItemCode) const
 {
 	const UWeaponDataAsset* weaponData = WeaponDatabase.Contains(ItemCode) ? WeaponDatabase[ItemCode] : nullptr;
 	return weaponData->PickupWeaponClass;

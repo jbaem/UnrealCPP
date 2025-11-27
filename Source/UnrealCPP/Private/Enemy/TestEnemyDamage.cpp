@@ -6,7 +6,7 @@
 #include "Framework/EnemyCountSubsystem.h"
 #include "Player/ResourceComponent.h"
 #include "Data/DataTableRows.h"
-#include "Item/WeaponPickUp.h"
+#include "Item/Pickup.h"
 #include "Framework/PickupFactorySubsystem.h"
 
 ATestEnemyDamage::ATestEnemyDamage()

@@ -11,11 +11,11 @@ void AEnhancedWeapon::BeginPlay()
 void AEnhancedWeapon::OnAttack()
 {
 	UseCountRemain--;
-	UE_LOG(LogTemp, Log, TEXT("Enhanced Weapon Used. Remaining Uses: %d"), UseCountRemain);
+	//UE_LOG(LogTemp, Log, TEXT("Enhanced Weapon Used. Remaining Uses: %d"), UseCountRemain);
 	if (UseCountRemain <= 0)
 	{
 		OnConsumeDelegate.Broadcast(WeaponID);
-		UE_LOG(LogTemp, Log, TEXT("Enhanced Weapon Consumed."));
+		//UE_LOG(LogTemp, Log, TEXT("Enhanced Weapon Consumed."));
 	}
 }
 

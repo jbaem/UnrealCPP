@@ -8,7 +8,7 @@
 
 class AWeapon;
 class AUsedWeapon;
-class AWeaponPickUp;
+class APickupWeapon;
 
 UCLASS()
 class UNREALCPP_API UWeaponDataAsset : public UDataAsset
@@ -30,5 +30,5 @@ public:
 	TSubclassOf<AUsedWeapon> UsedWeaponClass = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Actor Classes")
-	TSubclassOf<AWeaponPickUp> PickupWeaponClass = nullptr;
+	TSubclassOf<APickupWeapon> PickupWeaponClass = nullptr;
 };

@@ -9,6 +9,10 @@ enum class EItemCode : uint8
 	EIC_Basic			UMETA(DisplayName = "Basic"),
 	EIC_IceBlade		UMETA(DisplayName = "IceBlade"),
 	EIC_HellHammer		UMETA(DisplayName = "HellHammer"),
+
+	EIC_HealthPotion	UMETA(DisplayName = "HealthPotion"),
+	EIC_StaminaPotion	UMETA(DisplayName = "StaminaPotion"),
+	EIC_MiscItem		UMETA(DisplayName = "MiscItem"),
 };
 
 UENUM(BlueprintType)

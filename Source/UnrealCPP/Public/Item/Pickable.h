@@ -17,4 +17,6 @@ class UNREALCPP_API IPickable
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickup")
 	void OnPickup(AActor* Target);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Pickup")
+	void OnPickupComplete();
 };

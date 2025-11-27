@@ -9,7 +9,7 @@
 #include "Weapon/Weapon.h"
 #include "InventoryOwner.h"
 #include "Weapon/UsedWeapon.h"
-#include "Item/WeaponPickUp.h"
+#include "Item/Pickup.h"
 
 #include "ActionCharacter.generated.h"
 
@@ -56,6 +56,7 @@ public:
 	void BindActionMove(UEnhancedInputComponent* enhanced);
 
 	virtual void AddItem_Implementation(EItemCode Code, int32 Count);
+	virtual void AddWeapon_Implementation(EItemCode Code, int32 AttackCount);
 
 	inline void SetSectionJumpNotify(class UAnimNotifyState_SectionJump* InNotify);
 	inline void SetAttackTraceNotify(class UAnimNotifyState_AttackTrace* InNotify);

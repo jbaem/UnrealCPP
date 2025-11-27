@@ -1,7 +1,8 @@
 #include "Framework/PickupFactorySubsystem.h"
 
 #include "Settings/PickupFactorySettings.h"
-#include "Item/WeaponPickUp.h"
+#include "Item/Pickup.h"
+#include "Item/PickupWeapon.h"
 #include "Data/WeaponDataAsset.h"
 #include "Player/ActionCharacter.h"
 
@@ -33,7 +34,7 @@ void UPickupFactorySubsystem::SpawnItem(EItemCode ItemCode, FVector Location, FR
 		Rotation
 	);
 
-	if (AWeaponPickUp* WeaponPickUp = Cast<AWeaponPickUp>(actor))
+	if (APickup* WeaponPickUp = Cast<APickup>(actor))
 	{
 		WeaponPickUp->AddImpulse(Velocity);
 	}
@@ -62,11 +63,11 @@ void UPickupFactorySubsystem::SpawnUsedWeaponByItemCode(EItemCode ItemCode, FVec
 	);
 }
 
-AWeaponPickUp* UPickupFactorySubsystem::SpawnCurrentWeaponByItemCode(EItemCode ItemCode, FVector Location, FRotator Rotation, FVector Velocity)
+APickup* UPickupFactorySubsystem::SpawnCurrentWeaponByItemCode(EItemCode ItemCode, FVector Location, FRotator Rotation, FVector Velocity)
 {
 	if (!IsValidItemCode(ItemCode)) return nullptr;
 
-	AWeaponPickUp* pickup = GetWorld()->SpawnActor<AWeaponPickUp>(
+	APickup* pickup = GetWorld()->SpawnActor<APickup>(
 		ItemCodeToDataAsset[ItemCode]->PickupWeaponClass,
 		Location,
 		Rotation

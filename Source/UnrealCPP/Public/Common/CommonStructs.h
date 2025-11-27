@@ -23,7 +23,7 @@ struct FDropItemInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Drop Item")
-	TSubclassOf<class AWeaponPickUp> DropItemClass;
+	TSubclassOf<class APickup> DropItemClass;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Drop Item")
 	float DropItemRate = 0.0f;

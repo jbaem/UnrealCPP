@@ -1,8 +1,8 @@
 #include "Data/WeaponDataAsset.h"
 
-#include "Item/WeaponPickUp.h"
 #include "Weapon/UsedWeapon.h"
 #include "Weapon/Weapon.h"
+#include "Item/PickupWeapon.h"
 
 bool UWeaponDataAsset::IsValid() const
 {
