@@ -22,4 +22,10 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Inventory")
 	void AddWeapon(EItemCode Code, int32 AttackCount);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Inventory")
+	void AddMoney(int32 Amount);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Inventory")
+	void UseMoney(int32 Amount);
 };

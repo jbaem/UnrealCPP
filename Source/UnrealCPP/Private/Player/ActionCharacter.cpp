@@ -193,6 +193,14 @@ void AActionCharacter::AddWeapon_Implementation(EItemCode Code, int32 AttackCoun
 	EquipWeapon(Code, AttackCount);
 }
 
+void AActionCharacter::AddMoney_Implementation(int32 Amount)
+{
+}
+
+void AActionCharacter::UseMoney_Implementation(int32 Amount)
+{
+}
+
 inline void AActionCharacter::SetSectionJumpNotify(UAnimNotifyState_SectionJump* InNotify)
 {
 	SectionJumpNotify = InNotify;

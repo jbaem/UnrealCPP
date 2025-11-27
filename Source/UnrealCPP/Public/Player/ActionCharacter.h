@@ -44,8 +44,8 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	// Bind enhanced input actions
 	void BindActions(class UEnhancedInputComponent* enhanced);
 	void BindActionAttack2(UEnhancedInputComponent* enhanced);
 	void BindActionAttack1(UEnhancedInputComponent* enhanced);
@@ -54,9 +54,11 @@ public:
 	void BindActionSprintDeactivate(UEnhancedInputComponent* enhanced);
 	void BindActionSprintActivate(UEnhancedInputComponent* enhanced);
 	void BindActionMove(UEnhancedInputComponent* enhanced);
-
+	// IInventoryOwner interface
 	virtual void AddItem_Implementation(EItemCode Code, int32 Count);
 	virtual void AddWeapon_Implementation(EItemCode Code, int32 AttackCount);
+	virtual void AddMoney_Implementation(int32 Amount);
+	virtual void UseMoney_Implementation(int32 Amount);
 
 	inline void SetSectionJumpNotify(class UAnimNotifyState_SectionJump* InNotify);
 	inline void SetAttackTraceNotify(class UAnimNotifyState_AttackTrace* InNotify);
