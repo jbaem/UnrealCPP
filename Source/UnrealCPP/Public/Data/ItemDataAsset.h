@@ -13,25 +13,22 @@ class UNREALCPP_API UItemDataAsset : public UDataAsset
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Item Data Asset")
-	bool IsValid() const;
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Type")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	EItemCode Code = EItemCode::EIC_None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	FText Name = FText::FromString(TEXT(""));
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	FText Description = FText::FromString(TEXT(""));
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+	FText Name = FText::FromString(TEXT("아이템"));
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+	FText Description = FText::FromString(TEXT("아이템 설명"));
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
 	UTexture2D* Icon = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data", meta = (ClampMin = "0"))
 	int32 Cost = 0;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	int32 Count = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data", meta = (ClampMin = "0"))
+	int32 QuantityMax = 10;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
-	TSubclassOf<APickupItem> Class;
+	// using ItemCode 
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Data")
+	//TSubclassOf<APickupItem> Class;
 };

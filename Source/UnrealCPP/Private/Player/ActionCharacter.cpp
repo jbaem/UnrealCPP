@@ -185,6 +185,7 @@ void AActionCharacter::BindActionMove(UEnhancedInputComponent* enhanced)
 
 void AActionCharacter::AddItem_Implementation(EItemCode Code, int32 Count)
 {
+
 	//EquipWeapon(Code, Count);
 }
 
