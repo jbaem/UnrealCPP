@@ -16,6 +16,7 @@
 #include "Player/PlayerMontageData.h"
 #include "AnimNotify/AnimNotifyState_SlashEffect.h"
 #include "Framework/PickupFactorySubsystem.h"
+#include "Player/InventoryComponent.h"
 
 AActionCharacter::AActionCharacter()
 {
@@ -54,6 +55,7 @@ void AActionCharacter::InitComponents()
 	ResourceComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
 	StatusComponent = CreateDefaultSubobject<UStatusComponent>(TEXT("StatusComponent"));
 	WeaponManager = CreateDefaultSubobject<UWeaponManagerComponent>(TEXT("WeaponManager"));
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
 
 void AActionCharacter::InitDropLocation()
@@ -183,7 +185,7 @@ void AActionCharacter::BindActionMove(UEnhancedInputComponent* enhanced)
 	enhanced->BindAction(InputData->Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
 }
 
-void AActionCharacter::AddItem_Implementation(EItemCode Code, int32 Count)
+void AActionCharacter::AddItem_Implementation(UItemDataAsset* ItemData, int32 Count)
 {
 
 	//EquipWeapon(Code, Count);

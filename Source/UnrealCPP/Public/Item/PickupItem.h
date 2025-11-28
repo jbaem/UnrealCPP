@@ -13,9 +13,12 @@ public:
 	virtual void OnPickupComplete_Implementation() override;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
-	EItemCode Code = EItemCode::EIC_None;
+	// using DataAsset
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup|Item")
+	//EItemCode Code = EItemCode::EIC_None;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup|Item")
+	TObjectPtr<class UItemDataAsset> PickupItemData = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Pickup|Item")
 	int32 Count = 3;
 };

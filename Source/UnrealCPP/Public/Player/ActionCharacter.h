@@ -18,6 +18,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UResourceComponent;
 class UStatusComponent;
+class UInventoryComponent;
 
 UCLASS()
 class UNREALCPP_API AActionCharacter : public ACharacter, public IInventoryOwner
@@ -55,7 +56,7 @@ public:
 	void BindActionSprintActivate(UEnhancedInputComponent* enhanced);
 	void BindActionMove(UEnhancedInputComponent* enhanced);
 	// IInventoryOwner interface
-	virtual void AddItem_Implementation(EItemCode Code, int32 Count);
+	virtual void AddItem_Implementation(UItemDataAsset* ItemData, int32 Count);
 	virtual void AddWeapon_Implementation(EItemCode Code, int32 AttackCount);
 	virtual void AddMoney_Implementation(int32 Amount);
 	virtual void UseMoney_Implementation(int32 Amount);
@@ -115,6 +116,7 @@ private:
 public:
 	UResourceComponent* GetResourceComponent() const { return ResourceComponent; }
 	UStatusComponent* GetStatusComponent() const { return StatusComponent; }
+	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 
 protected:
 	// Components
@@ -128,6 +130,8 @@ protected:
 	TObjectPtr<UStatusComponent> StatusComponent = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<USceneComponent> DropLocation = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Inventory")
+	TObjectPtr<UInventoryComponent> InventoryComponent = nullptr;
 	// DataAssets
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<class UPlayerInputData> InputData;

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "Common/CommonEnums.h"
+#include "Data/ItemDataAsset.h"
 
 #include "InventoryOwner.generated.h"
 
@@ -18,7 +19,7 @@ class UNREALCPP_API IInventoryOwner
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Inventory")
-	void AddItem(EItemCode Code, int32 Count);
+	void AddItem(UItemDataAsset* Itemdata, int32 Count);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Inventory")
 	void AddWeapon(EItemCode Code, int32 AttackCount);
