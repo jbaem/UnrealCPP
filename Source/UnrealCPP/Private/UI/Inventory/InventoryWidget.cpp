@@ -35,7 +35,19 @@ void UInventoryWidget::InitializeInventoryWidget(UInventoryComponent* InInventor
 				FInvenSlot* slotData = TargetInventory->GetSlotDataAt(i);
 				UInventorySlotWidget* slotWidget = Cast<UInventorySlotWidget>(SlotGridPanel->GetChildAt(i));
 				slotWidget->InitializeSlot(i, slotData);
+				SlotWidgets.Add(slotWidget);
 			}
+		}
+	}
+}
+
+void UInventoryWidget::RefreshInventoryWidget()
+{
+	for(const UInventorySlotWidget* slotWidget : SlotWidgets)
+	{
+		if(slotWidget)
+		{
+			slotWidget->RefreshSlot();
 		}
 	}
 }

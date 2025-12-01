@@ -12,10 +12,10 @@ class UNREALCPP_API UInventorySlotWidget : public UUserWidget
 
 public:
 	void InitializeSlot(int32 InIndex, struct FInvenSlot* InSlotData);
-	void RefreshSlot();
+	void RefreshSlot() const;
 
 protected:
-	void ClearSlotWidget();
+	void ClearSlotWidget() const;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI|InventorySlot", meta = (BindWidget))

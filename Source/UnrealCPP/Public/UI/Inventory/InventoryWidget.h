@@ -14,6 +14,8 @@ class UNREALCPP_API UInventoryWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 	void InitializeInventoryWidget(class UInventoryComponent* InInventoryComponent);
+	
+	void RefreshInventoryWidget();
 	void ClearInventoryWidget();
 
 protected:
@@ -33,4 +35,6 @@ protected:
 private:
 	UPROPERTY()
 	TWeakObjectPtr<class UInventoryComponent> TargetInventory = nullptr;
+
+	TArray<TObjectPtr<class UInventorySlotWidget>> SlotWidgets;
 };

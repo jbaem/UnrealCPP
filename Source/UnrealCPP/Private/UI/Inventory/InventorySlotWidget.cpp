@@ -12,16 +12,15 @@ void UInventorySlotWidget::InitializeSlot(int32 InIndex, FInvenSlot* InSlotData)
 	RefreshSlot();
 }
 
-void UInventorySlotWidget::RefreshSlot()
+void UInventorySlotWidget::RefreshSlot() const
 {
-	if (SlotData)
+	if (SlotData && !SlotData->IsEmpty())
 	{
 		ItemIconImage->SetBrushFromTexture(SlotData->ItemDataAsset->Icon);
-		ItemIconImage->SetBrushTintColor(FLinearColor::White);
-
 		CountText->SetText(FText::AsNumber(SlotData->GetQuantity()));
 		MaxCountText->SetText(FText::AsNumber(SlotData->ItemDataAsset->QuantityMax));
 
+		ItemIconImage->SetBrushTintColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
 		CountText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		SeperateText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		MaxCountText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
@@ -32,7 +31,7 @@ void UInventorySlotWidget::RefreshSlot()
 	}
 }
 
-void UInventorySlotWidget::ClearSlotWidget()
+void UInventorySlotWidget::ClearSlotWidget() const
 {
 	ItemIconImage->SetBrushFromTexture(nullptr);
 	ItemIconImage->SetBrushTintColor(FLinearColor::Transparent);
