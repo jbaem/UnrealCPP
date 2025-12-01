@@ -8,6 +8,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+class UMainHudWidget;
 
 UCLASS()
 class UNREALCPP_API AActionPlayerController : public APlayerController
@@ -18,8 +19,13 @@ protected:
 
 public:
 	virtual void SetupInputComponent() override;
+	inline void SetMainHudWidget(UMainHudWidget* Widget) { MainHudWidget = Widget; }
 
 	void OnAreaAttack();
+
+	void OpenInventoryWidget();
+	UFUNCTION()
+	void CloseInventoryWidget();
 
 protected:
 	// UPROPERTY는 블루프린트에서 사용할 것 같다 or 가비지 컬렉팅이 필요할 것 같다 => 무조건 붙여준다
@@ -27,7 +33,10 @@ protected:
 	TObjectPtr<UInputMappingContext> DefaultMappingContext = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_Look;
+	TObjectPtr<UInputAction> IA_Look = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_InventoryToggle = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Pitch")
 	float ViewPitchMax = 30.0f;
@@ -40,6 +49,13 @@ protected:
 
 private:
 	void OnLookInput(const FInputActionValue& InValue);
+	void OnInventoryToggleInput(const FInputActionValue& InValue);
+
+	void SetGameInputMode();
+
+	void SetInventoryInputMode();
 
 	int32 GameInputPriority = 1;
+
+	TWeakObjectPtr<UMainHudWidget> MainHudWidget = nullptr;
 };

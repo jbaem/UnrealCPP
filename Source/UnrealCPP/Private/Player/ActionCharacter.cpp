@@ -243,6 +243,7 @@ bool AActionCharacter::IsAnimMontagePlaying()
 
 void AActionCharacter::OnRollInput(const FInputActionValue& Value)
 {
+	if (GetController()->IsMoveInputIgnored()) return;
 	if (IsAnimMontagePlaying()) return;
 	if (!::IsValid(MontageData->Roll)) return;
 	
@@ -275,6 +276,7 @@ bool AActionCharacter::IsUsingStamina(float StaminaCost)
 
 void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 {
+	if (GetController()->IsMoveInputIgnored()) return;
 	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack1)) return;
 	if (!PlayerWeapon || !PlayerWeapon->CanAttack()) return;
 
@@ -293,6 +295,7 @@ void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
 
 void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
 {
+	if (GetController()->IsMoveInputIgnored()) return;
 	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack2)) return;
 	if (!ResourceComponent->HasEnoughStamina(Attack2StaminaCost)) return;
 

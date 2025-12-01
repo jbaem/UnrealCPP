@@ -3,33 +3,26 @@
 #include "Player/ActionCharacter.h"
 #include "Player/ResourceComponent.h"
 #include "UI/ResourceBarWidget.h"
-#include "UI/Inventory/InventoryWidget.h"
 
 void UMainHudWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	InitResourceBar();
-
-	if (AActionCharacter* player = Cast<AActionCharacter>(GetOwningPlayerPawn()))
-	{
-		if(UInventoryComponent* InventoryComponent = player->GetInventoryComponent())
-		{
-			Inventory->OnInventoryClosedRequest.AddDynamic(this, &UMainHudWidget::CloseInventory);
-		}
-	}
+	
 	CloseInventory();
-
 }
 
 void UMainHudWidget::OpenInventory()
 {
 	Inventory->SetVisibility(ESlateVisibility::Visible);
+	InventoryState = EInventoryState::EIS_Open;
 }
 
 void UMainHudWidget::CloseInventory()
 {
 	Inventory->SetVisibility(ESlateVisibility::Hidden);
+	InventoryState = EInventoryState::EIS_Close;
 }
 
 void UMainHudWidget::InitResourceBar()

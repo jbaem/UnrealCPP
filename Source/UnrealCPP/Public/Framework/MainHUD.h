@@ -5,6 +5,8 @@
 
 #include "MainHUD.generated.h"
 
+class UMainHudWidget;
+
 UCLASS()
 class UNREALCPP_API AMainHUD : public AHUD
 {
@@ -12,8 +14,14 @@ class UNREALCPP_API AMainHUD : public AHUD
 protected:
 	virtual void BeginPlay() override;
 
+public:
+	inline UMainHudWidget* GetMainWidget() const { return MainWidget; }
+
 protected:
 	// TSubclassOf: that can hold a reference to any UUserWidget class or subclass
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<UUserWidget> MainWidgetClass = nullptr;
+	TSubclassOf<UMainHudWidget> MainWidgetClass = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UMainHudWidget> MainWidget = nullptr;
 };

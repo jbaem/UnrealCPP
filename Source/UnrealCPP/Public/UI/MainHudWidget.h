@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-
+#include "UI/Inventory/InventoryWidget.h"
 #include "MainHudWidget.generated.h"
 
 UENUM(BlueprintType)
@@ -24,6 +24,12 @@ public:
 	void OpenInventory();
 	UFUNCTION(BlueprintCallable, Category = "UI|Inventory")
 	void CloseInventory();
+
+	void AddToInventoryCloseDelegate(const FScriptDelegate& Delegate)
+	{
+		if(!Inventory) return;
+		Inventory->OnInventoryClosedRequest.Add(Delegate);
+	}
 
 	inline EInventoryState GetInventoryState() const { return InventoryState; }
 
