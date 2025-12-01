@@ -19,7 +19,7 @@ protected:
 
 public:
 	virtual void SetupInputComponent() override;
-	inline void SetMainHudWidget(UMainHudWidget* Widget) { MainHudWidget = Widget; }
+	void InitializeMainHudWidget(UMainHudWidget* Widget);
 
 	void OnAreaAttack();
 

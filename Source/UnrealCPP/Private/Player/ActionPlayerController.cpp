@@ -31,16 +31,20 @@ void AActionPlayerController::SetupInputComponent()
 
 	//Enhanced Input System 사용
 	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(InputComponent);
-
 	if (enhanced)
 	{
 		enhanced->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AActionPlayerController::OnLookInput);
-	}
-
-	if (enhanced)
-	{
 		enhanced->BindAction(IA_InventoryToggle, ETriggerEvent::Started, this, &AActionPlayerController::OnInventoryToggleInput);
 	}
+}
+
+void AActionPlayerController::InitializeMainHudWidget(UMainHudWidget* Widget)
+{
+	MainHudWidget = Widget;
+
+	FScriptDelegate delegate;
+	delegate.BindUFunction(this, "CloseInventoryWidget");
+	MainHudWidget->AddToInventoryCloseDelegate(delegate);
 }
 
 void AActionPlayerController::OnLookInput(const FInputActionValue& InValue)
