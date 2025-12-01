@@ -9,6 +9,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UMainHudWidget;
+class UInventoryWidget;
 
 UCLASS()
 class UNREALCPP_API AActionPlayerController : public APlayerController
@@ -16,6 +17,8 @@ class UNREALCPP_API AActionPlayerController : public APlayerController
 	GENERATED_BODY()
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
 
 public:
 	virtual void SetupInputComponent() override;
@@ -58,4 +61,6 @@ private:
 	int32 GameInputPriority = 1;
 
 	TWeakObjectPtr<UMainHudWidget> MainHudWidget = nullptr;
+	TWeakObjectPtr<UInventoryWidget> InventoryWidget = nullptr;
+	TWeakObjectPtr<class UInventoryComponent> InventoryComponent = nullptr;
 };

@@ -55,10 +55,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void ClearSlotAt(int32 Index);
 
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	const FInvenSlot& GetSlotDataAt(int32 Index) const;
+	FInvenSlot* GetSlotDataAt(int32 Index);
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	inline bool IsValidIndex(int32 Index) const { return Index < InventorySize && Index >= 0; }
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	inline int32 GetInventorySize() const { return InventorySize; }
 
 private:
 	int32 FindSlotIndexByItem(UItemDataAsset* InDataAsset, int32 StartIndex = 0);

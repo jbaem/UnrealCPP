@@ -13,6 +13,8 @@ class UNREALCPP_API UInventoryWidget : public UUserWidget
 	GENERATED_BODY()
 public:
 	virtual void NativeConstruct() override;
+	void InitializeInventoryWidget(class UInventoryComponent* InInventoryComponent);
+	void ClearInventoryWidget();
 
 protected:
 	UFUNCTION()
@@ -25,4 +27,10 @@ public:
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> CloseButton = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UUniformGridPanel> SlotGridPanel = nullptr;
+private:
+	UPROPERTY()
+	TWeakObjectPtr<class UInventoryComponent> TargetInventory = nullptr;
 };

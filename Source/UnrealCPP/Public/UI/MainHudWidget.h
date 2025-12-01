@@ -32,7 +32,7 @@ public:
 	}
 
 	inline EInventoryState GetInventoryState() const { return InventoryState; }
-
+	inline UInventoryWidget* GetInventoryWidget() const { return Inventory; }
 private:
 	void InitResourceBar();
 

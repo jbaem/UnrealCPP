@@ -5,6 +5,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Framework/MainHUD.h"
 #include "UI/MainHudWidget.h"
+#include "UI/Inventory/InventoryWidget.h"
+#include "Player/InventoryComponent.h"
+#include "Player/ActionCharacter.h"
 
 void AActionPlayerController::BeginPlay()
 {
@@ -22,7 +25,24 @@ void AActionPlayerController::BeginPlay()
 	PlayerCameraManager->ViewPitchMax = ViewPitchMax;
 	PlayerCameraManager->ViewPitchMin = ViewPitchMin;
 
-	MainHudWidget = Cast<UMainHudWidget>(GetHUD<AMainHUD>()->GetMainWidget());
+	//MainHudWidget = Cast<UMainHudWidget>(GetHUD<AMainHUD>()->GetMainWidget());
+}
+
+void AActionPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	if (AActionCharacter* player = Cast<AActionCharacter>(InPawn))
+	{
+		InventoryComponent = player->GetInventoryComponent();
+	}
+}
+
+void AActionPlayerController::OnUnPossess()
+{
+	InventoryComponent = nullptr;
+
+	Super::OnUnPossess();
 }
 
 void AActionPlayerController::SetupInputComponent()
@@ -40,11 +60,19 @@ void AActionPlayerController::SetupInputComponent()
 
 void AActionPlayerController::InitializeMainHudWidget(UMainHudWidget* Widget)
 {
+	if (!Widget) return;
+
 	MainHudWidget = Widget;
 
 	FScriptDelegate delegate;
 	delegate.BindUFunction(this, "CloseInventoryWidget");
 	MainHudWidget->AddToInventoryCloseDelegate(delegate);
+
+	InventoryWidget = MainHudWidget->GetInventoryWidget();
+	if (InventoryWidget.IsValid())
+	{
+		InventoryWidget->InitializeInventoryWidget(InventoryComponent.Get());
+	}
 }
 
 void AActionPlayerController::OnLookInput(const FInputActionValue& InValue)

@@ -14,7 +14,6 @@ void AMainHUD::BeginPlay()
 		if (MainWidget)
 		{
 			MainWidget->AddToViewport();
-
 			AActionPlayerController* pc = Cast<AActionPlayerController>(GetOwningPlayerController());
 			if(pc)
 			{

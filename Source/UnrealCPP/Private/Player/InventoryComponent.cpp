@@ -94,10 +94,10 @@ void UInventoryComponent::ClearSlotAt(int32 Index)
 	Slot.Clear();
 }
 
-const FInvenSlot& UInventoryComponent::GetSlotDataAt(int32 Index) const
+FInvenSlot* UInventoryComponent::GetSlotDataAt(int32 Index)
 {
 	check(IsValidIndex(Index));
-	return Slots[Index];
+	return Slots[Index].IsEmpty() ? nullptr : &Slots[Index];
 }
 
 int32 UInventoryComponent::FindSlotIndexByItem(UItemDataAsset* InDataAsset, int32 StartIndex)
