@@ -40,3 +40,22 @@ void UInventorySlotWidget::ClearSlotWidget() const
 	SeperateText->SetVisibility(ESlateVisibility::Hidden);
 	MaxCountText->SetVisibility(ESlateVisibility::Hidden);
 }
+
+FReply UInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+	{
+		if (SlotData && SlotData->ItemDataAsset)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Right mouse button clicked on InventorySlotWidget with item: %s"), *SlotData->ItemDataAsset->Name.ToString());
+			OnSlotRightClicked.ExecuteIfBound(Index);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("Right mouse button clicked on empty InventorySlotWidget"));
+		}
+		return FReply::Handled(); // Indicate that the event was handled
+	}
+
+	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent); // Call the base implementation for other mouse buttons
+}

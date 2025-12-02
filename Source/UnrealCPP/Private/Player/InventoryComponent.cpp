@@ -1,4 +1,5 @@
 #include "Player/InventoryComponent.h"
+#include "Item/UsableItem.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -98,6 +99,20 @@ FInvenSlot* UInventoryComponent::GetSlotDataAt(int32 Index)
 {
 	check(IsValidIndex(Index));
 	return Slots[Index].IsEmpty() ? nullptr : &Slots[Index];
+}
+
+void UInventoryComponent::UseItem(int32 InIndex)
+{
+	UE_LOG(LogTemp, Log, TEXT("UseItem called at index: %d"), InIndex);
+	FInvenSlot* slot = GetSlotDataAt(InIndex);
+	if (slot->ItemDataAsset->Implements<UUsableItem>())
+	{
+		IUsableItem::Execute_UseItem(slot->ItemDataAsset, this->GetOwner());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Item at index %d does not implement IUsableItem interface."), InIndex);
+	}
 }
 
 int32 UInventoryComponent::FindSlotIndexByItem(UItemDataAsset* InDataAsset, int32 StartIndex)

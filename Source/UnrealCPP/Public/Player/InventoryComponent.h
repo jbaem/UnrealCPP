@@ -61,6 +61,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	inline int32 GetInventorySize() const { return InventorySize; }
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void UseItem(int32 InIndex);
+
 private:
 	int32 FindSlotIndexByItem(UItemDataAsset* InDataAsset, int32 StartIndex = 0);
 	int32 FindSlotIndexIsEmpty(int32 StartIndex = 0);

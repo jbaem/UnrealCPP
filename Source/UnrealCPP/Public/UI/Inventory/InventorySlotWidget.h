@@ -5,6 +5,8 @@
 
 #include "InventorySlotWidget.generated.h"
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSlotClicked, int32, InSlotIndex);
+
 UCLASS()
 class UNREALCPP_API UInventorySlotWidget : public UUserWidget
 {
@@ -16,6 +18,11 @@ public:
 
 protected:
 	void ClearSlotWidget() const;
+
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
+public:
+	FOnSlotClicked OnSlotRightClicked;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI|InventorySlot", meta = (BindWidget))

@@ -28,13 +28,18 @@ void UInventoryWidget::InitializeInventoryWidget(UInventoryComponent* InInventor
 				UE_LOG(LogTemp, Warning, TEXT("SlotGridPanel children count (%d) does not match TargetInventory size (%d)."), SlotGridPanel->GetChildrenCount(), TargetInventory->GetInventorySize());
 				return;
 			}
-
+			
 			int32 size = FMath::Min(SlotGridPanel->GetChildrenCount(), TargetInventory->GetInventorySize());
 			for (int i = 0; i < size; ++i)
 			{
 				FInvenSlot* slotData = TargetInventory->GetSlotDataAt(i);
 				UInventorySlotWidget* slotWidget = Cast<UInventorySlotWidget>(SlotGridPanel->GetChildAt(i));
 				slotWidget->InitializeSlot(i, slotData);
+				
+				slotWidget->OnSlotRightClicked.Clear();
+				// UFUNCTION 바인딩은 FName으로 함수 이름을 지정
+				slotWidget->OnSlotRightClicked.BindUFunction(TargetInventory.Get(), FName("UseItem"));
+				
 				SlotWidgets.Add(slotWidget);
 			}
 		}
