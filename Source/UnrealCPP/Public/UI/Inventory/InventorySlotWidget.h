@@ -16,6 +16,10 @@ public:
 	void InitializeSlot(int32 InIndex, struct FInvenSlot* InSlotData);
 	void RefreshSlot() const;
 
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InMouseEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeOnDragCancelled(const FDragDropEvent& InMouseEvent, UDragDropOperation* InOperation) override;
+
 protected:
 	void ClearSlotWidget() const;
 

@@ -22,6 +22,8 @@ protected:
 	UFUNCTION()
 	void OnCloseClicked();
 
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InMouseEvent, UDragDropOperation* InOperation) override;
+
 public:
 	UPROPERTY(BlueprintAssignable, Category = "UI|Inventory")
 	FOnInventoryClosedRequested OnInventoryClosedRequest;

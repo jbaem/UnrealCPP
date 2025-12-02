@@ -4,6 +4,7 @@
 #include "Components/UniformGridPanel.h"
 #include "UI/Inventory/InventorySlotWidget.h"
 #include "Player/InventoryComponent.h"
+#include "Inventory/InventoryDragDropOperation.h"
 
 void UInventoryWidget::NativeConstruct()
 {
@@ -65,4 +66,15 @@ void UInventoryWidget::ClearInventoryWidget()
 void UInventoryWidget::OnCloseClicked()
 {
 	OnInventoryClosedRequest.Broadcast();
+}
+
+bool UInventoryWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InMouseEvent, UDragDropOperation* InOperation)
+{
+	UInventoryDragDropOperation* DragDropOp = Cast<UInventoryDragDropOperation>(InOperation);
+	if(DragDropOp)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Dropped item: %s into InventoryWidget."), *DragDropOp->ItemData->Name.ToString());
+		return true;
+	}
+	return false;
 }
