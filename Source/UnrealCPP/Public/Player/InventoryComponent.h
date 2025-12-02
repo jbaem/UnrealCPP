@@ -32,6 +32,9 @@ protected:
 	int32 Quantity = 0;
 };
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnInventorySlotChanged, int32, InIndex);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnInventoryMoneyChanged, int32, CurrentMoney);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UNREALCPP_API UInventoryComponent : public UActorComponent
 {
@@ -68,10 +71,17 @@ private:
 	int32 FindSlotIndexByItem(UItemDataAsset* InDataAsset, int32 StartIndex = 0);
 	int32 FindSlotIndexIsEmpty(int32 StartIndex = 0);
 
+public:
+	FOnInventoryMoneyChanged OnInventoryMoneyChanged;
+	FOnInventorySlotChanged OnInventorySlotChanged;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	int32 InventorySize = 4;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TArray<FInvenSlot> Slots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	int32 Money = 0;
 };
