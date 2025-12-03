@@ -22,18 +22,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DeactivatePopup();
 
-private:
-	void InitWidgetComponent();
-	void CreateWidgetInstance();
-	void ActivatePopupInstance(float InDamage);
-
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Components")
 	TObjectPtr<class UWidgetComponent> WidgetComponent = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Life Time", meta = (ClampMin = "1.0"))
 	float LifeTime = 1.5f;
-	
+
 private:
+	void InitWidgetComponent();
+	void CreateWidgetInstance();
+	void ActivatePopupInstance(float InDamage);
+
 	TObjectPtr<class UDamageWidget> WidgetInstance = nullptr;
 	FTimerHandle LifeTimerHandle;
 };

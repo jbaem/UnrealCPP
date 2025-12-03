@@ -13,95 +13,148 @@ AEnemyPawn::AEnemyPawn()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	Mesh->SetCollisionProfileName(TEXT("Pawn"));
-	SetRootComponent(Mesh);
-
-	ResourceComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
-
-	PopupLocation = CreateDefaultSubobject<USceneComponent>(TEXT("PopupLocation"));
-	PopupLocation->SetupAttachment(Mesh);
-	PopupLocation->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
+	InitComponents();
 }
 
 void AEnemyPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	OnTakeAnyDamage.AddDynamic(this, &AEnemyPawn::OnTakeDamage);
-	
-	if (UWorld* world = GetWorld())
-	{
-		if (UEnemyCountSubsystem* subsystem = world->GetSubsystem<UEnemyCountSubsystem>())
-		{
-			subsystem->RegisterEnemy(this);
-		}
-	}
+	BindOnTakeDamage();
+	RegisterEnemy();
+}
+
+void AEnemyPawn::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void AEnemyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
 void AEnemyPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (UWorld* world = GetWorld())
-	{
-		if (UEnemyCountSubsystem* subsystem = world->GetSubsystem<UEnemyCountSubsystem>())
-		{
-			subsystem->UnregisterEnemy(this);
-		}
-	}
+	UnregisterEnemy();
 
 	Super::EndPlay(EndPlayReason);
 }
 
 void AEnemyPawn::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("ATestEnemyDamage::OnTakeDamage Damage : %f"), Damage));
-	//ADamagePopupActor* actor = GetWorld()->SpawnActor<ADamagePopupActor>(
-	//	DamagePopupClass,
-	//	PopupLocation->GetComponentLocation(),
-	//	FRotator::ZeroRotator
-	//);
-	//if (actor)
-	//{
-	//	actor->PopupActivate(Damage);
-	//}
-	
-	// Early returns
-	if (!ResourceComponent || !ResourceComponent->IsAlive()) return;
-	if (bInvincible && FMath::IsNearlyEqual(LastDamage, Damage)) return;
+	if (!CanDamaged(Damage)) return;
 
-	UDamagePopupSubsystem* subsystem = GetWorld()->GetSubsystem<UDamagePopupSubsystem>();
-	if (subsystem)
+	ShowDamagePopup(Damage);
+	TakeDamageProcess(Damage);
+}
+
+void AEnemyPawn::InitComponents()
+{
+	InitMeshComponent();
+	InitResourceComponent();
+	InitPopupLocation();
+}
+
+void AEnemyPawn::InitMeshComponent()
+{
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetCollisionProfileName(TEXT("Pawn"));
+	SetRootComponent(Mesh);
+}
+
+void AEnemyPawn::InitResourceComponent()
+{
+	ResourceComponent = CreateDefaultSubobject<UResourceComponent>(TEXT("ResourceComponent"));
+}
+
+void AEnemyPawn::InitPopupLocation()
+{
+	PopupLocation = CreateDefaultSubobject<USceneComponent>(TEXT("PopupLocation"));
+	PopupLocation->SetupAttachment(Mesh);
+	PopupLocation->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
+}
+
+void AEnemyPawn::BindOnTakeDamage()
+{
+	OnTakeAnyDamage.AddDynamic(this, &AEnemyPawn::OnTakeDamage);
+}
+
+void AEnemyPawn::RegisterEnemy()
+{
+	if (UWorld* World = GetWorld())
 	{
-		subsystem->ShowDamagePopup(PopupLocation->GetComponentLocation(), Damage);
+		if (UEnemyCountSubsystem* EnemyCountSubsystem = World->GetSubsystem<UEnemyCountSubsystem>())
+		{
+			EnemyCountSubsystem->RegisterEnemy(this);
+		}
 	}
+}
 
+void AEnemyPawn::UnregisterEnemy()
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (UEnemyCountSubsystem* EnemyCountSubsystem = World->GetSubsystem<UEnemyCountSubsystem>())
+		{
+			EnemyCountSubsystem->UnregisterEnemy(this);
+		}
+	}
+}
+
+bool AEnemyPawn::CanDamaged(float Damage)
+{
+	return ResourceComponent && ResourceComponent->IsAlive()
+		&& (!bIsInvincible || !FMath::IsNearlyEqual(LastDamage, Damage));	
+}
+
+void AEnemyPawn::ShowDamagePopup(float Damage)
+{
+	if (UDamagePopupSubsystem* DamagePopupSubsystem = GetWorld()->GetSubsystem<UDamagePopupSubsystem>())
+	{
+		DamagePopupSubsystem->ShowDamagePopup(PopupLocation->GetComponentLocation(), Damage);
+	}
+}
+
+void AEnemyPawn::TakeDamageProcess(float Damage)
+{
 	ResourceComponent->TakeDamage(Damage);
-
 	if (ResourceComponent->IsAlive())
 	{
-		bInvincible = true;
-		LastDamage = Damage;
-
-		FTimerDelegate resetInvincibleDelegate = FTimerDelegate::CreateWeakLambda(
-			this,
-			[this]()
-			{
-				bInvincible = false;
-			}
-		);
-
-		GetWorldTimerManager().ClearTimer(InvincibleTimerHandle);
-		GetWorldTimerManager().SetTimer(
-			InvincibleTimerHandle,
-			resetInvincibleDelegate,
-			0.1f,
-			false
-		);
+		StartInvincible(Damage);
 	}
 	else
 	{
 		OnDie();
 	}
+}
+
+void AEnemyPawn::StartInvincible(float Damage)
+{
+	SetIsInvincible(Damage);
+	StartInvincibleTimer();
+}
+
+void AEnemyPawn::SetIsInvincible(float Damage)
+{
+	bIsInvincible = true;
+	LastDamage = Damage;
+}
+
+void AEnemyPawn::StartInvincibleTimer()
+{
+	FTimerDelegate InvincibleResetDelegate = FTimerDelegate::CreateWeakLambda(
+		this,
+		[this]() { bIsInvincible = false; }
+	);
+
+	GetWorldTimerManager().ClearTimer(InvincibleTimerHandle);
+	GetWorldTimerManager().SetTimer(
+		InvincibleTimerHandle,
+		InvincibleResetDelegate,
+		0.1f,
+		false
+	);
 }
 
 void AEnemyPawn::OnDie()
@@ -113,37 +166,34 @@ void AEnemyPawn::OnDie()
 void AEnemyPawn::DropItem()
 {
 	if (!DropItemTable) return;
-	TMap<FName, uint8*> rowMap = DropItemTable->GetRowMap();
-	for (auto& element : rowMap)
-	{
-		FDropItemData_TableRow* row = reinterpret_cast<FDropItemData_TableRow*>(element.Value);
-		if (FMath::FRand() > row->DropItemRate) continue;
-		
-		UPickupFactorySubsystem* subsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>();
-		if (subsystem)
-		{
 
-			FVector velocity = FVector::UpVector * 500.0f;
-			velocity = velocity.RotateAngleAxis(FMath::FRandRange(-15.0f, 15.0f), FVector::RightVector);
-			velocity = velocity.RotateAngleAxis(FMath::FRandRange(0.0f, 360.0f), FVector::UpVector);
-			subsystem->SpawnItem(
-				row->ItemCode,
-				GetActorLocation() + FVector::UpVector * 100.0f,
-				GetActorRotation(),
-				velocity
-			);
-		}
+	TMap<FName, uint8*> RowMap = DropItemTable->GetRowMap();
+	for (auto& Element : RowMap)
+	{
+		FDropItemData_TableRow* Row = reinterpret_cast<FDropItemData_TableRow*>(Element.Value);		
+		SpawnPickupItem(Row->ItemCode, Row->DropItemRate);
 	}
 }
 
-void AEnemyPawn::Tick(float DeltaTime)
+void AEnemyPawn::SpawnPickupItem(EItemCode ItemCode, float DropRate)
 {
-	Super::Tick(DeltaTime);
+	if (FMath::FRand() > DropRate) return;
 
+	if (UPickupFactorySubsystem* PickupFactorySubsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>())
+	{
+		PickupFactorySubsystem->SpawnItem(
+			ItemCode,
+			GetActorLocation() + FVector::UpVector * 100.0f,
+			GetActorRotation(),
+			GetRandomDropVelocity()
+		);
+	}
 }
 
-void AEnemyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+FVector AEnemyPawn::GetRandomDropVelocity()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	FVector DropVelocity = FVector::UpVector * 500.0f;
+	DropVelocity = DropVelocity.RotateAngleAxis(FMath::FRandRange(-15.0f, 15.0f), FVector::RightVector);
+	DropVelocity = DropVelocity.RotateAngleAxis(FMath::FRandRange(0.0f, 360.0f), FVector::UpVector);
+	return DropVelocity;
 }

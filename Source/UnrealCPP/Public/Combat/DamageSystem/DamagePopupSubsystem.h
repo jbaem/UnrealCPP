@@ -24,6 +24,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Damage Popup Pool")
 	void ReturnToPool(ADamagePopup* InDamagePopup);
 
+protected:
+	UPROPERTY()
+	TSubclassOf<ADamagePopup> DamagePopupClass;
+
 private:
 	void LoadDamagePopupClass();
 	void ActivateDamagePopup(ADamagePopup* InDamagePopup, FVector& InLocation, float InDamage);
@@ -32,11 +36,6 @@ private:
 	ADamagePopup* CreateDamagePopupByParams(FActorSpawnParameters& InParams);
 	void SetSpawnParamsForPool(FActorSpawnParameters& OutSpawnParams);
 
-protected:
-	UPROPERTY()
-	TSubclassOf<ADamagePopup> DamagePopupClass;
-
-private:
 	//UPROPERTY 를 붙이면 직렬화돼서 게임 저장 시 풀 상태가 유지됨
 	//Transient 를 붙이면 직렬화에서 제외됨
 	UPROPERTY()
