@@ -26,26 +26,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI|Inventory")
 	void CloseInventory();
 
-	void AddToInventoryCloseDelegate(const FScriptDelegate& Delegate)
-	{
-		if(!Inventory) return;
-		Inventory->OnInventoryClosedRequest.Add(Delegate);
-	}
+	void AddToInventoryCloseDelegate(const FScriptDelegate& Delegate);
 
 	inline EInventoryState GetInventoryState() const { return InventoryState; }
 	inline UInventoryWidget* GetInventoryWidget() const { return Inventory; }
-private:
-	void InitResourceBar();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource", meta = (BindWidget))
 	TObjectPtr<class UResourceBarWidget> HealthBar = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource", meta = (BindWidget))
 	TObjectPtr<class UResourceBarWidget> StaminaBar = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (BindWidget))
 	TObjectPtr<class UInventoryWidget> Inventory = nullptr;
 private:
+	void InitResourceBar();
+	void InitInventory();
+	void InitResourceBarColor();
+	void BindResourceComponentToBar(class AActionCharacter* Player);
+
 	EInventoryState InventoryState = EInventoryState::EIS_Close;
 };

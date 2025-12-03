@@ -21,7 +21,10 @@ protected:
 	// TSubclassOf: that can hold a reference to any UUserWidget class or subclass
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<UMainHudWidget> MainWidgetClass = nullptr;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UMainHudWidget> MainWidget = nullptr;
+
+private:
+	void AddMainHudToViewPort();
+	void InitMainhud();
 };

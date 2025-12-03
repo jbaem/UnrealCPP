@@ -7,41 +7,50 @@ void UEnemyCountSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	const UEnemyCountSettings* settings = GetDefault<UEnemyCountSettings>();
-	if(settings && !settings->DamagePopupClass.IsNull())
-	{
-		EnemyClass = settings->DamagePopupClass.LoadSynchronous();
-	}
+	LoadEnemyClass();
 }
 
 void UEnemyCountSubsystem::RegisterEnemy(AEnemyPawn* Enemy)
 {
-	if(!IsValid(Enemy) || RegisteredEnemies.Contains(Enemy))
-	{
-		return;
-	}
-
+	if (CanRegisterEnemy(Enemy)) return;
 	RegisteredEnemies.Add(Enemy);
-	int32 EnemyCount = RegisteredEnemies.Num();
-	//UE_LOG(LogTemp, Warning, TEXT("Enemy Count Increased: %d"), EnemyCount);
-	OnEnemyCountChanged.Broadcast(EnemyCount);
+	
+	GetEnemyCountOnChange();
 }
 
 void UEnemyCountSubsystem::UnregisterEnemy(AEnemyPawn* Enemy)
 {
-	if(!RegisteredEnemies.Contains(Enemy))
-	{
-		return;
-	}
-
+	if (CanUnregisterEnemy(Enemy)) return;
 	RegisteredEnemies.Remove(Enemy);
-	int32 EnemyCount = RegisteredEnemies.Num();
-
-	OnEnemyCountChanged.Broadcast(EnemyCount);
-	//UE_LOG(LogTemp, Warning, TEXT("Enemy Count Decreased: %d"), EnemyCount);
-	if(EnemyCount <= 0)
+	
+	if(GetEnemyCountOnChange() <= 0)
 	{
 		OnAllEnemiesCleared.Broadcast();
-		//UE_LOG(LogTemp, Warning, TEXT("All Enemies Cleared!"));
 	}
+}
+
+void UEnemyCountSubsystem::LoadEnemyClass()
+{
+	const UEnemyCountSettings* settings = GetDefault<UEnemyCountSettings>();
+	if (settings && !settings->EnemyClass.IsNull())
+	{
+		EnemyClass = settings->EnemyClass.LoadSynchronous();
+	}
+}
+
+bool UEnemyCountSubsystem::CanRegisterEnemy(AEnemyPawn* Enemy)
+{
+	return !IsValid(Enemy) || RegisteredEnemies.Contains(Enemy);
+}
+
+bool UEnemyCountSubsystem::CanUnregisterEnemy(AEnemyPawn*& Enemy)
+{
+	return !RegisteredEnemies.Contains(Enemy);
+}
+
+int32 UEnemyCountSubsystem::GetEnemyCountOnChange()
+{
+	int32 EnemyCount = GetEnemyCount();
+	OnEnemyCountChanged.Broadcast(EnemyCount);
+	return EnemyCount;
 }

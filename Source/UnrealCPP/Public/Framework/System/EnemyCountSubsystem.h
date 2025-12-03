@@ -18,6 +18,7 @@ class UNREALCPP_API UEnemyCountSubsystem : public UWorldSubsystem
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+public:
 	UFUNCTION(BlueprintCallable, Category = "Enemy Count")
 	void RegisterEnemy(AEnemyPawn* Enemy);
 	UFUNCTION(BlueprintCallable, Category = "Enemy Count")
@@ -32,11 +33,17 @@ protected:
 
 	UPROPERTY(BlueprintAssignable, Category = "Enemy Count")
 	FOnEnemyCountChanged OnEnemyCountChanged;
-	
 	UPROPERTY(BlueprintAssignable, Category = "Enemy Count")
 	FOnAllEnemiesCleared OnAllEnemiesCleared;
 
 private:
+	void LoadEnemyClass();
+
+	bool CanRegisterEnemy(AEnemyPawn* Enemy);
+	bool CanUnregisterEnemy(AEnemyPawn*& Enemy);
+
+	int32 GetEnemyCountOnChange();
+
 	UPROPERTY(VisibleAnywhere, Category = "Enemy Count")
 	TSet<TObjectPtr<AEnemyPawn>> RegisteredEnemies;
 };

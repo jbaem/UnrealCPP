@@ -13,5 +13,5 @@ class UNREALCPP_API UEnemyCountSettings : public UDeveloperSettings
 	
 public:
 	UPROPERTY(Config, EditAnywhere)
-	TSoftClassPtr<AEnemyPawn> DamagePopupClass;
+	TSoftClassPtr<AEnemyPawn> EnemyClass;
 };

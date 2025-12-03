@@ -8,17 +8,24 @@ void AMainHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (MainWidgetClass)
+	AddMainHudToViewPort();
+}
+
+void AMainHUD::AddMainHudToViewPort()
+{
+	if (!MainWidgetClass) return;
+	
+	MainWidget = CreateWidget<UMainHudWidget>(GetWorld(), MainWidgetClass);
+	if (!MainWidget) return;
+
+	MainWidget->AddToViewport();
+	InitMainhud();
+}
+
+void AMainHUD::InitMainhud()
+{
+	if (AActionPlayerController* pc = Cast<AActionPlayerController>(GetOwningPlayerController()))
 	{
-		MainWidget = CreateWidget<UMainHudWidget>(GetWorld(), MainWidgetClass);
-		if (MainWidget)
-		{
-			MainWidget->AddToViewport();
-			AActionPlayerController* pc = Cast<AActionPlayerController>(GetOwningPlayerController());
-			if(pc)
-			{
-				pc->InitializeMainHudWidget(MainWidget);
-			}
-		}
+		pc->InitializeMainHudWidget(MainWidget);
 	}
 }
