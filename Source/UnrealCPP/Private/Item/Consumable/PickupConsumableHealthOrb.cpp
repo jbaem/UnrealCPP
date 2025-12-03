@@ -12,7 +12,7 @@ void APickupConsumableHealthOrb::OnConsume()
 		if(UResourceComponent* resourceComp = player->GetResourceComponent())
 		{
 			//IHealthInterface* HealthInterface = Cast<IDamageInterface>(PickupTarget, Amount);
-			resourceComp->RestoreHealth(25.0f);
+			resourceComp->Heal(25.0f);
 		}
 	}
 }

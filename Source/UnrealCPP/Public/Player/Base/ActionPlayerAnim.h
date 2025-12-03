@@ -5,8 +5,6 @@
 
 #include "ActionPlayerAnim.generated.h"
 
-class ACharacter;
-
 UCLASS()
 class UNREALCPP_API UActionPlayerAnim : public UAnimInstance
 {
@@ -18,12 +16,18 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<APawn> OwnerPawn = nullptr;
-
+	
 	TObjectPtr<UPawnMovementComponent> MovementComponent = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	float Speed = 0.0f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Direction")
 	float Direction = 0.0f;
+
+private:
+	void InitOwner();
+
+	void UpdateByOwnerProperty();
+	void UpdateDirection();
+	void UpdateSpeed();
 };

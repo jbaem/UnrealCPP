@@ -27,24 +27,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void TakeDamage(float HealthAmount);
-
 	UFUNCTION(BlueprintCallable)
-	void RestoreHealth(float HealthAmount);
-
+	void Heal(float HealthAmount);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	inline bool IsAlive() const { return HealthCurrent > 0.0f; };
 
 	UFUNCTION(BlueprintCallable)
 	void UseStamina(float StaminaCost);
-
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	inline bool HasEnoughStamina(float StaminaCost) const { return StaminaCurrent >= StaminaCost; };
 
-protected:
-	void StartStaminaRegenTimer();
-	void RegenStaminaPerTick();
-
-public:
 	inline float GetHealthCurrent() const { return HealthCurrent; }
 	inline float GetHealthMax() const { return HealthMax; }
 	inline float GetStaminaCurrent() const { return StaminaCurrent; }
@@ -52,23 +44,20 @@ public:
 
 	void SetAllResourceByStatus(UStatusComponent* InStatus);
 	inline void SetHealthMaxByStatus(UStatusComponent* InStatus);
-	inline void SetHealthCurrent(float NewHealth);
 	inline void SetStaminaMaxByStatus(UStatusComponent* InStatus);
-	inline void SetStaminaCurrent(float NewStamina);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnDie OnDie;
 
-	//non-dynamic delegate
+	//non-dynamic delegate test
 	//UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnHealthChanged OnHealthChanged;
-
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnStaminaDepleted OnStaminaDepleted;
-
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnStaminaChanged OnStaminaChanged;
+
 protected:
 	// Health
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Resource|Health")
@@ -95,6 +84,17 @@ protected:
 	float StaminaRegenTickInterval = 1.0f;
 
 private:
+	inline void SetHealthCurrent(float NewHealth);
+	inline void SetStaminaCurrent(float NewStamina);
+
+	void StartStaminaRegenTimer();
+	void ClearAllRegenTimer(FTimerManager& TimerManager);
+	void WaitRegenStaminaCooldown(FTimerManager& TimerManager);
+	void RegenStaminaPerTick();
+	void StartRegenStamina(FTimerManager& TimerManager);
+	void StopRegenStaminaFull();
+
+
 	FTimerHandle StaminaAutoRegenCoolTimerHandle;
 	FTimerHandle StaminaRegenTickTimerHandle;
 };

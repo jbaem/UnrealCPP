@@ -13,34 +13,20 @@ void AActionPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//LocalPlayer 는 여러 명일 수 있다 (온라인)
-	UEnhancedInputLocalPlayerSubsystem* Subsystem =
-		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	
-	if (Subsystem) // Subsystem이 null이 아니면
-	{
-		Subsystem->AddMappingContext(DefaultMappingContext, GameInputPriority);
-	}
-
-	PlayerCameraManager->ViewPitchMax = ViewPitchMax;
-	PlayerCameraManager->ViewPitchMin = ViewPitchMin;
-
-	//MainHudWidget = Cast<UMainHudWidget>(GetHUD<AMainHUD>()->GetMainWidget());
+	InitMappingContext();
+	SetCameraPitchRange();
 }
 
 void AActionPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	if (AActionCharacter* player = Cast<AActionCharacter>(InPawn))
-	{
-		InventoryComponent = player->GetInventoryComponent();
-	}
+	SetInventoryByPlayer(InPawn);
 }
 
 void AActionPlayerController::OnUnPossess()
 {
-	InventoryComponent = nullptr;
+	UnsetInventory();
 
 	Super::OnUnPossess();
 }
@@ -49,13 +35,17 @@ void AActionPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	//Enhanced Input System 사용
-	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(InputComponent);
-	if (enhanced)
-	{
-		enhanced->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AActionPlayerController::OnLookInput);
-		enhanced->BindAction(IA_InventoryToggle, ETriggerEvent::Started, this, &AActionPlayerController::OnInventoryToggleInput);
-	}
+	BindActions();
+}
+
+void AActionPlayerController::OnAreaAttack()
+{
+	if (!AreaAttackCameraShakeClass) return;
+
+	PlayerCameraManager->StartCameraShake(
+		AreaAttackCameraShakeClass,
+		1.0f
+	);
 }
 
 void AActionPlayerController::InitializeMainHudWidget(UMainHudWidget* Widget)
@@ -63,16 +53,8 @@ void AActionPlayerController::InitializeMainHudWidget(UMainHudWidget* Widget)
 	if (!Widget) return;
 
 	MainHudWidget = Widget;
-
-	FScriptDelegate delegate;
-	delegate.BindUFunction(this, "CloseInventoryWidget");
-	MainHudWidget->AddToInventoryCloseDelegate(delegate);
-
-	InventoryWidget = MainHudWidget->GetInventoryWidget();
-	if (InventoryWidget.IsValid())
-	{
-		InventoryWidget->InitializeInventoryWidget(InventoryComponent.Get());
-	}
+	BindCloseInventoryToMainHud();
+	InitInventoryWidget();
 }
 
 void AActionPlayerController::OnLookInput(const FInputActionValue& InValue)
@@ -84,19 +66,101 @@ void AActionPlayerController::OnLookInput(const FInputActionValue& InValue)
 
 void AActionPlayerController::OnInventoryToggleInput(const FInputActionValue& InValue)
 {
-	if(MainHudWidget.IsValid())
+	if (!MainHudWidget.IsValid()) return;
+
+	if (MainHudWidget->GetInventoryState() == EInventoryState::EIS_Close)
 	{
-		if(MainHudWidget->GetInventoryState() == EInventoryState::EIS_Close)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Inventory Opened"));
-			OpenInventoryWidget();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Inventory Closed"));
-			CloseInventoryWidget();
-		}
+		OpenInventoryWidget();
 	}
+	else
+	{
+		CloseInventoryWidget();
+	}
+}
+
+void AActionPlayerController::InitMappingContext()
+{
+	//LocalPlayer 는 여러 명일 수 있다 (온라인)
+	if (UEnhancedInputLocalPlayerSubsystem* EnhancedInputLocalPlayerSubsystem =
+		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer())) // Subsystem이 null이 아니면
+	{
+		EnhancedInputLocalPlayerSubsystem->AddMappingContext(DefaultMappingContext, GameInputPriority);
+	}
+}
+
+void AActionPlayerController::SetCameraPitchRange()
+{
+	PlayerCameraManager->ViewPitchMax = ViewPitchMax;
+	PlayerCameraManager->ViewPitchMin = ViewPitchMin;
+}
+
+void AActionPlayerController::SetInventoryByPlayer(APawn* InPawn)
+{
+	if (AActionCharacter* player = Cast<AActionCharacter>(InPawn))
+	{
+		InventoryComponent = player->GetInventoryComponent();
+	}
+}
+
+void AActionPlayerController::UnsetInventory()
+{
+	InventoryComponent = nullptr;
+}
+
+void AActionPlayerController::BindActions()
+{
+	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(InputComponent);
+	if (!enhanced) return;
+
+	BindActionLook(enhanced);
+	BindActionInventoryToggle(enhanced);
+}
+
+void AActionPlayerController::BindActionLook(UEnhancedInputComponent* enhanced)
+{
+	if (!IA_Look) return;
+	enhanced->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AActionPlayerController::OnLookInput);
+}
+
+void AActionPlayerController::BindActionInventoryToggle(UEnhancedInputComponent* enhanced)
+{
+	if (!IA_InventoryToggle) return;
+	enhanced->BindAction(IA_InventoryToggle, ETriggerEvent::Started, this, &AActionPlayerController::OnInventoryToggleInput);
+}
+
+void AActionPlayerController::InitInventoryWidget()
+{
+	InventoryWidget = MainHudWidget->GetInventoryWidget();
+	if (InventoryWidget.IsValid())
+	{
+		InventoryWidget->InitializeInventoryWidget(InventoryComponent.Get());
+	}
+}
+
+void AActionPlayerController::BindCloseInventoryToMainHud()
+{
+	FScriptDelegate delegate;
+	delegate.BindUFunction(this, "CloseInventoryWidget");
+	MainHudWidget->AddToInventoryCloseDelegate(delegate);
+}
+
+
+void AActionPlayerController::OpenInventoryWidget()
+{
+	MainHudWidget->OpenInventory();
+
+	SetInventoryInputMode();
+	bShowMouseCursor = true;
+	SetIgnoreAll(true);
+}
+
+void AActionPlayerController::CloseInventoryWidget()
+{
+	SetIgnoreAll(false);
+	SetGameInputMode();
+	bShowMouseCursor = false;
+
+	MainHudWidget->CloseInventory();
 }
 
 void AActionPlayerController::SetGameInputMode()
@@ -114,40 +178,9 @@ void AActionPlayerController::SetInventoryInputMode()
 	SetInputMode(inputMode);
 }
 
-void AActionPlayerController::OpenInventoryWidget()
+void AActionPlayerController::SetIgnoreAll(bool bIsIgnore)
 {
-	if(MainHudWidget.IsValid())
-	{
-		MainHudWidget->OpenInventory();
-		
-		SetInventoryInputMode();
-		bShowMouseCursor = true;
-		SetIgnoreMoveInput(true);
-		SetIgnoreLookInput(true);
-		//SetPause(true);
-	}
-}
-
-void AActionPlayerController::CloseInventoryWidget()
-{
-	if(MainHudWidget.IsValid())
-	{
-		//SetPause(false);
-		SetIgnoreMoveInput(false);
-		SetIgnoreLookInput(false);
-		SetGameInputMode();
-		bShowMouseCursor = false;
-
-		MainHudWidget->CloseInventory();
-	}
-}
-
-void AActionPlayerController::OnAreaAttack()
-{
-	if (!AreaAttackCameraShakeClass) return;
-
-	PlayerCameraManager->StartCameraShake(
-		AreaAttackCameraShakeClass,
-		1.0f
-	);
+	SetIgnoreMoveInput(bIsIgnore);
+	SetIgnoreLookInput(bIsIgnore);
+	//SetPause(bIsIgnore);
 }

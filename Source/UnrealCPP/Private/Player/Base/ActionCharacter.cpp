@@ -28,6 +28,36 @@ AActionCharacter::AActionCharacter()
 	InitMovementRotation();
 }
 
+
+void AActionCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	InitIsSprinting();
+	InitAnimInstance();
+	InitResourceByStatus();
+	
+	BindStaminaDepleted();
+	BindBeginOverlap();
+
+	EquipNewWeapon(EItemCode::EIC_Basic, 10);
+}
+
+void AActionCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	SpendSprintStamina(DeltaTime);
+}
+
+void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
+	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	BindActions(enhanced);
+}
+
 void AActionCharacter::InitCameraSystem()
 {
 	InitSpringArm();
@@ -72,19 +102,6 @@ void AActionCharacter::InitMovementRotation()
 	GetCharacterMovement()->RotationRate = FRotator(0, 360, 0); // 회전 속도 설정
 }
 
-void AActionCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	InitIsSprinting();
-	InitAnimInstance();
-	InitResourceByStatus();
-	
-	BindStaminaDepleted();
-	BindBeginOverlap();
-
-	EquipNewWeapon(EItemCode::EIC_Basic, 10);
-}
 
 void AActionCharacter::InitIsSprinting()
 {
@@ -114,20 +131,6 @@ void AActionCharacter::BindBeginOverlap()
 	OnActorBeginOverlap.AddDynamic(this, &AActionCharacter::OnBeginOverlap);
 }
 
-void AActionCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	SpendSprintStamina(DeltaTime);
-}
-
-void AActionCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	
-	UEnhancedInputComponent* enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	BindActions(enhanced);
-}
 
 void AActionCharacter::BindActions(UEnhancedInputComponent* enhanced)
 {
@@ -224,8 +227,80 @@ inline void AActionCharacter::SetSlashEffectNotify(UAnimNotifyState_SlashEffect*
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
 {
-	if (IsAnimMontagePlaying()) return;
-	AddMovementInput(InputToMoveDirection(InValue));
+	if (CanMove())
+	{
+		AddMovementInput(InputToMoveDirection(InValue));
+	}
+}
+
+bool AActionCharacter::CanMove()
+{
+	return !IsAnimMontagePlaying();
+}
+
+void AActionCharacter::OnRollInput(const FInputActionValue& Value)
+{
+	if (CanRoll())
+	{
+		PlayRoll();
+	}
+}
+
+bool AActionCharacter::CanRoll()
+{
+	return !GetController()->IsMoveInputIgnored()
+		&& !IsAnimMontagePlaying()
+		&& ::IsValid(MontageData->Roll);
+}
+
+void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
+{
+	if (CanAttack1())
+	{
+		if (!ActionAnimInstance->IsAnyMontagePlaying())
+		{
+			PlayAttack1();
+		}
+		else if (ActionAnimInstance->Montage_IsPlaying(MontageData->Attack1) && bComboReady)
+		{
+			bComboReady = false;
+			PlayComboAttack1();
+		}
+	}
+}
+
+bool AActionCharacter::CanAttack1()
+{
+	return !GetController()->IsMoveInputIgnored()
+		&& ActionAnimInstance.IsValid()
+		&& ::IsValid(MontageData->Attack1)
+		&& PlayerWeapon
+		&& PlayerWeapon->CanAttack()
+		&& ResourceComponent->HasEnoughStamina(AttackStaminaCost);
+}
+
+void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
+{
+	if (CanAttack2())
+	{
+		if (!ActionAnimInstance->IsAnyMontagePlaying())
+		{
+			PlayAttack2();
+		}
+		else if (ActionAnimInstance->Montage_IsPlaying(MontageData->Attack2) && bComboReady)
+		{
+			bComboReady = false;
+			PlayComboAttack2();
+		}
+	}
+}
+
+bool AActionCharacter::CanAttack2()
+{
+	return !GetController()->IsMoveInputIgnored()
+		&& ActionAnimInstance.IsValid()
+		&& IsValid(MontageData->Attack2)
+		&& ResourceComponent->HasEnoughStamina(Attack2StaminaCost);
 }
 
 FVector AActionCharacter::InputToMoveDirection(const FInputActionValue& InValue)
@@ -239,15 +314,6 @@ FVector AActionCharacter::InputToMoveDirection(const FInputActionValue& InValue)
 bool AActionCharacter::IsAnimMontagePlaying()
 {
 	return ActionAnimInstance.IsValid() && ActionAnimInstance->IsAnyMontagePlaying();
-}
-
-void AActionCharacter::OnRollInput(const FInputActionValue& Value)
-{
-	if (GetController()->IsMoveInputIgnored()) return;
-	if (IsAnimMontagePlaying()) return;
-	if (!::IsValid(MontageData->Roll)) return;
-	
-	PlayRoll();
 }
 
 void AActionCharacter::PlayRoll()
@@ -274,41 +340,7 @@ bool AActionCharacter::IsUsingStamina(float StaminaCost)
 	return true;
 }
 
-void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
-{
-	if (GetController()->IsMoveInputIgnored()) return;
-	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack1)) return;
-	if (!PlayerWeapon || !PlayerWeapon->CanAttack()) return;
 
-	if (!ResourceComponent->HasEnoughStamina(AttackStaminaCost)) return;
-	
-	if (!ActionAnimInstance->IsAnyMontagePlaying())
-	{
-		PlayAttack1();
-	}
-	else if(ActionAnimInstance->Montage_IsPlaying(MontageData->Attack1) && bComboReady)
-	{
-		bComboReady = false;
-		PlayComboAttack1();
-	}
-}
-
-void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
-{
-	if (GetController()->IsMoveInputIgnored()) return;
-	if (!ActionAnimInstance.IsValid() || !::IsValid(MontageData->Attack2)) return;
-	if (!ResourceComponent->HasEnoughStamina(Attack2StaminaCost)) return;
-
-	if (!ActionAnimInstance->IsAnyMontagePlaying())
-	{
-		PlayAttack2();
-	}
-	else if (ActionAnimInstance->Montage_IsPlaying(MontageData->Attack2) && bComboReady)
-	{
-		bComboReady = false;
-		PlayComboAttack2();
-	}
-}
 
 void AActionCharacter::SetSprintMode()
 {

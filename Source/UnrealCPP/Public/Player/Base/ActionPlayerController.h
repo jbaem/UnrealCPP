@@ -6,10 +6,7 @@
 
 #include "ActionPlayerController.generated.h"
 
-class UInputMappingContext;
-class UInputAction;
-class UMainHudWidget;
-class UInventoryWidget;
+class UEnhancedInputComponent;
 
 UCLASS()
 class UNREALCPP_API AActionPlayerController : public APlayerController
@@ -22,28 +19,25 @@ protected:
 
 public:
 	virtual void SetupInputComponent() override;
-	void InitializeMainHudWidget(UMainHudWidget* Widget);
 
+public:
 	void OnAreaAttack();
-
-	void OpenInventoryWidget();
-	UFUNCTION()
-	void CloseInventoryWidget();
+	void InitializeMainHudWidget(class UMainHudWidget* Widget);
 
 protected:
+	void OnLookInput(const FInputActionValue& InValue);
+	void OnInventoryToggleInput(const FInputActionValue& InValue);
+
 	// UPROPERTY는 블루프린트에서 사용할 것 같다 or 가비지 컬렉팅이 필요할 것 같다 => 무조건 붙여준다
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputMappingContext> DefaultMappingContext = nullptr;
-
+	TObjectPtr<class UInputMappingContext> DefaultMappingContext = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Look = nullptr;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_InventoryToggle = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Pitch")
 	float ViewPitchMax = 30.0f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Pitch")
 	float ViewPitchMin = -40.0f;
 
@@ -51,16 +45,29 @@ protected:
 	TSubclassOf<UCameraShakeBase> AreaAttackCameraShakeClass;
 
 private:
-	void OnLookInput(const FInputActionValue& InValue);
-	void OnInventoryToggleInput(const FInputActionValue& InValue);
+	void InitMappingContext();
+	void SetCameraPitchRange();
+
+	void SetInventoryByPlayer(APawn* InPawn);
+	void UnsetInventory();
+
+	void BindActions();
+	void BindActionLook(UEnhancedInputComponent* enhanced);
+	void BindActionInventoryToggle(UEnhancedInputComponent* enhanced);
+
+	void InitInventoryWidget();
+	void BindCloseInventoryToMainHud();
+	void OpenInventoryWidget();
+	UFUNCTION()
+	void CloseInventoryWidget();
 
 	void SetGameInputMode();
-
 	void SetInventoryInputMode();
+	void SetIgnoreAll(bool bIsIgnore);
 
 	int32 GameInputPriority = 1;
 
-	TWeakObjectPtr<UMainHudWidget> MainHudWidget = nullptr;
-	TWeakObjectPtr<UInventoryWidget> InventoryWidget = nullptr;
+	TWeakObjectPtr<class UMainHudWidget> MainHudWidget = nullptr;
+	TWeakObjectPtr<class UInventoryWidget> InventoryWidget = nullptr;
 	TWeakObjectPtr<class UInventoryComponent> InventoryComponent = nullptr;
 };

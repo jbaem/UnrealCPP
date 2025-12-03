@@ -24,8 +24,8 @@ void AMainHUD::AddMainHudToViewPort()
 
 void AMainHUD::InitMainhud()
 {
-	if (AActionPlayerController* pc = Cast<AActionPlayerController>(GetOwningPlayerController()))
+	if (AActionPlayerController* PC = Cast<AActionPlayerController>(GetOwningPlayerController()))
 	{
-		pc->InitializeMainHudWidget(MainWidget);
+		PC->InitializeMainHudWidget(MainWidget);
 	}
 }

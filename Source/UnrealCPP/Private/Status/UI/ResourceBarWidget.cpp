@@ -26,23 +26,6 @@ void UResourceBarWidget::RefreshWidget(float CurrentValue, float MaxValue)
 	Max->SetText(FText::AsNumber(FMath::FloorToInt(MaxValue)));	
 }
 
-#if WITH_EDITOR
-// UObject 멤버 변수에 변화가 있을 때마다 호출되는 함수
-void UResourceBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	FName propertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
-	
-	if(propertyName == GET_MEMBER_NAME_CHECKED(UResourceBarWidget, FillColor))
-	{
-		//BackgroundColor = FillColor.CopyWithNewOpacity(0.2f);
-		BackgroundColor = FillColor;
-		BackgroundColor.A = 0.2f;
-	}
-}
-#endif
-
 void UResourceBarWidget::SetBarColorWithBackground(FLinearColor InColor)
 {
 	SetBarColor(InColor);
@@ -59,7 +42,26 @@ void UResourceBarWidget::SetBarColor(FLinearColor InColor)
 
 void UResourceBarWidget::SetBarBackgroundColor(FLinearColor InColor)
 {
-	FProgressBarStyle style = Bar->WidgetStyle;
+	FProgressBarStyle style = Bar->GetWidgetStyle();
 	style.BackgroundImage.TintColor = InColor;
 	Bar->SetWidgetStyle(style);
 }
+
+#if WITH_EDITOR
+// UObject 멤버 변수에 변화가 있을 때마다 호출되는 함수
+void UResourceBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	FName propertyName =
+		PropertyChangedEvent.Property != nullptr ?
+		PropertyChangedEvent.Property->GetFName() :
+		NAME_None;
+
+	if (propertyName == GET_MEMBER_NAME_CHECKED(UResourceBarWidget, FillColor))
+	{
+		BackgroundColor = FillColor;
+		BackgroundColor.A = 0.2f;
+	}
+}
+#endif
