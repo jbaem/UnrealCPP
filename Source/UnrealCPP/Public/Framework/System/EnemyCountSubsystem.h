@@ -5,7 +5,7 @@
 
 #include "EnemyCountSubsystem.generated.h"
 
-class ATestEnemyDamage;
+class AEnemyPawn;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyCountChanged, int32, NewCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllEnemiesCleared);
@@ -19,16 +19,16 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy Count")
-	void RegisterEnemy(ATestEnemyDamage* Enemy);
+	void RegisterEnemy(AEnemyPawn* Enemy);
 	UFUNCTION(BlueprintCallable, Category = "Enemy Count")
-	void UnregisterEnemy(ATestEnemyDamage* Enemy);
+	void UnregisterEnemy(AEnemyPawn* Enemy);
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy Count")
 	int32 GetEnemyCount() const { return RegisteredEnemies.Num(); }
 
 protected:
 	UPROPERTY()
-	TSubclassOf<ATestEnemyDamage> EnemyClass;
+	TSubclassOf<AEnemyPawn> EnemyClass;
 
 	UPROPERTY(BlueprintAssignable, Category = "Enemy Count")
 	FOnEnemyCountChanged OnEnemyCountChanged;
@@ -38,5 +38,5 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Enemy Count")
-	TSet<TObjectPtr<ATestEnemyDamage>> RegisteredEnemies;
+	TSet<TObjectPtr<AEnemyPawn>> RegisteredEnemies;
 };

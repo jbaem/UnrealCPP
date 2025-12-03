@@ -4,17 +4,13 @@
 
 void UDamageWidget::SetDamagetText(float Damage)
 {
-	if(DamageText)
-	{
-		//FMath::RoundToFloat(Damage);
-		DamageText->SetText(FText::AsNumber(static_cast<int32>(Damage)));
-	}
+	if (!DamageText) return;
+	//FMath::RoundToFloat(Damage);
+	DamageText->SetText(FText::AsNumber(static_cast<int32>(Damage)));
 }
 
 void UDamageWidget::PlayPopupAnimation()
 {
-	if(PopupAnimation)
-	{
-		PlayAnimation(PopupAnimation);
-	}
+	if (!PopupAnimation) return;
+	PlayAnimation(PopupAnimation);
 }

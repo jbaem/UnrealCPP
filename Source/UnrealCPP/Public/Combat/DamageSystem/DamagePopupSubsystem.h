@@ -5,7 +5,7 @@
 
 #include "DamagePopupSubsystem.generated.h"
 
-class ADamagePopupActor;
+class ADamagePopup;
 
 /**
  * Damage Popup Subsystem for object pooling
@@ -16,22 +16,29 @@ class UNREALCPP_API UDamagePopupSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 	
 public:
-	// 게임 시작 전(로딩되는 타임)에 서브시스템 초기화
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override; 	// 게임 시작 전(로딩되는 타임)에 서브시스템 초기화
 
+public:
 	UFUNCTION(BlueprintCallable, Category = "Damage Popup Pool")
-	void ShowDamagePopup(float Damage, FVector Location);
+	void ShowDamagePopup(FVector InLocation, float InDamage);
 	UFUNCTION(BlueprintCallable, Category = "Damage Popup Pool")
-	void ReturnToPool(ADamagePopupActor* DamagePopup);
+	void ReturnToPool(ADamagePopup* InDamagePopup);
+
+private:
+	void LoadDamagePopupClass();
+	void ActivateDamagePopup(ADamagePopup* InDamagePopup, FVector& InLocation, float InDamage);
+	ADamagePopup* GetDamagePopupInPool();
+	ADamagePopup* GetNewDamagePopup();
+	ADamagePopup* CreateDamagePopupByParams(FActorSpawnParameters& InParams);
+	void SetSpawnParamsForPool(FActorSpawnParameters& OutSpawnParams);
 
 protected:
 	UPROPERTY()
-	TSubclassOf<ADamagePopupActor> PopupClass;
+	TSubclassOf<ADamagePopup> DamagePopupClass;
 
 private:
 	//UPROPERTY 를 붙이면 직렬화돼서 게임 저장 시 풀 상태가 유지됨
 	//Transient 를 붙이면 직렬화에서 제외됨
 	UPROPERTY()
-	TArray<TObjectPtr<ADamagePopupActor>> Pool;
-
+	TArray<TObjectPtr<ADamagePopup>> Pool;
 };

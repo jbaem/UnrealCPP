@@ -14,7 +14,7 @@ void UEnemyCountSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	}
 }
 
-void UEnemyCountSubsystem::RegisterEnemy(ATestEnemyDamage* Enemy)
+void UEnemyCountSubsystem::RegisterEnemy(AEnemyPawn* Enemy)
 {
 	if(!IsValid(Enemy) || RegisteredEnemies.Contains(Enemy))
 	{
@@ -27,7 +27,7 @@ void UEnemyCountSubsystem::RegisterEnemy(ATestEnemyDamage* Enemy)
 	OnEnemyCountChanged.Broadcast(EnemyCount);
 }
 
-void UEnemyCountSubsystem::UnregisterEnemy(ATestEnemyDamage* Enemy)
+void UEnemyCountSubsystem::UnregisterEnemy(AEnemyPawn* Enemy)
 {
 	if(!RegisteredEnemies.Contains(Enemy))
 	{

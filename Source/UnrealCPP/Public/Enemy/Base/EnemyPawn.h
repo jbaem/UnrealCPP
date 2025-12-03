@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Core/Common/CommonStructs.h"
 
 #include "EnemyPawn.generated.h"
 
@@ -13,33 +14,41 @@ class UNREALCPP_API AEnemyPawn : public APawn
 public:
 	AEnemyPawn();
 
+public:
+	virtual void Tick(float DeltaTime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
-	virtual float TakeDamage(
-		float Damage,
-		FDamageEvent const& DamageEvent,
-		AController* EventInstigator,
-		AActor* DamageCauser
-	) override;
-	
-	void SetDamage(float DamageAmount);
+	UFUNCTION()
+	void OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-	FORCEINLINE bool IsDamageWidgetActive() const { return bIsDamageWidgetActive; }
-	void ActivateDamageWidget(float DamageAmount);
-	void DeactivateDamageWidget();
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UStaticMeshComponent> Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<class UWidgetComponent> DamageWidgetComponent;
+	UFUNCTION(BlueprintCallable)
+	void TestDropItem() { DropItem(); }
 
 private:
-	FTimerHandle DeactivateDamageWidgetTimerHandle;
+	void OnDie();
+	void DropItem();
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> Mesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<class UResourceComponent> ResourceComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USceneComponent> PopupLocation;
 	
-	bool bIsDamageWidgetActive = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class ADamagePopup> DamagePopupClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Drop Item")
+	TObjectPtr<class UDataTable> DropItemTable = nullptr;
+
+private:
+	FTimerHandle InvincibleTimerHandle;
+
+	bool bInvincible = false;
+	float LastDamage = 0.0f;
 };

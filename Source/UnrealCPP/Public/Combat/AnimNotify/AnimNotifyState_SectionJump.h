@@ -24,10 +24,10 @@ public:
 	inline FName GetNextSectionName() const { return NextSectionName; }
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SectionJump")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Section Jump")
 	FName NextSectionName;
 
 private:
 	UPROPERTY()
-	TWeakObjectPtr<class AActionCharacter> OwnerCharacter;
+	TWeakObjectPtr<class AActionCharacter> Owner;
 };

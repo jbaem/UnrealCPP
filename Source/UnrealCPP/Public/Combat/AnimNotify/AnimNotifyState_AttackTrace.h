@@ -23,5 +23,5 @@ public:
 
 private:
 	UPROPERTY()
-	TWeakObjectPtr<class AActionCharacter> OwnerCharacter;
+	TWeakObjectPtr<class AActionCharacter> Owner;
 };

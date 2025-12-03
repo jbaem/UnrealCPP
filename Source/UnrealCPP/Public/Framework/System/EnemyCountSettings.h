@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
-#include "Enemy/Base/TestEnemyDamage.h"
+#include "Enemy/Base/EnemyPawn.h"
 
 #include "EnemyCountSettings.generated.h"
 
@@ -13,5 +13,5 @@ class UNREALCPP_API UEnemyCountSettings : public UDeveloperSettings
 	
 public:
 	UPROPERTY(Config, EditAnywhere)
-	TSoftClassPtr<ATestEnemyDamage> DamagePopupClass;
+	TSoftClassPtr<AEnemyPawn> DamagePopupClass;
 };

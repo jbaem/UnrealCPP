@@ -6,10 +6,10 @@ void UAnimNotifyState_AttackTrace::NotifyBegin(USkeletalMeshComponent* MeshComp,
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
-	OwnerCharacter = Cast<AActionCharacter>(MeshComp->GetOwner());
-	if(OwnerCharacter.IsValid())
+	Owner = Cast<AActionCharacter>(MeshComp->GetOwner());
+	if(Owner.IsValid())
 	{
-		OwnerCharacter->SetAttackTraceNotify(this);
+		Owner->SetAttackTraceNotify(this);
 	}
 }
 
@@ -17,9 +17,9 @@ void UAnimNotifyState_AttackTrace::NotifyEnd(USkeletalMeshComponent* MeshComp, U
 {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 
-	if(OwnerCharacter.IsValid())
+	if(Owner.IsValid())
 	{
-		OwnerCharacter->SetAttackTraceNotify(nullptr);
-		OwnerCharacter = nullptr;
+		Owner->SetAttackTraceNotify(nullptr);
+		Owner = nullptr;
 	}
 }

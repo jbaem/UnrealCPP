@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
-#include "Combat/DamageSystem/DamagePopupActor.h"
+#include "Combat/DamageSystem/DamagePopup.h"
 
 #include "DamagePopupSettings.generated.h"
 
@@ -19,5 +19,5 @@ public:
 	// 소프트 클래스 포인터 : 클래스 타입을 가리키는 포인터이지만
 	// 소프트 레퍼런스 : 실제로 로드되지 않은 경우에도 참조할 수 있음 (필요한 시점에 연결된 리소스를 로딩할 수 있음)
 	UPROPERTY(Config, EditAnywhere)
-	TSoftClassPtr<ADamagePopupActor> DamagePopupClass;
+	TSoftClassPtr<ADamagePopup> DamagePopupClass;
 };

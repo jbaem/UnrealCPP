@@ -5,19 +5,19 @@
 void UAnimNotifyState_SlashEffect::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
-	OwnerCharacter = Cast<AActionCharacter>(MeshComp->GetOwner());
-	if (OwnerCharacter.IsValid())
+	Owner = Cast<AActionCharacter>(MeshComp->GetOwner());
+	if (Owner.IsValid())
 	{
-		OwnerCharacter->SetSlashEffectNotify(this);
+		Owner->SetSlashEffectNotify(this);
 	}
 }
 
 void UAnimNotifyState_SlashEffect::NotifyEnd(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation, const FAnimNotifyEventReference & EventReference)
 {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
-	if (OwnerCharacter.IsValid())
+	if (Owner.IsValid())
 	{
-		OwnerCharacter->SetSlashEffectNotify(nullptr);
-		OwnerCharacter = nullptr;
+		Owner->SetSlashEffectNotify(nullptr);
+		Owner = nullptr;
 	}
 }

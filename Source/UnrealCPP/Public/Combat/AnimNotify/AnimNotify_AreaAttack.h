@@ -14,5 +14,5 @@ public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 	
 private:
-	TWeakObjectPtr<class AActionCharacter> OwnerCharacter = nullptr;
+	TWeakObjectPtr<class AActionCharacter> Owner = nullptr;
 };
