@@ -22,8 +22,5 @@ public:
 	TObjectPtr<UInputAction> Roll = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Combat")
-	TObjectPtr<UInputAction> Attack1 = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Combat")
-	TObjectPtr<UInputAction> Attack2 = nullptr;
+	TObjectPtr<UInputAction> Attack = nullptr;
 };

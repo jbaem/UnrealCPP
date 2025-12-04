@@ -15,8 +15,5 @@ public:
 	TObjectPtr<UAnimMontage> Roll = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	TObjectPtr<UAnimMontage> Attack1 = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	TObjectPtr<UAnimMontage> Attack2 = nullptr;
+	TObjectPtr<UAnimMontage> Attack = nullptr;
 };

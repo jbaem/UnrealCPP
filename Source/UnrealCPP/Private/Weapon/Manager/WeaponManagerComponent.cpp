@@ -1,12 +1,24 @@
 #include "Weapon/Manager/WeaponManagerComponent.h"
 
 #include "Core/Interface/Consumable.h"
+#include "Item/SpawnSystem/PickupFactorySubsystem.h"
+#include "Item/Pickupable/PickupWeapon.h"
 #include "Player/Base/ActionCharacter.h"
 #include "Weapon/Base/Weapon.h"
 
 UWeaponManagerComponent::UWeaponManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UWeaponManagerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitOwner();
+	ValidateWeaponDatabase();
+	SpawnWeaponInstances();
+	InitializeEquippedWeapon();
 }
 
 AWeapon* UWeaponManagerComponent::GetEquippedWeaponByItemCode(EItemCode ItemCode) const
@@ -16,85 +28,171 @@ AWeapon* UWeaponManagerComponent::GetEquippedWeaponByItemCode(EItemCode ItemCode
 
 TSubclassOf<AUsedWeapon> UWeaponManagerComponent::GetUsedWeaponClassByItemCode(EItemCode ItemCode) const
 {
-	const UWeaponDataAsset* weaponData = WeaponDatabase.Contains(ItemCode) ? WeaponDatabase[ItemCode] : nullptr;
-	return weaponData->UsedWeaponClass;
+	const UWeaponDataAsset* WeaponDataAsset = WeaponDB.Contains(ItemCode) ? WeaponDB[ItemCode] : nullptr;
+	return WeaponDataAsset->UsedWeaponClass;
 }
 
 TSubclassOf<APickupWeapon> UWeaponManagerComponent::GetPickupWeaponClassByItemCode(EItemCode ItemCode) const
 {
-	const UWeaponDataAsset* weaponData = WeaponDatabase.Contains(ItemCode) ? WeaponDatabase[ItemCode] : nullptr;
-	return weaponData->PickupWeaponClass;
+	const UWeaponDataAsset* WeaponDataAsset = WeaponDB.Contains(ItemCode) ? WeaponDB[ItemCode] : nullptr;
+	return WeaponDataAsset->PickupWeaponClass;
 }
 
-void UWeaponManagerComponent::BeginPlay()
+void UWeaponManagerComponent::InitOwner()
 {
-	Super::BeginPlay();
+	Owner = Cast<AActionCharacter>(GetOwner());
+}
 
-	OwnerPlayer = Cast<AActionCharacter>(GetOwner());
-
-	ValidateWeaponDatabase();
-	SpawnWeaponInstances();
-
-	AWeapon* basicWeapon = GetEquippedWeaponByItemCode(EItemCode::EIC_Basic);
-	basicWeapon->WeaponActivate(true);
-
-	OwnerPlayer->EquipWeapon(EItemCode::EIC_Basic, 10);
+void UWeaponManagerComponent::InitializeEquippedWeapon()
+{
+	AWeapon* BasicWeapon = GetEquippedWeaponByItemCode(EItemCode::EIC_Basic);
+	BasicWeapon->WeaponActivate(true);
+	EquipWeapon(EItemCode::EIC_Basic, 10);
 }
 
 void UWeaponManagerComponent::ValidateWeaponDatabase()
 {
-	if (WeaponDatabase.Num() <= 0)
+	if (WeaponDB.Num() <= 0) return;
+	
+	for (const auto& pair : WeaponDB)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Weapon Database is empty in %s"), *GetOwner()->GetName());
-	}
-	else
-	{
-		for (const auto& pair : WeaponDatabase)
+		if (!pair.Value || !pair.Value->IsValid())
 		{
-			if (!pair.Value || !pair.Value->IsValid())
-			{
-				UE_LOG(LogTemp, Error, TEXT("Invalid Weapon Data Asset for Weapon Type %d in %s"), static_cast<int32>(pair.Key), *GetOwner()->GetName());
-			}
-			else if (pair.Key != pair.Value->WeaponType)
-			{
-				UE_LOG(LogTemp, Error, TEXT("Mismatched Weapon Code for Weapon Type %d in %s"), static_cast<int32>(pair.Key), *GetOwner()->GetName());
-			}
+			UE_LOG(LogTemp, Error, TEXT("Invalid Weapon Data Asset for Weapon Type %d in %s"), static_cast<int32>(pair.Key), *GetOwner()->GetName());
+		}
+		else if (pair.Key != pair.Value->ItemCode)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Mismatched Weapon Code for Weapon Type %d in %s"), static_cast<int32>(pair.Key), *GetOwner()->GetName());
 		}
 	}
 }
 
 void UWeaponManagerComponent::SpawnWeaponInstances()
 {
-	WeaponInstances.Empty(WeaponDatabase.Num()); // 미리 할당하여 성능 최적화
+	if (!Owner.IsValid()) return;
 
-	if (!OwnerPlayer.IsValid()) return;
-
-	UWorld* world = GetWorld();
-	FVector defaultLocation = FVector(0, 0, -10000);
-	for (const auto& pair : WeaponDatabase)
+	WeaponInstances.Empty(WeaponDB.Num()); // 미리 할당하여 성능 최적화
+	for (const auto& pair : WeaponDB)
 	{
-		AWeapon* SpawnedWeapon = world->SpawnActor<AWeapon>(
-			pair.Value->EquippedWeaponClass,
-			defaultLocation,
-			FRotator::ZeroRotator
-		);
-
-		if (SpawnedWeapon)
-		{
-			SpawnedWeapon->AttachToComponent(
-				OwnerPlayer->GetMesh(),
-				FAttachmentTransformRules::KeepWorldTransform,
-				FName("root") // 임시로 root 소켓에 부착
-			);
-			
-			SpawnedWeapon->SetWeaponOwner(Cast<ACharacter>(OwnerPlayer));
-			SpawnedWeapon->WeaponActivate(false);
-
-			WeaponInstances.Add(pair.Key, SpawnedWeapon);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to spawn weapon instance for Weapon Type %d in %s"), static_cast<int32>(pair.Key), *GetOwner()->GetName());
-		}
+		AWeapon* SpawnedWeapon = SpawnWeaponInstance(pair.Value);
+		AttachInstanceToOwner(SpawnedWeapon, pair.Key);
 	}
 }
+
+AWeapon* UWeaponManagerComponent::SpawnWeaponInstance(UWeaponDataAsset* InDataAsset)
+{
+	if (!InDataAsset) return nullptr;
+
+	FVector StorageLocation = FVector(0, 0, -10000);
+	return GetWorld()->SpawnActor<AWeapon>(
+		InDataAsset->EquippedWeaponClass,
+		StorageLocation,
+		FRotator::ZeroRotator
+	);
+}
+
+void UWeaponManagerComponent::AttackEnable(bool Flag)
+{
+	if (!WeaponCurrent) return;
+	WeaponCurrent->AttackEnable(Flag);
+}
+
+void UWeaponManagerComponent::ActivateSlashEffect(bool Flag)
+{
+	if (!WeaponCurrent) return;
+	WeaponCurrent->ActivateSlashEffect(Flag);
+}
+
+bool UWeaponManagerComponent::CanAttack()
+{
+	if (!WeaponCurrent) return false;
+	return WeaponCurrent->CanAttack();
+}
+
+void UWeaponManagerComponent::AttachInstanceToOwner(AWeapon* SpawnedWeapon, EItemCode InItemCode)
+{
+	if (!SpawnedWeapon) return;
+	
+	SpawnedWeapon->SetWeaponOwner(Cast<ACharacter>(Owner));
+
+	SpawnedWeapon->AttachToComponent(
+		Owner->GetMesh(),
+		FAttachmentTransformRules::KeepWorldTransform,
+		FName("root") // 임시로 root 소켓에 부착
+	);
+
+	SpawnedWeapon->WeaponActivate(false);
+	WeaponInstances.Add(InItemCode, SpawnedWeapon);
+}
+
+void UWeaponManagerComponent::OnAreaAttack()
+{
+	if (!WeaponCurrent) return;
+	WeaponCurrent->DamageToArea();
+}
+void UWeaponManagerComponent::EquipWeapon(EItemCode WeaponCode, int32 Count)
+{
+	if (!WeaponCurrent) return;
+	WeaponCurrent->WeaponActivate(false);
+	if (ShouldDropCurrentWeapon(WeaponCode))
+	{
+		DropCurrentWeapon();
+	}
+	EquipNewWeapon(WeaponCode, Count);
+}
+void UWeaponManagerComponent::EquipNewWeapon(EItemCode WeaponCode, int32 Count)
+{
+	WeaponCurrent = GetEquippedWeaponByItemCode(WeaponCode);
+	WeaponCurrent->WeaponActivate(true);
+	WeaponCurrent->SetUsedCountRemain(Count);
+}
+bool UWeaponManagerComponent::ShouldDropCurrentWeapon(EItemCode WeaponCode)
+{
+	return WeaponCode != EItemCode::EIC_Basic && WeaponCode != WeaponCurrent->GetWeaponID();
+}
+void UWeaponManagerComponent::DropWeapon(EItemCode WeaponCode)
+{
+	UPickupFactorySubsystem* subsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>();
+	if (subsystem)
+	{
+		subsystem->SpawnUsedWeaponByItemCode(
+			WeaponCode,
+			Cast<AActionCharacter>(Owner)->GetDropLocation()->GetComponentLocation(),
+			Owner->GetActorRotation()
+		);
+	}
+}
+void UWeaponManagerComponent::DropCurrentWeapon()
+{
+	UPickupFactorySubsystem* subsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>();
+	if (subsystem)
+	{
+		int32 usedCount = WeaponCurrent->GetUsedCountRemain();
+
+		APickup* pickup = subsystem->SpawnCurrentWeaponByItemCode(
+			WeaponCurrent->GetWeaponID(),
+			Cast<AActionCharacter>(Owner)->GetDropLocation()->GetComponentLocation(),
+			Owner->GetActorRotation(),
+			(Owner->GetActorForwardVector() + Owner->GetActorUpVector()) * 300.0f
+		);
+
+		if (!pickup) return;
+
+		Cast<APickupWeapon>(pickup)->SetAttackCountRemain(usedCount);
+	}
+}
+void UWeaponManagerComponent::ResetWeapon()
+{
+	if (!WeaponCurrent || WeaponCurrent->CanAttack()) return;
+
+	DropWeapon(WeaponCurrent->GetWeaponID());
+	EquipWeapon(EItemCode::EIC_Basic, 10);
+}
+void UWeaponManagerComponent::OnAttack()
+{
+	if (!WeaponCurrent) return;
+	WeaponCurrent->OnAttack();
+}
+
+
+

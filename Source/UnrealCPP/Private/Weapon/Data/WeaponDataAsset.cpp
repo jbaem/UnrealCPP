@@ -2,7 +2,7 @@
 
 #include "Weapon/Extra/UsedWeapon.h"
 #include "Weapon/Base/Weapon.h"
-#include "Weapon/Extra/PickupWeapon.h"
+#include "Item/Pickupable/PickupWeapon.h"
 
 bool UWeaponDataAsset::IsValid() const
 {

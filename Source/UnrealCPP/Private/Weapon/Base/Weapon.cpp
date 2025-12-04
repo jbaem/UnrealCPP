@@ -15,20 +15,10 @@ AWeapon::AWeapon()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	USceneComponent* root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	SetRootComponent(root);
-
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
-	WeaponMesh->SetupAttachment(root);
-	WeaponMesh->SetCollisionProfileName(TEXT("NoCollision"));
-	//WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	WeaponCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
-	WeaponCollision->SetupAttachment(WeaponMesh);
-	WeaponCollision->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
-	
-	WeaponEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponEffect"));
-	WeaponEffect->SetupAttachment(WeaponMesh);
+	InitRoot();
+	InitMeshComponent();
+	InitCapsuleCollision();
+	InitVFX();
 }
 
 void AWeapon::PostInitializeComponents()
@@ -53,7 +43,6 @@ void AWeapon::OnWeaponBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 
 void AWeapon::DamageToTarget(AActor* Target)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Target Actor: %s"), *Target->GetName());
 	float finalDamage = Damage;
 	AController* instigator = nullptr;
 	
@@ -75,14 +64,11 @@ void AWeapon::DamageToTarget(AActor* Target)
 		}
 		instigator = WeaponOwner->GetController();
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("Final Damage: %f"), finalDamage);
 	UGameplayStatics::ApplyDamage(Target, finalDamage, instigator, this, DamageType);
-	//UE_LOG(LogTemp, Warning, TEXT("Damage applied to target: %s"), *Target->GetName());
 }
 
 void AWeapon::DamageToArea()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("AWeapon::DamageToArea called"));
 	float finalDamage = Damage;
 	AController* instigator = nullptr;
 	if (WeaponOwner.IsValid())
@@ -137,7 +123,6 @@ void AWeapon::DamageToArea()
 	}
 
 	TArray<AActor*> ignoreActors = { WeaponOwner.Get(), this };
-	// Falloff : 거리에 따른 데미지 감소 정도
 	UGameplayStatics::ApplyRadialDamageWithFalloff(
 		GetWorld(),
 		finalDamage,
@@ -145,7 +130,7 @@ void AWeapon::DamageToArea()
 		center,
 		AreaInnerRadius,
 		AreaOuterRadius,
-		Falloff,
+		Falloff,	//거리에 따른 데미지 감소 정도
 		DamageType,
 		ignoreActors,
 		this,
@@ -180,21 +165,6 @@ void AWeapon::DamageToArea()
 
 void AWeapon::WeaponActivate(bool bActivate)
 {
-	/*
-	* < Activate / Deactivate >
-	* Visibility - o
-	* Collision - x
-	* Actor's Tick - x
-	* Actor's Components Tick - x
-	* Physics Simulation - x
-	* Timer - x
-	* Audio - x
-	* Particle System - x
-	* Animation - x
-	* Movement Component - x
-	* AI Logic - x
-	*/
-
 	if(bActivate)
 	{
 		AttachToComponent(
@@ -208,6 +178,7 @@ void AWeapon::WeaponActivate(bool bActivate)
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Weapon Deactivate"));
 		SetActorHiddenInGame(true);
 		AttachToComponent(
 			WeaponOwner->GetMesh(),
@@ -264,3 +235,29 @@ void AWeapon::OnWeaponPickuped()
 {
 }
 
+void AWeapon::InitRoot()
+{
+	USceneComponent* root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	SetRootComponent(root);
+}
+
+void AWeapon::InitVFX()
+{
+	WeaponEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponEffect"));
+	WeaponEffect->SetupAttachment(WeaponMesh);
+}
+
+void AWeapon::InitCapsuleCollision()
+{
+	WeaponCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
+	WeaponCollision->SetupAttachment(WeaponMesh);
+	WeaponCollision->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
+}
+
+void AWeapon::InitMeshComponent()
+{
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+	WeaponMesh->SetupAttachment(RootComponent);
+	WeaponMesh->SetCollisionProfileName(TEXT("NoCollision"));
+	//WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}

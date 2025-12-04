@@ -12,7 +12,4 @@ class UNREALCPP_API UAnimNotify_AreaAttack : public UAnimNotify
 	
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
-	
-private:
-	TWeakObjectPtr<class AActionCharacter> Owner = nullptr;
 };

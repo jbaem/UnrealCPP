@@ -2,7 +2,7 @@
 
 #include "Item/SpawnSystem/PickupFactorySettings.h"
 #include "Item/Pickupable/Pickup.h"
-#include "Weapon/Extra/PickupWeapon.h"
+#include "Item/Pickupable/PickupWeapon.h"
 #include "Weapon/Data/WeaponDataAsset.h"
 #include "Player/Base/ActionCharacter.h"
 

@@ -20,8 +20,4 @@ public:
 		USkeletalMeshComponent* MeshComp,
 		UAnimSequenceBase* Animation,
 		const FAnimNotifyEventReference& EventReference) override;
-
-private:
-	UPROPERTY()
-	TWeakObjectPtr<class AActionCharacter> Owner;
 };

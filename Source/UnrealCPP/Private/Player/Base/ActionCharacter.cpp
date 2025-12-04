@@ -11,10 +11,10 @@
 #include "Weapon/Manager/WeaponManagerComponent.h"
 #include "Weapon/Base/Weapon.h"
 #include "Core/Interface/Pickable.h"
-#include "Weapon/Extra/PickupWeapon.h"
 #include "Player/Data/PlayerInputData.h"
 #include "Player/Data/PlayerMontageData.h"
 #include "Combat/AnimNotify/AnimNotifyState_SlashEffect.h"
+#include "Item/Pickupable/PickupWeapon.h"
 #include "Item/SpawnSystem/PickupFactorySubsystem.h"
 #include "Inventory/Base/InventoryComponent.h"
 
@@ -40,7 +40,7 @@ void AActionCharacter::BeginPlay()
 	BindStaminaDepleted();
 	BindBeginOverlap();
 
-	EquipNewWeapon(EItemCode::EIC_Basic, 10);
+	WeaponManager->EquipNewWeapon(EItemCode::EIC_Basic, 10);
 }
 
 void AActionCharacter::Tick(float DeltaTime)
@@ -102,12 +102,6 @@ void AActionCharacter::InitMovementRotation()
 	GetCharacterMovement()->RotationRate = FRotator(0, 360, 0); // 회전 속도 설정
 }
 
-
-void AActionCharacter::InitIsSprinting()
-{
-	bIsSprinting = false;
-}
-
 void AActionCharacter::InitAnimInstance()
 {
 	if (!GetMesh()) return;
@@ -131,28 +125,19 @@ void AActionCharacter::BindBeginOverlap()
 	OnActorBeginOverlap.AddDynamic(this, &AActionCharacter::OnBeginOverlap);
 }
 
-
 void AActionCharacter::BindActions(UEnhancedInputComponent* enhanced)
 {
 	if (!enhanced || !InputData) return;
-	
 	BindActionMove(enhanced);
 	BindActionSprint(enhanced);
 	BindActionRoll(enhanced);
-	BindActionAttack1(enhanced);
-	BindActionAttack2(enhanced);
+	BindActionAttack(enhanced);
 }
 
-void AActionCharacter::BindActionAttack2(UEnhancedInputComponent* enhanced)
+void AActionCharacter::BindActionAttack(UEnhancedInputComponent* enhanced)
 {
-	if (!InputData->Attack2) return;
-	enhanced->BindAction(InputData->Attack2, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack2Input);
-}
-
-void AActionCharacter::BindActionAttack1(UEnhancedInputComponent* enhanced)
-{
-	if (!InputData->Attack1) return;
-	enhanced->BindAction(InputData->Attack1, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttack1Input);
+	if (!InputData->Attack) return;
+	enhanced->BindAction(InputData->Attack, ETriggerEvent::Triggered, this, &AActionCharacter::OnAttackInput);
 }
 
 void AActionCharacter::BindActionRoll(UEnhancedInputComponent* enhanced)
@@ -188,41 +173,10 @@ void AActionCharacter::BindActionMove(UEnhancedInputComponent* enhanced)
 	enhanced->BindAction(InputData->Move, ETriggerEvent::Triggered, this, &AActionCharacter::OnMoveInput);
 }
 
-void AActionCharacter::AddItem_Implementation(UItemDataAsset* ItemData, int32 Count)
-{
-
-	//EquipWeapon(Code, Count);
-}
-
-void AActionCharacter::AddWeapon_Implementation(EItemCode Code, int32 AttackCount)
-{
-	EquipWeapon(Code, AttackCount);
-}
-
-void AActionCharacter::AddMoney_Implementation(int32 Amount)
-{
-}
-
-void AActionCharacter::UseMoney_Implementation(int32 Amount)
-{
-}
-
 inline void AActionCharacter::SetSectionJumpNotify(UAnimNotifyState_SectionJump* InNotify)
 {
 	SectionJumpNotify = InNotify;
 	bComboReady = SectionJumpNotify.IsValid();
-}
-
-inline void AActionCharacter::SetAttackTraceNotify(UAnimNotifyState_AttackTrace* InNotify)
-{
-	AttackTraceNotify = InNotify;
-	PlayerWeapon->AttackEnable(AttackTraceNotify.IsValid());
-}
-
-inline void AActionCharacter::SetSlashEffectNotify(UAnimNotifyState_SlashEffect* InNotify)
-{
-	SlashEffectNotify = InNotify;
-	PlayerWeapon->ActivateSlashEffect(SlashEffectNotify.IsValid());
 }
 
 void AActionCharacter::OnMoveInput(const FInputActionValue& InValue)
@@ -253,54 +207,30 @@ bool AActionCharacter::CanRoll()
 		&& ::IsValid(MontageData->Roll);
 }
 
-void AActionCharacter::OnAttack1Input(const FInputActionValue& Value)
+void AActionCharacter::OnAttackInput(const FInputActionValue& Value)
 {
-	if (CanAttack1())
+	if (CanAttack())
 	{
 		if (!ActionAnimInstance->IsAnyMontagePlaying())
 		{
-			PlayAttack1();
+			PlayAttack();
 		}
-		else if (ActionAnimInstance->Montage_IsPlaying(MontageData->Attack1) && bComboReady)
+		else if (ActionAnimInstance->Montage_IsPlaying(MontageData->Attack) && bComboReady)
 		{
 			bComboReady = false;
-			PlayComboAttack1();
+			PlayComboAttack();
 		}
 	}
 }
 
-bool AActionCharacter::CanAttack1()
+bool AActionCharacter::CanAttack()
 {
 	return !GetController()->IsMoveInputIgnored()
 		&& ActionAnimInstance.IsValid()
-		&& ::IsValid(MontageData->Attack1)
-		&& PlayerWeapon
-		&& PlayerWeapon->CanAttack()
+		&& ::IsValid(MontageData->Attack)
+		&& WeaponManager
+		&& WeaponManager->CanAttack()
 		&& ResourceComponent->HasEnoughStamina(AttackStaminaCost);
-}
-
-void AActionCharacter::OnAttack2Input(const FInputActionValue& Value)
-{
-	if (CanAttack2())
-	{
-		if (!ActionAnimInstance->IsAnyMontagePlaying())
-		{
-			PlayAttack2();
-		}
-		else if (ActionAnimInstance->Montage_IsPlaying(MontageData->Attack2) && bComboReady)
-		{
-			bComboReady = false;
-			PlayComboAttack2();
-		}
-	}
-}
-
-bool AActionCharacter::CanAttack2()
-{
-	return !GetController()->IsMoveInputIgnored()
-		&& ActionAnimInstance.IsValid()
-		&& IsValid(MontageData->Attack2)
-		&& ResourceComponent->HasEnoughStamina(Attack2StaminaCost);
 }
 
 FVector AActionCharacter::InputToMoveDirection(const FInputActionValue& InValue)
@@ -340,8 +270,6 @@ bool AActionCharacter::IsUsingStamina(float StaminaCost)
 	return true;
 }
 
-
-
 void AActionCharacter::SetSprintMode()
 {
 	if (ResourceComponent->GetStaminaCurrent() <= 0) return;
@@ -363,18 +291,17 @@ void AActionCharacter::SpendSprintStamina(float DeltaTime)
 	ResourceComponent->UseStamina(SprintStaminaCost * DeltaTime);
 }
 
-void AActionCharacter::PlayAttack1()
+void AActionCharacter::PlayAttack()
 {
 	if (!IsUsingStamina(AttackStaminaCost)) return;
-	PlayAnimMontage(MontageData->Attack1);
+	PlayAnimMontage(MontageData->Attack);
 	BindMontageEnded();
 	SetWeaponToAttack();
 }
 
 void AActionCharacter::SetWeaponToAttack()
 {
-	if (!PlayerWeapon) return;
-	PlayerWeapon->OnAttack();
+	WeaponManager->OnAttack();
 }
 
 void AActionCharacter::BindMontageEnded()
@@ -384,113 +311,19 @@ void AActionCharacter::BindMontageEnded()
 	ActionAnimInstance->Montage_SetEndDelegate(onMontageEnded);
 }
 
-void AActionCharacter::PlayComboAttack1()
+void AActionCharacter::PlayComboAttack()
 {
 	if (!IsUsingStamina(AttackStaminaCost)) return;
 	
 	ActionAnimInstance->Montage_JumpToSection(
 		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
-		MontageData->Attack1
+		MontageData->Attack
 	);
 	SetWeaponToAttack();
-}
-
-void AActionCharacter::PlayAttack2()
-{
-	if (!IsUsingStamina(Attack2StaminaCost)) return;
-	PlayAnimMontage(MontageData->Attack2);
-	SetWeaponToAttack();
-}
-
-void AActionCharacter::PlayComboAttack2()
-{
-	if (!IsUsingStamina(Attack2StaminaCost)) return;
-
-	ActionAnimInstance->Montage_JumpToSection(
-		SectionJumpNotify.IsValid() ? SectionJumpNotify->GetNextSectionName() : NAME_None,
-		MontageData->Attack2
-	);
-	SetWeaponToAttack();
-}
-
-void AActionCharacter::OnAreaAttack()
-{
-	if (::IsValid(PlayerWeapon))
-	{
-		PlayerWeapon->DamageToArea();
-	}
-}
-
-void AActionCharacter::EquipWeapon(EItemCode WeaponCode, int32 Count)
-{
-	LOG_MESSAGE(Warning, TEXT("EquipWeapon: %d"), static_cast<uint8>(WeaponCode));
-	if (!::IsValid(PlayerWeapon)) return;
-	
-	PlayerWeapon->WeaponActivate(false);
-
-	if (ShouldDropCurrentWeapon(WeaponCode))
-	{
-		DropCurrentWeapon();
-	}
-	EquipNewWeapon(WeaponCode, Count);
-}
-
-void AActionCharacter::EquipNewWeapon(EItemCode WeaponCode, int32 Count)
-{
-	PlayerWeapon = WeaponManager->GetEquippedWeaponByItemCode(WeaponCode);
-	PlayerWeapon->WeaponActivate(true);
-	PlayerWeapon->SetUsedCountRemain(Count);
-}
-
-bool AActionCharacter::ShouldDropCurrentWeapon(EItemCode WeaponCode)
-{
-	return WeaponCode != EItemCode::EIC_Basic && WeaponCode != PlayerWeapon->GetWeaponID();
-}
-
-void AActionCharacter::DropWeapon(EItemCode WeaponCode)
-{
-	UPickupFactorySubsystem* subsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>();
-	if (subsystem)
-	{
-		subsystem->SpawnUsedWeaponByItemCode(
-			WeaponCode,
-			DropLocation->GetComponentLocation(),
-			GetActorRotation()
-		);
-	}
-}
-
-void AActionCharacter::DropCurrentWeapon()
-{
-	UPickupFactorySubsystem* subsystem = GetWorld()->GetSubsystem<UPickupFactorySubsystem>();
-	if (subsystem)
-	{
-		int32 usedCount = PlayerWeapon->GetUsedCountRemain();
-
-		APickup* pickup = subsystem->SpawnCurrentWeaponByItemCode(
-			PlayerWeapon->GetWeaponID(),
-			DropLocation->GetComponentLocation(),
-			GetActorRotation(),
-			(GetActorForwardVector() + GetActorUpVector()) * 300.0f
-		);
-		
-		if (!pickup) return;
-
-		Cast<APickupWeapon>(pickup)->SetAttackCountRemain(usedCount);
-	}
 }
 
 void AActionCharacter::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	/* // Cast case
-	IPickable* pickableItem = Cast<IPickable>(OtherActor);
-	if(pickableItem)
-	{
-		IPickable::Execute_OnPickup(OtherActor);	// Execute blueprint if implemented
-		//pickableItem->OnPickup_Implementation();	// Execute only C++ implementation directly
-	}
-	*/
-
 	// Implements case
 	if(OtherActor->Implements<UPickable>())
 	{
@@ -505,9 +338,5 @@ void AActionCharacter::OnStaminaDepleted()
 
 void AActionCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (::IsValid(PlayerWeapon) && !PlayerWeapon->CanAttack())
-	{
-		DropWeapon(PlayerWeapon->GetWeaponID());
-		EquipWeapon(EItemCode::EIC_Basic, 10);
-	}
+	WeaponManager->ResetWeapon();
 }

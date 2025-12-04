@@ -22,7 +22,7 @@ class UInventoryComponent;
 class UEnhancedInputComponent;
 
 UCLASS()
-class UNREALCPP_API AActionCharacter : public ACharacter, public IInventoryOwner
+class UNREALCPP_API AActionCharacter : public ACharacter
 {
 	GENERATED_BODY()
 public:
@@ -36,25 +36,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:
-	// IInventoryOwner interface
-	virtual void AddItem_Implementation(UItemDataAsset* ItemData, int32 Count);
-	virtual void AddWeapon_Implementation(EItemCode Code, int32 AttackCount);
-	virtual void AddMoney_Implementation(int32 Amount);
-	virtual void UseMoney_Implementation(int32 Amount);
 	// notify setters
 	inline void SetSectionJumpNotify(class UAnimNotifyState_SectionJump* InNotify);
-	inline void SetAttackTraceNotify(class UAnimNotifyState_AttackTrace* InNotify);
-	inline void SetSlashEffectNotify(class UAnimNotifyState_SlashEffect* InNotify);
-	void OnAreaAttack();
-	// weapon management
-	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
-	void EquipWeapon(EItemCode WeaponCode, int32 Count);
-	void EquipNewWeapon(EItemCode WeaponCode, int32 Count);
-	bool ShouldDropCurrentWeapon(EItemCode WeaponCode);
-	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
-	void DropWeapon(EItemCode WeaponCode);
-	UFUNCTION(BlueprintCallable, Category = "Player|Weapon")
-	void DropCurrentWeapon();
 
 protected:
 	// Input handlers
@@ -62,11 +45,8 @@ protected:
 	bool CanMove();
 	void OnRollInput(const FInputActionValue& Value);
 	bool CanRoll();
-	void OnAttack1Input(const FInputActionValue& Value);
-	bool CanAttack1();
-	void OnAttack2Input(const FInputActionValue& Value);
-
-	bool CanAttack2();
+	void OnAttackInput(const FInputActionValue& Value);
+	bool CanAttack();
 
 	UFUNCTION()
 	void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
@@ -75,6 +55,7 @@ protected:
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 public:
+	USceneComponent* GetDropLocation() const { return DropLocation; }
 	UResourceComponent* GetResourceComponent() const { return ResourceComponent; }
 	UStatusComponent* GetStatusComponent() const { return StatusComponent; }
 	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
@@ -109,42 +90,14 @@ protected:
 	float RollStaminaCost = 40.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Combat|Attack")
 	float AttackStaminaCost = 10.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Combat|Attack")
-	float Attack2StaminaCost = 15.0f;
 	// Managers
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
 	TObjectPtr<class UWeaponManagerComponent> WeaponManager = nullptr;
-	// Current Weapon
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Player|Weapon")
-	TObjectPtr<AWeapon> PlayerWeapon = nullptr;
 	// States
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Player|State")
 	bool bIsSprinting = false;
 
 private:
-	// Init constructor settings
-	void InitCameraSystem();
-	void InitComponents();
-	void InitDropLocation();
-	void InitMovementRotation();
-	void InitSpringArm();
-	void InitCamera();
-	// Init begin play settings
-	void InitResourceByStatus();
-	void InitIsSprinting();
-	void InitAnimInstance();
-	// Bind events
-	void BindBeginOverlap();
-	void BindStaminaDepleted();
-	// Bind enhanced input actions
-	void BindActions(UEnhancedInputComponent* enhanced);
-	void BindActionAttack2(UEnhancedInputComponent* enhanced);
-	void BindActionAttack1(UEnhancedInputComponent* enhanced);
-	void BindActionRoll(UEnhancedInputComponent* enhanced);
-	void BindActionSprint(UEnhancedInputComponent* enhanced);
-	void BindActionSprintDeactivate(UEnhancedInputComponent* enhanced);
-	void BindActionSprintActivate(UEnhancedInputComponent* enhanced);
-	void BindActionMove(UEnhancedInputComponent* enhanced);
 	UFUNCTION()
 	void OnStaminaDepleted();
 
@@ -159,22 +112,39 @@ private:
 	void SetSprintMode();
 	void SetWalkMode();
 
-	void PlayAttack1();
+	void PlayAttack();
 	void SetWeaponToAttack();
 	void BindMontageEnded();
-	void PlayComboAttack1();
-	void PlayAttack2();
-	void PlayComboAttack2();
-
+	void PlayComboAttack();
 
 	UPROPERTY()
 	TWeakObjectPtr<UAnimInstance> ActionAnimInstance = nullptr;
 	UPROPERTY()
 	TWeakObjectPtr<UAnimNotifyState_SectionJump> SectionJumpNotify = nullptr;
-	UPROPERTY()
-	TWeakObjectPtr<UAnimNotifyState_AttackTrace> AttackTraceNotify = nullptr;
-	UPROPERTY()
-	TWeakObjectPtr<UAnimNotifyState_SlashEffect> SlashEffectNotify = nullptr;
 
 	bool bComboReady = false;
+	
+	// Init functions
+	// Constructor settings
+	void InitCameraSystem();
+	void InitComponents();
+	void InitDropLocation();
+	void InitMovementRotation();
+	void InitSpringArm();
+	void InitCamera();
+	// BeginPlay settings
+	void InitResourceByStatus();
+	inline void InitIsSprinting() { bIsSprinting = false; };
+	void InitAnimInstance();
+	// Bind events
+	void BindBeginOverlap();
+	void BindStaminaDepleted();
+	// Bind enhanced input actions
+	void BindActions(UEnhancedInputComponent* enhanced);
+	void BindActionAttack(UEnhancedInputComponent* enhanced);
+	void BindActionRoll(UEnhancedInputComponent* enhanced);
+	void BindActionSprint(UEnhancedInputComponent* enhanced);
+	void BindActionSprintDeactivate(UEnhancedInputComponent* enhanced);
+	void BindActionSprintActivate(UEnhancedInputComponent* enhanced);
+	void BindActionMove(UEnhancedInputComponent* enhanced);
 };

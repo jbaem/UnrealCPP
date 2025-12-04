@@ -16,25 +16,49 @@ class UNREALCPP_API UWeaponManagerComponent : public UActorComponent
 public:	
 	UWeaponManagerComponent();
 
-	AWeapon* GetEquippedWeaponByItemCode(EItemCode ItemCode) const;
-	TSubclassOf<AUsedWeapon> GetUsedWeaponClassByItemCode(EItemCode ItemCode) const;
-	TSubclassOf<APickupWeapon> GetPickupWeaponClassByItemCode(EItemCode ItemCode) const;
 protected:
 	virtual void BeginPlay() override;
 
-private:
-	void ValidateWeaponDatabase();
-	void SpawnWeaponInstances();
-
 public:
+	void AttackEnable(bool Flag);
+	void ActivateSlashEffect(bool Flag);
+	bool CanAttack();
+
+	void OnAreaAttack();
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void EquipWeapon(EItemCode WeaponCode, int32 Count);
+	void EquipNewWeapon(EItemCode WeaponCode, int32 Count);
+	bool ShouldDropCurrentWeapon(EItemCode WeaponCode);
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void DropWeapon(EItemCode WeaponCode);
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void DropCurrentWeapon();
+	void ResetWeapon();
+	void OnAttack();
+
+	AWeapon* GetEquippedWeaponByItemCode(EItemCode ItemCode) const;
+	TSubclassOf<AUsedWeapon> GetUsedWeaponClassByItemCode(EItemCode ItemCode) const;
+	TSubclassOf<APickupWeapon> GetPickupWeaponClassByItemCode(EItemCode ItemCode) const;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon Database")
-	TMap<EItemCode, TObjectPtr<UWeaponDataAsset>> WeaponDatabase;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data|Weapon|DB")
+	TMap<EItemCode, TObjectPtr<UWeaponDataAsset>> WeaponDB;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Instance")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Weapon|Instance")
 	TMap<EItemCode, TObjectPtr<AWeapon>> WeaponInstances;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Data|Weapon")
+	TObjectPtr<AWeapon> WeaponCurrent = nullptr;
+
 private:
+	void InitOwner();
+	void InitializeEquippedWeapon();
+
+	void ValidateWeaponDatabase();
+	void SpawnWeaponInstances();
+	AWeapon* SpawnWeaponInstance(UWeaponDataAsset* InDataAsset);
+	void AttachInstanceToOwner(AWeapon* SpawnedWeapon, EItemCode InItemCode);
+
 	UPROPERTY()
-	TWeakObjectPtr<AActionCharacter> OwnerPlayer;
+	TWeakObjectPtr<AActionCharacter> Owner;
 };
